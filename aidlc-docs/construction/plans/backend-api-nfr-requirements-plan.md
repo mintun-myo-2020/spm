@@ -13,35 +13,35 @@ This plan outlines the non-functional requirements assessment for the Backend AP
 ## NFR Assessment Phases
 
 ### Phase 1: Scalability Requirements
-- [ ] Assess expected user load and growth patterns
-- [ ] Determine scaling triggers and capacity planning
-- [ ] Define horizontal vs vertical scaling strategy
+- [x] Assess expected user load and growth patterns
+- [x] Determine scaling triggers and capacity planning
+- [x] Define horizontal vs vertical scaling strategy
 
 ### Phase 2: Performance Requirements
-- [ ] Define response time expectations
-- [ ] Determine throughput requirements
-- [ ] Establish performance benchmarks
+- [x] Define response time expectations
+- [x] Determine throughput requirements
+- [x] Establish performance benchmarks
 
 ### Phase 3: Availability Requirements
-- [ ] Define uptime expectations
-- [ ] Determine disaster recovery needs
-- [ ] Establish failover and backup strategies
+- [x] Define uptime expectations
+- [x] Determine disaster recovery needs
+- [x] Establish failover and backup strategies
 
 ### Phase 4: Security Requirements
-- [ ] Assess data protection requirements
-- [ ] Determine compliance needs
-- [ ] Define authentication and authorization requirements
-- [ ] Identify threat models and mitigation strategies
+- [x] Assess data protection requirements
+- [x] Determine compliance needs
+- [x] Define authentication and authorization requirements
+- [x] Identify threat models and mitigation strategies
 
 ### Phase 5: Tech Stack Selection
-- [ ] Validate technology choices
-- [ ] Identify integration requirements
-- [ ] Determine infrastructure needs
+- [x] Validate technology choices
+- [x] Identify integration requirements
+- [x] Determine infrastructure needs
 
 ### Phase 6: Reliability and Monitoring
-- [ ] Define error handling requirements
-- [ ] Determine monitoring and alerting needs
-- [ ] Establish logging and observability requirements
+- [x] Define error handling requirements
+- [x] Determine monitoring and alerting needs
+- [x] Establish logging and observability requirements
 
 ---
 
@@ -54,18 +54,18 @@ This plan outlines the non-functional requirements assessment for the Backend AP
 What is the expected user load for a typical tuition centre deployment?
 
 **Initial deployment**:
-- Number of teachers: [Answer]: 
-- Number of parents: [Answer]: 
-- Number of students: [Answer]: 
-- Number of admins: [Answer]: 
+- Number of teachers: [Answer]: 5-10 teachers
+- Number of parents: [Answer]: 50-100 parents
+- Number of students: [Answer]: 50-100 students
+- Number of admins: [Answer]: 1-2 admins
 
 **Growth expectations (3 years)**:
-- Expected growth rate per year: [Answer]: 
-- Maximum expected users: [Answer]: 
+- Expected growth rate per year: [Answer]: 20-30% annual growth
+- Maximum expected users: [Answer]: 300-400 total users
 
 **Concurrent users**:
-- Peak concurrent users (% of total): [Answer]: 
-- Peak usage times (e.g., evenings, weekends): [Answer]: 
+- Peak concurrent users (% of total): [Answer]: 20-30% (60-120 concurrent users)
+- Peak usage times (e.g., evenings, weekends): [Answer]: Weekday evenings (6-9 PM), weekend mornings 
 
 ---
 
@@ -74,14 +74,14 @@ What is the expected user load for a typical tuition centre deployment?
 What data volumes do you expect?
 
 **Test scores**:
-- Average tests per student per month: [Answer]: 
-- Average questions per test: [Answer]: 
-- Average sub-questions per question: [Answer]: 
+- Average tests per student per month: [Answer]: 4-6 tests per month
+- Average questions per test: [Answer]: 10-15 questions
+- Average sub-questions per question: [Answer]: 2-3 sub-questions
 
 **Data retention**:
-- How long should test score data be retained? [Answer]: 
-- Should old data be archived or deleted? [Answer]: 
-- Expected database size after 3 years: [Answer]: 
+- How long should test score data be retained? [Answer]: Indefinitely (permanent academic records)
+- Should old data be archived or deleted? [Answer]: Archived after 5 years to cold storage
+- Expected database size after 3 years: [Answer]: 5-10 GB 
 
 ---
 
@@ -94,11 +94,11 @@ B) Horizontal scaling (add more server instances)
 C) Hybrid (vertical first, then horizontal)
 D) No scaling needed (fixed capacity)
 
-[Answer]: 
+[Answer]: C (Hybrid - vertical first, then horizontal)
 
 **Scaling triggers**:
-- At what CPU/memory utilization should we scale? [Answer]: 
-- Should scaling be automatic or manual? [Answer]: 
+- At what CPU/memory utilization should we scale? [Answer]: 70% CPU or 80% memory sustained for 5 minutes
+- Should scaling be automatic or manual? [Answer]: Automatic with CloudWatch alarms 
 
 ---
 
@@ -109,16 +109,16 @@ D) No scaling needed (fixed capacity)
 What are the acceptable response times for API endpoints?
 
 **Critical endpoints** (e.g., login, dashboard):
-- Target response time: [Answer]: 
-- Maximum acceptable response time: [Answer]: 
+- Target response time: [Answer]: < 500ms (p95)
+- Maximum acceptable response time: [Answer]: < 1000ms (p99)
 
 **Standard endpoints** (e.g., list students, view scores):
-- Target response time: [Answer]: 
-- Maximum acceptable response time: [Answer]: 
+- Target response time: [Answer]: < 1000ms (p95)
+- Maximum acceptable response time: [Answer]: < 2000ms (p99)
 
 **Heavy endpoints** (e.g., generate report, bulk operations):
-- Target response time: [Answer]: 
-- Maximum acceptable response time: [Answer]: 
+- Target response time: [Answer]: < 5000ms (p95)
+- Maximum acceptable response time: [Answer]: < 10000ms (p99) 
 
 ---
 
@@ -127,16 +127,16 @@ What are the acceptable response times for API endpoints?
 What are the database performance requirements?
 
 **Query performance**:
-- Acceptable query response time: [Answer]: 
-- Maximum acceptable query time: [Answer]: 
+- Acceptable query response time: [Answer]: < 100ms for simple queries, < 500ms for complex queries
+- Maximum acceptable query time: [Answer]: < 2000ms
 
 **Write performance**:
-- Expected write operations per second: [Answer]: 
-- Acceptable write latency: [Answer]: 
+- Expected write operations per second: [Answer]: 5-10 writes/second during peak
+- Acceptable write latency: [Answer]: < 200ms
 
 **Indexing strategy**:
-- Should we optimize for read or write performance? [Answer]: 
-- Are complex queries expected (joins, aggregations)? [Answer]: 
+- Should we optimize for read or write performance? [Answer]: Read-optimized (90% reads, 10% writes)
+- Are complex queries expected (joins, aggregations)? [Answer]: Yes, for progress calculations and reporting 
 
 ---
 
@@ -149,12 +149,12 @@ B) Application-level caching (in-memory cache like Caffeine)
 C) Distributed caching (Redis, Memcached)
 D) Database query caching only
 
-[Answer]: 
+[Answer]: B (Application-level caching with Caffeine)
 
 **If caching**:
-- What data should be cached? (e.g., subjects, topics, user profiles) [Answer]: 
-- Cache expiration strategy: [Answer]: 
-- Cache invalidation strategy: [Answer]: 
+- What data should be cached? (e.g., subjects, topics, user profiles) [Answer]: Subjects, topics, user profiles, class lists (relatively static data)
+- Cache expiration strategy: [Answer]: TTL-based: 1 hour for subjects/topics, 15 minutes for user profiles
+- Cache invalidation strategy: [Answer]: Event-driven invalidation on updates + TTL expiration 
 
 ---
 
@@ -170,11 +170,11 @@ C) 99.9% uptime (43 minutes downtime per month)
 D) 99.99% uptime (4 minutes downtime per month)
 E) Best effort (no SLA)
 
-[Answer]: 
+[Answer]: B (99.5% uptime - 3.6 hours downtime per month)
 
 **Maintenance windows**:
-- Are scheduled maintenance windows acceptable? [Answer]: 
-- If yes, when and how often? [Answer]: 
+- Are scheduled maintenance windows acceptable? [Answer]: Yes, during off-peak hours (2-4 AM local time)
+- If yes, when and how often? [Answer]: Monthly, 2-hour window on Sunday 2-4 AM 
 
 ---
 
@@ -183,15 +183,15 @@ E) Best effort (no SLA)
 What are the disaster recovery requirements?
 
 **Recovery Time Objective (RTO)**:
-- How quickly must the system be restored after a failure? [Answer]: 
+- How quickly must the system be restored after a failure? [Answer]: 1-2 hours
 
 **Recovery Point Objective (RPO)**:
-- How much data loss is acceptable? [Answer]: 
+- How much data loss is acceptable? [Answer]: Maximum 15 minutes of data loss
 
 **Backup strategy**:
-- How often should database backups be taken? [Answer]: 
-- How long should backups be retained? [Answer]: 
-- Should backups be stored in a different region? [Answer]: 
+- How often should database backups be taken? [Answer]: Automated daily backups + continuous transaction log backups
+- How long should backups be retained? [Answer]: 30 days for daily backups, 7 days for transaction logs
+- Should backups be stored in a different region? [Answer]: Yes, cross-region backup for disaster recovery 
 
 ---
 
@@ -204,11 +204,11 @@ B) Active-passive (standby instance for failover)
 C) Active-active (multiple instances with load balancing)
 D) Multi-region deployment
 
-[Answer]: 
+[Answer]: B (Active-passive with standby instance for failover)
 
 **If high availability**:
-- Acceptable failover time: [Answer]: 
-- Should database have read replicas? [Answer]: 
+- Acceptable failover time: [Answer]: 5-10 minutes automatic failover
+- Should database have read replicas? [Answer]: Yes, one read replica for reporting queries 
 
 ---
 
@@ -219,16 +219,16 @@ D) Multi-region deployment
 What data protection measures are required?
 
 **Data at rest**:
-- Should database be encrypted at rest? [Answer]: 
-- Should S3 reports be encrypted? [Answer]: 
+- Should database be encrypted at rest? [Answer]: Yes, AES-256 encryption
+- Should S3 reports be encrypted? [Answer]: Yes, S3 server-side encryption (SSE-S3)
 
 **Data in transit**:
-- HTTPS/TLS for all API calls? [Answer]: 
-- Database connections encrypted? [Answer]: 
+- HTTPS/TLS for all API calls? [Answer]: Yes, TLS 1.2+ required
+- Database connections encrypted? [Answer]: Yes, SSL/TLS for database connections
 
 **Sensitive data**:
-- Should PII (email, phone) be encrypted in database? [Answer]: 
-- Should test scores be encrypted? [Answer]: 
+- Should PII (email, phone) be encrypted in database? [Answer]: No, database-level encryption sufficient for MVP
+- Should test scores be encrypted? [Answer]: No, database-level encryption sufficient 
 
 ---
 
@@ -237,14 +237,14 @@ What data protection measures are required?
 Are there any compliance requirements?
 
 **Regulations**:
-- GDPR (EU data protection)? [Answer]: 
-- PDPA (Singapore data protection)? [Answer]: 
-- COPPA (children's privacy)? [Answer]: 
-- Other regulations? [Answer]: 
+- GDPR (EU data protection)? [Answer]: No, Singapore-based deployment
+- PDPA (Singapore data protection)? [Answer]: Yes, comply with PDPA requirements
+- COPPA (children's privacy)? [Answer]: Yes, students are minors
+- Other regulations? [Answer]: None initially
 
 **Data residency**:
-- Must data be stored in a specific region/country? [Answer]: 
-- Are there cross-border data transfer restrictions? [Answer]: 
+- Must data be stored in a specific region/country? [Answer]: Yes, Singapore region (ap-southeast-1)
+- Are there cross-border data transfer restrictions? [Answer]: No cross-border transfers needed 
 
 ---
 
@@ -253,18 +253,18 @@ Are there any compliance requirements?
 What are the authentication and authorization requirements?
 
 **Password policy** (if not using social login):
-- Minimum password length: [Answer]: 
-- Password complexity requirements: [Answer]: 
-- Password expiration: [Answer]: 
+- Minimum password length: [Answer]: 12 characters
+- Password complexity requirements: [Answer]: At least one uppercase, lowercase, number, special character
+- Password expiration: [Answer]: No expiration (modern security practice)
 
 **Session management**:
-- JWT token expiration time: [Answer]: 
-- Refresh token support needed? [Answer]: 
-- Maximum concurrent sessions per user: [Answer]: 
+- JWT token expiration time: [Answer]: 1 hour for access token
+- Refresh token support needed? [Answer]: Yes, 7-day refresh token
+- Maximum concurrent sessions per user: [Answer]: 3 concurrent sessions
 
 **Multi-factor authentication (MFA)**:
-- Should MFA be supported? [Answer]: 
-- If yes, for which roles? [Answer]: 
+- Should MFA be supported? [Answer]: Yes, optional for MVP
+- If yes, for which roles? [Answer]: Admin role required, optional for teachers 
 
 ---
 
@@ -273,15 +273,15 @@ What are the authentication and authorization requirements?
 What security threats should we protect against?
 
 **Common threats**:
-- SQL injection protection needed? [Answer]: 
-- XSS (Cross-Site Scripting) protection needed? [Answer]: 
-- CSRF (Cross-Site Request Forgery) protection needed? [Answer]: 
-- Rate limiting to prevent abuse? [Answer]: 
+- SQL injection protection needed? [Answer]: Yes, use parameterized queries (JPA/Hibernate)
+- XSS (Cross-Site Scripting) protection needed? [Answer]: Yes, Spring Security XSS protection
+- CSRF (Cross-Site Request Forgery) protection needed? [Answer]: Yes, CSRF tokens for state-changing operations
+- Rate limiting to prevent abuse? [Answer]: Yes, 100 requests per minute per user
 
 **API security**:
-- Should we implement API key authentication (in addition to JWT)? [Answer]: 
-- Should we log all API access for audit? [Answer]: 
-- Should we implement IP whitelisting? [Answer]: 
+- Should we implement API key authentication (in addition to JWT)? [Answer]: No, JWT sufficient for MVP
+- Should we log all API access for audit? [Answer]: Yes, log all authenticated requests
+- Should we implement IP whitelisting? [Answer]: No, not needed for MVP 
 
 ---
 
@@ -292,18 +292,18 @@ What security threats should we protect against?
 You've chosen PostgreSQL 18. Any specific requirements?
 
 **Database features**:
-- Do we need full-text search? [Answer]: 
-- Do we need JSON/JSONB support? [Answer]: 
-- Do we need database-level encryption? [Answer]: 
+- Do we need full-text search? [Answer]: No, not for MVP (simple LIKE queries sufficient)
+- Do we need JSON/JSONB support? [Answer]: No, normalized relational model
+- Do we need database-level encryption? [Answer]: Yes, RDS encryption at rest
 
 **Database hosting**:
-- AWS RDS PostgreSQL? [Answer]: 
-- Self-managed PostgreSQL on EC2? [Answer]: 
-- Other managed service? [Answer]: 
+- AWS RDS PostgreSQL? [Answer]: Yes, RDS PostgreSQL
+- Self-managed PostgreSQL on EC2? [Answer]: No
+- Other managed service? [Answer]: No
 
 **Database configuration**:
-- Expected database instance size (e.g., db.t3.medium): [Answer]: 
-- Multi-AZ deployment for high availability? [Answer]: 
+- Expected database instance size (e.g., db.t3.medium): [Answer]: db.t3.small for MVP, scale to db.t3.medium as needed
+- Multi-AZ deployment for high availability? [Answer]: Yes, Multi-AZ for production 
 
 ---
 
@@ -317,15 +317,15 @@ C) AWS EKS (Kubernetes)
 D) AWS EC2 (self-managed)
 E) AWS Lambda (serverless)
 
-[Answer]: 
+[Answer]: B (AWS ECS with Docker containers)
 
 **If containerized**:
-- Docker image registry (ECR, Docker Hub)? [Answer]: 
-- Container orchestration preferences? [Answer]: 
+- Docker image registry (ECR, Docker Hub)? [Answer]: AWS ECR (Elastic Container Registry)
+- Container orchestration preferences? [Answer]: ECS with Fargate for serverless containers
 
 **Server sizing**:
-- Expected instance type (e.g., t3.medium, m5.large): [Answer]: 
-- Number of instances for load balancing: [Answer]: 
+- Expected instance type (e.g., t3.medium, m5.large): [Answer]: Fargate: 0.5 vCPU, 1 GB RAM initially, scale to 1 vCPU, 2 GB RAM
+- Number of instances for load balancing: [Answer]: 2 tasks minimum for high availability 
 
 ---
 
@@ -339,7 +339,7 @@ B) SendGrid
 C) Mailgun
 D) Other
 
-[Answer]: 
+[Answer]: A (AWS SES)
 
 **SMS service**:
 A) AWS SNS (Simple Notification Service)
@@ -347,12 +347,12 @@ B) Twilio
 C) Nexmo
 D) Other
 
-[Answer]: 
+[Answer]: A (AWS SNS)
 
 **Email/SMS requirements**:
-- Expected email volume per day: [Answer]: 
-- Expected SMS volume per day: [Answer]: 
-- Need email templates? [Answer]: 
+- Expected email volume per day: [Answer]: 50-200 emails per day
+- Expected SMS volume per day: [Answer]: 20-100 SMS per day
+- Need email templates? [Answer]: Yes, HTML email templates for notifications 
 
 ---
 
@@ -361,13 +361,13 @@ D) Other
 You've chosen S3 for report storage. Any specific requirements?
 
 **S3 configuration**:
-- S3 bucket per centre or shared bucket with prefixes? [Answer]: 
-- S3 storage class (Standard, Infrequent Access, Glacier)? [Answer]: 
-- S3 lifecycle policy (auto-delete after 2 years)? [Answer]: 
+- S3 bucket per centre or shared bucket with prefixes? [Answer]: Separate bucket per centre (single-tenant deployment)
+- S3 storage class (Standard, Infrequent Access, Glacier)? [Answer]: Standard for first year, lifecycle to Infrequent Access after 1 year
+- S3 lifecycle policy (auto-delete after 2 years)? [Answer]: Yes, auto-delete after 2 years
 
 **File access**:
-- Pre-signed URL expiration time: [Answer]: 
-- Should reports be publicly accessible or private? [Answer]: 
+- Pre-signed URL expiration time: [Answer]: 1 hour
+- Should reports be publicly accessible or private? [Answer]: Private, pre-signed URLs only 
 
 ---
 
@@ -379,7 +379,7 @@ What build and deployment tools should we use?
 A) Maven
 B) Gradle
 
-[Answer]: 
+[Answer]: B (Gradle with Kotlin DSL)
 
 **CI/CD pipeline**:
 A) AWS CodePipeline + CodeBuild + CodeDeploy
@@ -388,7 +388,7 @@ C) GitLab CI/CD
 D) Jenkins
 E) Other
 
-[Answer]: 
+[Answer]: B (GitHub Actions)
 
 **Deployment strategy**:
 A) Blue-green deployment
@@ -396,7 +396,7 @@ B) Rolling deployment
 C) Canary deployment
 D) Simple deployment (downtime acceptable)
 
-[Answer]: 
+[Answer]: B (Rolling deployment with health checks) 
 
 ---
 
@@ -407,18 +407,18 @@ D) Simple deployment (downtime acceptable)
 What error handling and resilience patterns should we implement?
 
 **Retry logic**:
-- Should we retry failed external API calls (Keycloak, email, SMS)? [Answer]: 
-- Maximum retry attempts: [Answer]: 
-- Retry backoff strategy (exponential, linear): [Answer]: 
+- Should we retry failed external API calls (Keycloak, email, SMS)? [Answer]: Yes, with exponential backoff
+- Maximum retry attempts: [Answer]: 3 attempts
+- Retry backoff strategy (exponential, linear): [Answer]: Exponential backoff (1s, 2s, 4s)
 
 **Circuit breaker**:
-- Should we implement circuit breaker for external services? [Answer]: 
-- Circuit breaker threshold (failures before opening): [Answer]: 
+- Should we implement circuit breaker for external services? [Answer]: Yes, using Resilience4j
+- Circuit breaker threshold (failures before opening): [Answer]: 5 failures in 10 seconds
 
 **Fallback behavior**:
-- What should happen if email service fails? [Answer]: 
-- What should happen if SMS service fails? [Answer]: 
-- What should happen if Keycloak is unavailable? [Answer]: 
+- What should happen if email service fails? [Answer]: Log error, queue for retry, continue operation
+- What should happen if SMS service fails? [Answer]: Log error, queue for retry, continue operation
+- What should happen if Keycloak is unavailable? [Answer]: Return 503 Service Unavailable, cannot proceed without auth 
 
 ---
 
@@ -434,19 +434,19 @@ D) New Relic
 E) Prometheus + Grafana
 F) Other
 
-[Answer]: 
+[Answer]: B (AWS CloudWatch + Application Insights)
 
 **Metrics to monitor**:
-- API response times? [Answer]: 
-- Error rates? [Answer]: 
-- Database performance? [Answer]: 
-- Memory and CPU usage? [Answer]: 
-- Custom business metrics (e.g., test scores created per day)? [Answer]: 
+- API response times? [Answer]: Yes, p50, p95, p99 latencies
+- Error rates? [Answer]: Yes, 4xx and 5xx error rates
+- Database performance? [Answer]: Yes, connection pool, query times, slow queries
+- Memory and CPU usage? [Answer]: Yes, container/instance metrics
+- Custom business metrics (e.g., test scores created per day)? [Answer]: Yes, test scores, user logins, notifications sent
 
 **Alerting**:
-- Who should receive alerts? [Answer]: 
-- Alert channels (email, SMS, Slack, PagerDuty)? [Answer]: 
-- Alert thresholds (e.g., error rate > 5%, response time > 2s)? [Answer]: 
+- Who should receive alerts? [Answer]: DevOps team, on-call engineer
+- Alert channels (email, SMS, Slack, PagerDuty)? [Answer]: Email + Slack for warnings, PagerDuty for critical
+- Alert thresholds (e.g., error rate > 5%, response time > 2s)? [Answer]: Error rate > 5%, p95 latency > 2s, CPU > 80%, memory > 85% 
 
 ---
 
@@ -455,9 +455,9 @@ F) Other
 What logging strategy should we implement?
 
 **Log levels**:
-- Default log level (INFO, DEBUG, WARN): [Answer]: 
-- Should we log all API requests? [Answer]: 
-- Should we log all database queries? [Answer]: 
+- Default log level (INFO, DEBUG, WARN): [Answer]: INFO for production, DEBUG for development
+- Should we log all API requests? [Answer]: Yes, with request ID, user ID, endpoint, response time
+- Should we log all database queries? [Answer]: No, only slow queries (> 1s)
 
 **Log aggregation**:
 A) AWS CloudWatch Logs
@@ -466,11 +466,11 @@ C) Splunk
 D) Datadog Logs
 E) Other
 
-[Answer]: 
+[Answer]: A (AWS CloudWatch Logs)
 
 **Log retention**:
-- How long should logs be retained? [Answer]: 
-- Should logs be archived for compliance? [Answer]: 
+- How long should logs be retained? [Answer]: 30 days in CloudWatch, 90 days in S3
+- Should logs be archived for compliance? [Answer]: Yes, archive to S3 for 1 year 
 
 ---
 
@@ -479,21 +479,21 @@ E) Other
 What testing requirements should we meet?
 
 **Unit testing**:
-- Target code coverage: [Answer]: 
-- Testing framework (JUnit 5, TestNG): [Answer]: 
+- Target code coverage: [Answer]: 80% line coverage, 70% branch coverage
+- Testing framework (JUnit 5, TestNG): [Answer]: JUnit 5 with Mockito
 
 **Integration testing**:
-- Should we use Testcontainers for database tests? [Answer]: 
-- Should we test external integrations (Keycloak, email, SMS)? [Answer]: 
+- Should we use Testcontainers for database tests? [Answer]: Yes, Testcontainers for PostgreSQL
+- Should we test external integrations (Keycloak, email, SMS)? [Answer]: Yes, with mocks/stubs for external services
 
 **Performance testing**:
-- Should we conduct load testing? [Answer]: 
-- If yes, what tools (JMeter, Gatling, k6)? [Answer]: 
-- Performance test scenarios: [Answer]: 
+- Should we conduct load testing? [Answer]: Yes, before production release
+- If yes, what tools (JMeter, Gatling, k6)? [Answer]: Gatling for load testing
+- Performance test scenarios: [Answer]: 100 concurrent users, 1000 requests/minute sustained for 10 minutes
 
 **Security testing**:
-- Should we conduct security scans (OWASP ZAP, SonarQube)? [Answer]: 
-- Penetration testing required? [Answer]: 
+- Should we conduct security scans (OWASP ZAP, SonarQube)? [Answer]: Yes, SonarQube for static analysis, OWASP dependency check
+- Penetration testing required? [Answer]: Yes, annual penetration testing 
 
 ---
 
@@ -502,17 +502,17 @@ What testing requirements should we meet?
 What documentation should we create?
 
 **API documentation**:
-- OpenAPI/Swagger specification? [Answer]: 
-- Interactive API documentation (Swagger UI)? [Answer]: 
+- OpenAPI/Swagger specification? [Answer]: Yes, OpenAPI 3.0 specification
+- Interactive API documentation (Swagger UI)? [Answer]: Yes, Swagger UI for development/staging
 
 **Code documentation**:
-- Javadoc for all public methods? [Answer]: 
-- Architecture decision records (ADRs)? [Answer]: 
+- Javadoc for all public methods? [Answer]: Yes, Javadoc for public APIs and complex logic
+- Architecture decision records (ADRs)? [Answer]: Yes, document major architectural decisions
 
 **Operational documentation**:
-- Deployment runbook? [Answer]: 
-- Troubleshooting guide? [Answer]: 
-- Monitoring and alerting guide? [Answer]: 
+- Deployment runbook? [Answer]: Yes, step-by-step deployment guide
+- Troubleshooting guide? [Answer]: Yes, common issues and resolutions
+- Monitoring and alerting guide? [Answer]: Yes, dashboard setup and alert response procedures 
 
 ---
 
@@ -521,16 +521,16 @@ What documentation should we create?
 What operational requirements should we consider?
 
 **Database migrations**:
-- Migration tool (Flyway, Liquibase): [Answer]: 
-- Migration strategy (automatic on startup, manual): [Answer]: 
+- Migration tool (Flyway, Liquibase): [Answer]: Flyway for database migrations
+- Migration strategy (automatic on startup, manual): [Answer]: Automatic on startup for dev/staging, manual approval for production
 
 **Configuration management**:
-- Environment-specific configs (dev, staging, prod): [Answer]: 
-- Secrets management (AWS Secrets Manager, Parameter Store, HashiCorp Vault): [Answer]: 
+- Environment-specific configs (dev, staging, prod): [Answer]: Yes, Spring profiles (dev, staging, prod)
+- Secrets management (AWS Secrets Manager, Parameter Store, HashiCorp Vault): [Answer]: AWS Secrets Manager for database credentials, API keys
 
 **Health checks**:
-- Health check endpoint for load balancer? [Answer]: 
-- What should health check verify (database, Keycloak, email service)? [Answer]: 
+- Health check endpoint for load balancer? [Answer]: Yes, /actuator/health endpoint
+- What should health check verify (database, Keycloak, email service)? [Answer]: Database connectivity, Keycloak availability (optional), disk space 
 
 ---
 
@@ -539,35 +539,35 @@ What operational requirements should we consider?
 What cost optimization strategies should we consider?
 
 **Infrastructure costs**:
-- Budget per centre per month: [Answer]: 
-- Should we use reserved instances for cost savings? [Answer]: 
-- Should we use spot instances for non-critical workloads? [Answer]: 
+- Budget per centre per month: [Answer]: $200-400 USD per month (RDS, ECS, S3, SES, SNS, CloudWatch)
+- Should we use reserved instances for cost savings? [Answer]: Yes, 1-year reserved instances for RDS after 3 months
+- Should we use spot instances for non-critical workloads? [Answer]: No, not for MVP (all workloads are critical)
 
 **Data transfer costs**:
-- Expected data transfer volume: [Answer]: 
-- Should we use CloudFront CDN for static assets? [Answer]: 
+- Expected data transfer volume: [Answer]: 10-20 GB per month
+- Should we use CloudFront CDN for static assets? [Answer]: No, frontend handles static assets
 
 **Storage costs**:
-- Expected S3 storage costs: [Answer]: 
-- Should we use S3 Intelligent-Tiering? [Answer]: 
+- Expected S3 storage costs: [Answer]: $5-10 per month (reports storage)
+- Should we use S3 Intelligent-Tiering? [Answer]: No, use lifecycle policies (Standard → IA → Delete) 
 
 ---
 
 ## Plan Completion Checklist
 
-- [ ] All questions answered by user
-- [ ] All ambiguities resolved
-- [ ] Scalability requirements defined
-- [ ] Performance requirements defined
-- [ ] Availability requirements defined
-- [ ] Security requirements defined
-- [ ] Tech stack decisions finalized
-- [ ] Reliability and monitoring requirements defined
-- [ ] NFR requirements artifacts generated
+- [x] All questions answered by user
+- [x] All ambiguities resolved
+- [x] Scalability requirements defined
+- [x] Performance requirements defined
+- [x] Availability requirements defined
+- [x] Security requirements defined
+- [x] Tech stack decisions finalized
+- [x] Reliability and monitoring requirements defined
+- [x] NFR requirements artifacts generated
 - [ ] User approval received
 
 ---
 
-**Plan Status**: Awaiting User Input  
+**Plan Status**: Awaiting User Approval  
 **Created**: 2026-03-08  
 **Unit**: UNIT-01 (Backend API)

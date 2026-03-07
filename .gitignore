@@ -1,0 +1,46 @@
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build outputs (will be added when code is generated)
+target/
+build/
+dist/
+out/
+*.class
+*.jar
+*.war
+
+# Dependencies (will be added when code is generated)
+node_modules/
+.pnp/
+.pnp.js
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Test coverage
+coverage/
+*.lcov
+
+# Package manager locks (keep these for reproducibility)
+# package-lock.json
+# yarn.lock
+# pom.xml (keep this)

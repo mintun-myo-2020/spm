@@ -34,7 +34,7 @@
 - [x] User Stories - COMPLETED
 - [x] Workflow Planning - COMPLETED
 - [x] Application Design - COMPLETED
-- [ ] Units Generation - EXECUTE
+- [x] Units Generation - COMPLETED
 
 ### CONSTRUCTION PHASE
 - [ ] Functional Design - EXECUTE (per unit)

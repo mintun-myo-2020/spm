@@ -73,17 +73,23 @@ The backend is organized into feature modules, each containing:
 
 **Components**:
 - `AuthController`: Login/logout endpoints
-- `AuthService`: Authentication orchestration
-- `JwtTokenProvider`: JWT token generation and validation
-- `KeycloakAdapter`: Integration with Keycloak
+- `SecurityConfig`: Spring Security 6 OAuth2 configuration
+- `JwtAuthenticationFilter`: JWT validation filter
+- `OAuth2ResourceServerConfig`: OAuth2 resource server configuration
 - `RoleService`: Role-based access control
 
 **Key Methods**:
-- `login()`: Redirect to Keycloak
-- `handleCallback()`: Process OAuth callback
-- `validateToken()`: Validate JWT
-- `getUserRoles()`: Extract roles from JWT
+- `login()`: Redirect to Keycloak (handled by Spring Security OAuth2)
+- `handleCallback()`: Process OAuth callback (handled by Spring Security OAuth2)
+- `validateToken()`: Validate JWT (Spring Security OAuth2 JWT decoder)
+- `getUserRoles()`: Extract roles from JWT claims
 - `logout()`: Invalidate session
+
+**Technology**:
+- **Spring Security 6** with OAuth2 Resource Server support
+- **spring-boot-starter-oauth2-resource-server** dependency
+- **spring-boot-starter-oauth2-client** for OAuth2 login flow
+- NO deprecated Keycloak adapters - using generic OIDC/OAuth2 libraries
 
 #### 2. User Management Feature
 **Purpose**: Manage teachers, parents, students, and administrators
@@ -440,9 +446,9 @@ src/
 ### Backend Dependencies
 
 ```
-AuthService
-  └─> KeycloakAdapter
-  └─> JwtTokenProvider
+SecurityConfig (Spring Security 6)
+  └─> OAuth2ResourceServerConfig
+  └─> JwtAuthenticationFilter
 
 UserService
   └─> UserRepository
@@ -509,10 +515,14 @@ Form Components
 ## Integration Points
 
 ### Keycloak Integration
-- **Frontend**: `@react-keycloak/web` library
-- **Backend**: Spring Security with Keycloak adapter
+- **Frontend**: `@react-keycloak/web` or `keycloak-js` library (actively maintained)
+- **Backend**: **Spring Security 6 OAuth2 Resource Server** (generic OIDC/OAuth2 support)
+  - Uses `spring-boot-starter-oauth2-resource-server` for JWT validation
+  - Uses `spring-boot-starter-oauth2-client` for OAuth2 login flow
+  - **NO deprecated Keycloak adapters** - follows best practices with generic OAuth2 libraries
 - **Flow**: OAuth2 authorization code flow with JWT
 - **Token**: JWT stored in memory, included in API calls
+- **Configuration**: Keycloak configured as standard OIDC provider in application.yml
 
 ### Notification Integration
 - **Email**: AWS SES or similar email service

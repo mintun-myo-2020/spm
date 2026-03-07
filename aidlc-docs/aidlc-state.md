@@ -48,8 +48,8 @@
 - [ ] Operations - PLACEHOLDER
 
 ## Current Status
-- **Lifecycle Phase**: INCEPTION
-- **Current Stage**: Workflow Planning Complete
-- **Next Stage**: Application Design
-- **Status**: Ready to proceed
+- **Lifecycle Phase**: CONSTRUCTION
+- **Current Stage**: NFR Requirements (Unit 1 - Backend API)
+- **Next Stage**: NFR Design (Unit 1)
+- **Status**: In Progress
 

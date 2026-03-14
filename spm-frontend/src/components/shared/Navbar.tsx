@@ -20,7 +20,7 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
         <HiMenuAlt2 className="h-6 w-6" />
       </button>
 
-      <span className="ml-2 text-lg font-bold text-blue-600 lg:ml-0 dark:text-blue-400">EGGTIVE SPM</span>
+      <span className="ml-2 text-lg font-bold text-blue-600 lg:ml-0 dark:text-blue-400">{import.meta.env.VITE_TENANT_NAME}</span>
 
       <div className="flex-1" />
 

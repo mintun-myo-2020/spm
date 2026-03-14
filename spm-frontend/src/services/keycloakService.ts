@@ -30,7 +30,7 @@ export const keycloakService = {
   },
 
   login(): void {
-    keycloak.login();
+    keycloak.login({ redirectUri: window.location.origin + '/' });
   },
 
   logout(): void {

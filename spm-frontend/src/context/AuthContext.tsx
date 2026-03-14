@@ -37,8 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const response = await apiClient.get<{ success: boolean; data: UserInfo }>('/auth/me');
           setUser(response.data.data);
-        } catch {
-          console.error('Failed to fetch user info');
+        } catch (err) {
+          console.error('Failed to fetch user info:', err);
         }
       }
       setIsLoading(false);

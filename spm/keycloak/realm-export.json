@@ -29,7 +29,7 @@
       "attributes": {
         "post.logout.redirect.uris": "http://localhost:5173/*"
       },
-      "defaultClientScopes": ["web-origins", "acr", "profile", "roles", "email"],
+      "defaultClientScopes": ["basic", "web-origins", "acr", "profile", "roles", "email"],
       "protocolMappers": [
         {
           "name": "realm-roles",
@@ -58,7 +58,7 @@
   "users": [
     {
       "username": "admin",
-      "email": "[email]",
+      "email": "admin@spm.local",
       "firstName": "System",
       "lastName": "Admin",
       "enabled": true,
@@ -68,7 +68,7 @@
     },
     {
       "username": "teacher1",
-      "email": "[email]",
+      "email": "teacher1@spm.local",
       "firstName": "Test",
       "lastName": "Teacher",
       "enabled": true,
@@ -78,7 +78,7 @@
     },
     {
       "username": "parent1",
-      "email": "[email]",
+      "email": "parent1@spm.local",
       "firstName": "Test",
       "lastName": "Parent",
       "enabled": true,
@@ -88,7 +88,7 @@
     },
     {
       "username": "student1",
-      "email": "[email]",
+      "email": "student1@spm.local",
       "firstName": "Test",
       "lastName": "Student",
       "enabled": true,

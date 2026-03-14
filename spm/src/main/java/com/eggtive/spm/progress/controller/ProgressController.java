@@ -38,4 +38,12 @@ public class ProgressController {
         studentAccessService.verifyAccess(currentUserService.getCurrentUser(), studentId);
         return ApiResponse.ok(progressService.getAllTopicsProgress(studentId));
     }
+
+    @GetMapping("/topics/{topicId}")
+    public ApiResponse<com.eggtive.spm.progress.dto.TopicProgressDTO> topicProgress(
+            @PathVariable UUID studentId, @PathVariable UUID topicId) {
+        studentAccessService.verifyAccess(currentUserService.getCurrentUser(), studentId);
+        return ApiResponse.ok(progressService.getTopicProgress(studentId, topicId));
+    }
+
 }

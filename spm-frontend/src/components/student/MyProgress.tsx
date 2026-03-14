@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { progressService } from '../../services/progressService';
 import { PageHeader } from '../shared/PageHeader';
 import { Chart } from '../shared/Chart';
+import { TopicProgressModal } from '../shared/TopicProgressModal';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { ErrorMessage } from '../shared/ErrorMessage';
 import type { OverallProgressDTO, TopicProgressSummaryDTO } from '../../types/domain';
@@ -14,6 +15,7 @@ export function MyProgress() {
   const [topics, setTopics] = useState<TopicProgressSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<TopicProgressSummaryDTO | null>(null);
 
   const studentId = user?.profileId;
 
@@ -43,13 +45,15 @@ export function MyProgress() {
       <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Topic Performance</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {topics.map((t) => (
-          <Card key={t.topicId}>
+          <Card key={t.topicId} className="cursor-pointer transition-shadow hover:shadow-md" onClick={() => setSelectedTopic(t)}>
             <h3 className="font-medium text-gray-900 dark:text-white">{t.topicName}</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400">Avg: {t.averagePercentage.toFixed(1)}% · {t.testCount} tests</p>
             <Badge color={t.trend === 'IMPROVING' ? 'success' : t.trend === 'DECLINING' ? 'failure' : 'gray'} className="w-fit">{t.trend}</Badge>
           </Card>
         ))}
       </div>
+
+      {studentId && <TopicProgressModal studentId={studentId} topic={selectedTopic} onClose={() => setSelectedTopic(null)} />}
     </div>
   );
 }

@@ -97,6 +97,49 @@ public class ProgressService {
         }).toList();
     }
 
+    public TopicProgressDTO getTopicProgress(UUID studentId, UUID topicId) {
+        Student student = userService.findStudentOrThrow(studentId);
+        List<TestScore> scores = testScoreService.findByStudentOrderByDateAsc(studentId);
+
+        String topicName = null;
+        List<TopicTrendDataPointDTO> trendData = new ArrayList<>();
+
+        for (TestScore ts : scores) {
+            BigDecimal topicScore = BigDecimal.ZERO;
+            BigDecimal topicMaxScore = BigDecimal.ZERO;
+            boolean found = false;
+
+            for (var q : ts.getQuestions()) {
+                for (SubQuestion sq : q.getSubQuestions()) {
+                    if (sq.getTopic().getId().equals(topicId)) {
+                        topicScore = topicScore.add(sq.getScore());
+                        topicMaxScore = topicMaxScore.add(sq.getMaxScore());
+                        if (topicName == null) topicName = sq.getTopic().getName();
+                        found = true;
+                    }
+                }
+            }
+
+            if (found && topicMaxScore.compareTo(BigDecimal.ZERO) > 0) {
+                BigDecimal pct = topicScore.multiply(BigDecimal.valueOf(100))
+                    .divide(topicMaxScore, 2, RoundingMode.HALF_UP);
+                trendData.add(new TopicTrendDataPointDTO(ts.getTestDate(), ts.getTestName(),
+                    topicScore, topicMaxScore, pct));
+            }
+        }
+
+        if (topicName == null) {
+            throw new AppException(ErrorCode.NOT_FOUND, "No data for this topic");
+        }
+
+        List<BigDecimal> percentages = trendData.stream()
+            .map(TopicTrendDataPointDTO::percentage).toList();
+        BigDecimal avg = calculator.average(percentages);
+
+        return new TopicProgressDTO(studentId, topicId, topicName, trendData, avg);
+    }
+
+
     private record SubQuestionData(BigDecimal score, BigDecimal maxScore, java.time.LocalDate testDate) {}
 }
 

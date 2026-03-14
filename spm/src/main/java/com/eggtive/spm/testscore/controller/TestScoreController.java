@@ -7,15 +7,6 @@ import com.eggtive.spm.common.dto.PagedResponse;
 import com.eggtive.spm.common.enums.ErrorCode;
 import com.eggtive.spm.common.exception.AppException;
 import com.eggtive.spm.testscore.dto.CreateTestScoreRequestDTO;
-
-@PutMapping("/test-scores/{testScoreId}")
-@PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
-public ApiResponse<TestScoreDTO> update(@PathVariable UUID testScoreId,
-                                         @Valid @RequestBody CreateTestScoreRequestDTO req) {
-    User user = currentUserService.getCurrentUser();
-    return ApiResponse.ok(testScoreService.updateTestScore(testScoreId, req, user));
-}
-
 import com.eggtive.spm.testscore.dto.TestScoreDTO;
 import com.eggtive.spm.testscore.dto.TestScoreDetailDTO;
 import com.eggtive.spm.testscore.service.TestScoreService;
@@ -57,6 +48,14 @@ public class TestScoreController {
         Teacher teacher = teacherRepository.findByUserId(user.getId())
             .orElseThrow(() -> new AppException(ErrorCode.FORBIDDEN, "Only teachers can create test scores"));
         return ApiResponse.ok(testScoreService.createTestScore(req, user, teacher));
+    }
+
+    @PutMapping("/test-scores/{testScoreId}")
+    @PreAuthorize("hasAnyRole('TEACHER', 'ADMIN')")
+    public ApiResponse<TestScoreDTO> update(@PathVariable UUID testScoreId,
+                                             @Valid @RequestBody CreateTestScoreRequestDTO req) {
+        User user = currentUserService.getCurrentUser();
+        return ApiResponse.ok(testScoreService.updateTestScore(testScoreId, req, user));
     }
 
     @GetMapping("/students/{studentId}/test-scores")

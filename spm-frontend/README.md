@@ -1,75 +1,54 @@
-# React + TypeScript + Vite
+# SPM Frontend — Student Progress Management
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React 19 + TypeScript + Vite 8 + Tailwind CSS 4 frontend for the Student Progress Management system.
 
-Currently, two official plugins are available:
+## Prerequisites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js 20.19+ or 22.12+
+- Backend API running at `http://localhost:8080`
+- Keycloak instance running
 
-## React Compiler
+## Setup
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
-
-Note: This will impact Vite dev & build performances.
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+cp .env.example .env   # Edit with your Keycloak settings
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Environment Variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+| Variable | Description | Default |
+|---|---|---|
+| `VITE_API_BASE_URL` | Backend API base URL | `/api/v1` |
+| `VITE_KEYCLOAK_URL` | Keycloak server URL | `http://localhost:9090` |
+| `VITE_KEYCLOAK_REALM` | Keycloak realm name | `spm` |
+| `VITE_KEYCLOAK_CLIENT_ID` | Keycloak client ID | `spm-frontend` |
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Scripts
+
+```bash
+npm run dev       # Start dev server on port 3000
+npm run build     # TypeScript check + production build
+npm run preview   # Preview production build
+npm run test      # Run unit tests (single run)
+npm run test:watch # Run tests in watch mode
+npm run lint      # ESLint
+```
+
+## Project Structure
+
+```
+src/
+├── components/
+│   ├── admin/       # Admin dashboard, user/class/subject management
+│   ├── auth/        # Login, ProtectedRoute, AccessDenied, NotFound
+│   ├── parent/      # Parent dashboard, scores, progress, notifications
+│   ├── shared/      # Layout, DataTable, Chart, Modal, Toast, etc.
+│   ├── student/     # Student dashboard, scores, progress
+│   └── teacher/     # Teacher dashboard, classes, score entry, feedback
+├── context/         # AuthContext (Keycloak)
+├── hooks/           # useAuth, useApi, useDebounce, usePagination
+├── services/        # API client + domain service modules
+├── test/            # Test setup
+└── types/           # TypeScript types (api, domain, forms)
 ```

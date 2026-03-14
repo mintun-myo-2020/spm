@@ -117,34 +117,34 @@
 
 ### Step 13: Global Styles & Responsive Design (Story: UI-1)
 - [x] Create `src/index.css` - Tailwind imports, base styles, custom utilities
-- [ ] Verify all components use responsive Tailwind classes (mobile-first)
-- [ ] Verify touch targets >= 44px on interactive elements
+- [x] Verify all components use responsive Tailwind classes (mobile-first)
+- [x] Verify touch targets >= 44px on interactive elements
 
 ### Step 14: Unit Tests - Services & Hooks
-- [ ] Create `src/services/__tests__/apiClient.test.ts` - API client interceptor tests
-- [ ] Create `src/hooks/__tests__/useAuth.test.ts` - Auth hook tests
-- [ ] Create `src/hooks/__tests__/useApi.test.ts` - API hook tests
-- [ ] Create `src/hooks/__tests__/useDebounce.test.ts` - Debounce hook tests
+- [x] Create `src/services/__tests__/apiClient.test.ts` - API client interceptor tests
+- [x] Create `src/hooks/__tests__/useAuth.test.ts` - Auth hook tests
+- [x] Create `src/hooks/__tests__/useApi.test.ts` - API hook tests
+- [x] Create `src/hooks/__tests__/useDebounce.test.ts` - Debounce hook tests
 
 ### Step 15: Unit Tests - Components
-- [ ] Create `src/components/auth/__tests__/ProtectedRoute.test.tsx` - Route guard tests
-- [ ] Create `src/components/teacher/__tests__/TestScoreForm.test.tsx` - Score form validation tests
-- [ ] Create `src/components/shared/__tests__/DataTable.test.tsx` - Table component tests
-- [ ] Create `src/components/shared/__tests__/Chart.test.tsx` - Chart component tests
+- [x] Create `src/components/auth/__tests__/ProtectedRoute.test.tsx` - Route guard tests
+- [x] Create `src/components/teacher/__tests__/TestScoreForm.test.tsx` - Score form validation tests
+- [x] Create `src/components/shared/__tests__/DataTable.test.tsx` - Table component tests
+- [x] Create `src/components/shared/__tests__/Chart.test.tsx` - Chart component tests
 
 ### Step 16: Documentation
-- [ ] Create `spm-frontend/README.md` - Setup instructions, environment variables, scripts, project structure
-- [ ] Create `aidlc-docs/construction/frontend-application/code/code-summary.md` - Summary of generated code
+- [x] Create `spm-frontend/README.md` - Setup instructions, environment variables, scripts, project structure
+- [x] Create `aidlc-docs/construction/frontend-application/code/code-summary.md` - Summary of generated code
 
 ### Step 17: Build & Deployment Configuration
-- [ ] Verify `vite build` produces optimized output
-- [ ] Configure code splitting in vite.config.ts (vendor chunk, per-role chunks)
+- [x] Verify `vite build` produces optimized output
+- [x] Configure code splitting in vite.config.ts (automatic via Vite 8/Rolldown + lazy route imports)
 
 ### Step 18: Final Verification
-- [ ] Verify all TypeScript types compile without errors
-- [ ] Verify all imports resolve correctly
-- [ ] Verify route structure matches user-flows.md
-- [ ] Mark all stories as implemented
+- [x] Verify all TypeScript types compile without errors
+- [x] Verify all imports resolve correctly
+- [x] Verify route structure matches user-flows.md
+- [x] Mark all stories as implemented
 
 ## Estimated Scope
 

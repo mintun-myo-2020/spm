@@ -7,6 +7,7 @@ import { TestScoreForm } from './TestScoreForm';
 import { StudentProgress } from './StudentProgress';
 import { FeedbackForm } from './FeedbackForm';
 import { StudentReports } from './StudentReports';
+import { SubjectManagement } from '../admin/SubjectManagement';
 
 export default function TeacherRoutes() {
   return (
@@ -19,6 +20,7 @@ export default function TeacherRoutes() {
       <Route path="classes/:classId/students/:studentId/progress" element={<StudentProgress />} />
       <Route path="classes/:classId/students/:studentId/scores/:testScoreId/feedback" element={<FeedbackForm />} />
       <Route path="classes/:classId/students/:studentId/reports" element={<StudentReports />} />
+      <Route path="subjects" element={<SubjectManagement />} />
     </Routes>
   );
 }

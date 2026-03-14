@@ -6,10 +6,13 @@ import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { ErrorMessage } from '../shared/ErrorMessage';
 import { useToast } from '../shared/Toast';
 import { Modal } from '../shared/Modal';
+import { useAuth } from '../../hooks/useAuth';
 import type { SubjectDetailDTO, TopicDTO } from '../../types/domain';
 
 export function SubjectManagement() {
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const isAdmin = user?.profileType === 'ADMIN';
   const [subjects, setSubjects] = useState<SubjectDetailDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -110,9 +113,11 @@ export function SubjectManagement() {
               <div className="flex gap-2">
                 <Button size="xs" color="light" onClick={() => { setEditSubject(s); setEditForm({ name: s.name, description: s.description || '' }); }} data-testid={`edit-subject-${s.id}`}>Edit</Button>
                 <Button size="xs" color="light" onClick={() => setNewTopic({ subjectId: s.id })} data-testid={`add-topic-${s.id}`}>Add Topic</Button>
-                <Button size="xs" color="failure" onClick={() => handleDeactivateSubject(s.id)} data-testid={`deactivate-subject-${s.id}`}>
-                  {s.isActive ? 'Deactivate' : 'Activate'}
-                </Button>
+                {isAdmin && (
+                  <Button size="xs" color="failure" onClick={() => handleDeactivateSubject(s.id)} data-testid={`deactivate-subject-${s.id}`}>
+                    {s.isActive ? 'Deactivate' : 'Activate'}
+                  </Button>
+                )}
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -151,7 +156,7 @@ export function SubjectManagement() {
           <div><Label htmlFor="edit-topic-name">Topic name</Label><TextInput id="edit-topic-name" value={editTopicForm.name} onChange={(e) => setEditTopicForm((p) => ({ ...p, name: e.target.value }))} data-testid="edit-topic-name" /></div>
           <div><Label htmlFor="edit-topic-desc">Description</Label><TextInput id="edit-topic-desc" value={editTopicForm.description} onChange={(e) => setEditTopicForm((p) => ({ ...p, description: e.target.value }))} data-testid="edit-topic-description" /></div>
           <div className="flex justify-end gap-3">
-            <Button color="failure" size="sm" onClick={() => { if (editTopic) { handleDeactivateTopic(editTopic.topic.id); setEditTopic(null); } }}>Deactivate</Button>
+            {isAdmin && <Button color="failure" size="sm" onClick={() => { if (editTopic) { handleDeactivateTopic(editTopic.topic.id); setEditTopic(null); } }}>Deactivate</Button>}
             <Button color="gray" onClick={() => setEditTopic(null)}>Cancel</Button>
             <Button onClick={handleUpdateTopic} data-testid="update-topic-submit">Save</Button>
           </div>

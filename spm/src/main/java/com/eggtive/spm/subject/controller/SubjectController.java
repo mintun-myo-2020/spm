@@ -33,14 +33,14 @@ public class SubjectController {
     }
 
     @PostMapping("/subjects")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<SubjectDTO> createSubject(@Valid @RequestBody CreateSubjectRequestDTO req) {
         return ApiResponse.ok(subjectService.createSubject(req));
     }
 
     @PostMapping("/subjects/{subjectId}/topics")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<TopicDTO> createTopic(@PathVariable UUID subjectId,
                                               @Valid @RequestBody CreateTopicRequestDTO req) {
@@ -48,14 +48,14 @@ public class SubjectController {
     }
 
     @PutMapping("/subjects/{subjectId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ApiResponse<SubjectDTO> updateSubject(@PathVariable UUID subjectId,
                                                   @Valid @RequestBody UpdateSubjectRequestDTO req) {
         return ApiResponse.ok(subjectService.updateSubject(subjectId, req));
     }
 
     @PutMapping("/subjects/{subjectId}/topics/{topicId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ApiResponse<TopicDTO> updateTopic(@PathVariable UUID subjectId,
                                               @PathVariable UUID topicId,
                                               @Valid @RequestBody UpdateTopicRequestDTO req) {

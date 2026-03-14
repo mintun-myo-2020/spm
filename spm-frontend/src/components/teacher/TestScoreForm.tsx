@@ -6,9 +6,10 @@ import { z } from 'zod';
 import { Button, Card, Label, Select, TextInput } from 'flowbite-react';
 import { testScoreService } from '../../services/testScoreService';
 import { subjectService } from '../../services/subjectService';
+import { classService } from '../../services/classService';
 import { useToast } from '../shared/Toast';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
-import type { SubjectDetailDTO } from '../../types/domain';
+import type { TopicDTO } from '../../types/domain';
 
 const subQuestionSchema = z.object({
   label: z.string().min(1, 'Required'),
@@ -32,14 +33,14 @@ const formSchema = z.object({
 });
 
 type FormValues = z.infer<typeof formSchema>;
-interface TopicOption { id: string; name: string; subjectName: string }
 
 export function TestScoreForm() {
   const { classId, studentId } = useParams<{ classId: string; studentId: string }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const [subjects, setSubjects] = useState<SubjectDetailDTO[]>([]);
-  const [loadingSubjects, setLoadingSubjects] = useState(true);
+  const [topics, setTopics] = useState<TopicDTO[]>([]);
+  const [subjectName, setSubjectName] = useState('');
+  const [loading, setLoading] = useState(true);
 
   const { register, control, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -52,16 +53,17 @@ export function TestScoreForm() {
   const { fields: questionFields, append: addQuestion, remove: removeQuestion } = useFieldArray({ control, name: 'questions' });
 
   useEffect(() => {
-    subjectService.getSubjects()
-      .then(async (res) => {
-        const details = await Promise.all(res.data.data.map((s) => subjectService.getSubjectWithTopics(s.id).then((r) => r.data.data)));
-        setSubjects(details);
+    if (!classId) return;
+    classService.getClassDetails(classId)
+      .then((res) => {
+        const cls = res.data.data;
+        setSubjectName(cls.subjectName);
+        return subjectService.getSubjectWithTopics(String(cls.subjectId));
       })
-      .catch(() => showToast('Failed to load subjects', 'error'))
-      .finally(() => setLoadingSubjects(false));
-  }, [showToast]);
-
-  const allTopics: TopicOption[] = subjects.flatMap((s) => s.topics.map((t) => ({ ...t, subjectName: s.name })));
+      .then((res) => setTopics(res.data.data.topics))
+      .catch(() => showToast('Failed to load class subject', 'error'))
+      .finally(() => setLoading(false));
+  }, [classId, showToast]);
 
   const onSubmit = async (data: FormValues) => {
     if (!studentId || !classId) return;
@@ -74,13 +76,13 @@ export function TestScoreForm() {
     }
   };
 
-  if (loadingSubjects) return <LoadingSpinner />;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="mx-auto max-w-3xl" data-testid="test-score-form">
       <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Record Test Score</h1>
       <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
-        Enter the test details below. Each question can have sub-questions mapped to specific topics for detailed performance tracking.
+        Enter the test details below. Topics are filtered to the class subject{subjectName ? `: ${subjectName}` : ''}.
       </p>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -114,7 +116,7 @@ export function TestScoreForm() {
             <Button size="sm" color="light" onClick={() => addQuestion({ questionNumber: `Q${questionFields.length + 1}`, maxScore: 20, subQuestions: [{ label: 'a', score: 0, maxScore: 10, topicId: '' }] })} data-testid="add-question-button">+ Add Question</Button>
           </div>
           {questionFields.map((qField, qIdx) => (
-            <QuestionBlock key={qField.id} qIdx={qIdx} control={control} register={register} topics={allTopics} onRemove={() => removeQuestion(qIdx)} />
+            <QuestionBlock key={qField.id} qIdx={qIdx} control={control} register={register} topics={topics} onRemove={() => removeQuestion(qIdx)} />
           ))}
         </div>
 
@@ -128,7 +130,7 @@ export function TestScoreForm() {
 }
 
 function QuestionBlock({ qIdx, control, register, topics, onRemove }: {
-  qIdx: number; control: Control<FormValues>; register: UseFormRegister<FormValues>; topics: TopicOption[]; onRemove: () => void;
+  qIdx: number; control: Control<FormValues>; register: UseFormRegister<FormValues>; topics: TopicDTO[]; onRemove: () => void;
 }) {
   const { fields: subFields, append: addSub, remove: removeSub } = useFieldArray({ control, name: `questions.${qIdx}.subQuestions` });
 
@@ -174,7 +176,7 @@ function QuestionBlock({ qIdx, control, register, topics, onRemove }: {
             <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Topic</Label>
             <Select sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.topicId`)} className="w-full" data-testid={`topic-select-${qIdx}-${sIdx}`}>
               <option value="">Select topic</option>
-              {topics.map((t) => <option key={t.id} value={t.id}>{t.subjectName} - {t.name}</option>)}
+              {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
             </Select>
           </div>
           <Button size="xs" color="failure" onClick={() => removeSub(sIdx)}>×</Button>

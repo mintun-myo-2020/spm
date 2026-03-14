@@ -14,6 +14,7 @@ const navByRole: Record<string, NavItem[]> = {
   TEACHER: [
     { label: 'Dashboard', to: '/teacher/dashboard', icon: HiHome },
     { label: 'My Classes', to: '/teacher/classes', icon: HiAcademicCap },
+    { label: 'Subjects', to: '/teacher/subjects', icon: HiBookOpen },
   ],
   PARENT: [
     { label: 'Dashboard', to: '/parent/dashboard', icon: HiHome },

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { Button, Select } from 'flowbite-react';
 import { classService } from '../../services/classService';
 import { userService } from '../../services/userService';
@@ -12,9 +12,8 @@ import { useToast } from '../shared/Toast';
 import { Modal } from '../shared/Modal';
 import type { ClassDetailDTO, ClassStudentDTO, StudentDTO } from '../../types/domain';
 
-export function ClassDetails() {
+export function AdminClassDetails() {
   const { classId } = useParams<{ classId: string }>();
-  const navigate = useNavigate();
   const { showToast } = useToast();
   const [classDetail, setClassDetail] = useState<ClassDetailDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,18 +80,13 @@ export function ClassDetails() {
   if (!classDetail) return <ErrorMessage message="Class not found" />;
 
   return (
-    <div data-testid="class-details">
-      <PageHeader title={classDetail.name} subtitle={`${classDetail.subjectName} · ${classDetail.currentStudentCount} students`} action={{ label: 'Enroll Student', onClick: openEnrollModal }} />
+    <div data-testid="admin-class-details">
+      <PageHeader title={classDetail.name} subtitle={`${classDetail.subjectName} · ${classDetail.teacherName} · ${classDetail.currentStudentCount}/${classDetail.maxStudents} students`} action={{ label: 'Enroll Student', onClick: openEnrollModal }} />
 
       {classDetail.students.length === 0 ? (
-        <EmptyState title="No students enrolled" description="Students will appear here once enrolled." />
+        <EmptyState title="No students enrolled" description="Click 'Enroll Student' to add students to this class." />
       ) : (
-        <DataTable
-          data={classDetail.students}
-          columns={columns}
-          keyExtractor={(row) => row.id}
-          onRowClick={(row) => navigate(`/teacher/classes/${classId}/students/${row.id}`)}
-        />
+        <DataTable data={classDetail.students} columns={columns} keyExtractor={(row) => row.id} />
       )}
 
       <Modal isOpen={showEnroll} onClose={() => setShowEnroll(false)} title="Enroll Student">

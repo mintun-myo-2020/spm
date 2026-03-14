@@ -47,6 +47,21 @@ public class SubjectController {
         return ApiResponse.ok(subjectService.createTopic(subjectId, req));
     }
 
+    @PutMapping("/subjects/{subjectId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<SubjectDTO> updateSubject(@PathVariable UUID subjectId,
+                                                  @Valid @RequestBody UpdateSubjectRequestDTO req) {
+        return ApiResponse.ok(subjectService.updateSubject(subjectId, req));
+    }
+
+    @PutMapping("/subjects/{subjectId}/topics/{topicId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<TopicDTO> updateTopic(@PathVariable UUID subjectId,
+                                              @PathVariable UUID topicId,
+                                              @Valid @RequestBody UpdateTopicRequestDTO req) {
+        return ApiResponse.ok(subjectService.updateTopic(topicId, req));
+    }
+
     @PutMapping("/subjects/{subjectId}/deactivate")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<SubjectDTO> deactivateSubject(@PathVariable UUID subjectId) {

@@ -20,6 +20,14 @@ export const subjectService = {
     return apiClient.post<ApiResponse<TopicDTO>>(`/subjects/${subjectId}/topics`, data);
   },
 
+  updateSubject(subjectId: string, data: { name: string; description?: string }) {
+    return apiClient.put<ApiResponse<SubjectDTO>>(`/subjects/${subjectId}`, data);
+  },
+
+  updateTopic(subjectId: string, topicId: string, data: { name: string; description?: string }) {
+    return apiClient.put<ApiResponse<TopicDTO>>(`/subjects/${subjectId}/topics/${topicId}`, data);
+  },
+
   deactivateSubject(subjectId: string) {
     return apiClient.put<ApiResponse<SubjectDTO>>(`/subjects/${subjectId}/deactivate`);
   },

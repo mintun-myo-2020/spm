@@ -69,17 +69,29 @@ public class ClassController {
     }
 
     @PostMapping("/{classId}/students")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<EnrollmentDTO> enrollStudent(@PathVariable UUID classId,
                                                      @Valid @RequestBody EnrollStudentRequestDTO req) {
+        User user = currentUserService.getCurrentUser();
+        if (user.hasRole(com.eggtive.spm.common.enums.Role.TEACHER)) {
+            Teacher teacher = teacherRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher profile not found"));
+            classService.verifyTeacherOwnsClass(classId, teacher.getId());
+        }
         return ApiResponse.ok(classService.enrollStudent(classId, req.studentId()));
     }
 
     @PutMapping("/{classId}/students/{studentId}/withdraw")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ApiResponse<EnrollmentDTO> withdrawStudent(@PathVariable UUID classId,
                                                        @PathVariable UUID studentId) {
+        User user = currentUserService.getCurrentUser();
+        if (user.hasRole(com.eggtive.spm.common.enums.Role.TEACHER)) {
+            Teacher teacher = teacherRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher profile not found"));
+            classService.verifyTeacherOwnsClass(classId, teacher.getId());
+        }
         return ApiResponse.ok(classService.withdrawStudent(classId, studentId));
     }
 

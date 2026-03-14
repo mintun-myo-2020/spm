@@ -1,6 +1,7 @@
 package com.eggtive.spm.report.controller;
 
 import com.eggtive.spm.auth.CurrentUserService;
+import com.eggtive.spm.auth.StudentAccessService;
 import com.eggtive.spm.common.dto.ApiResponse;
 import com.eggtive.spm.common.dto.PagedResponse;
 import com.eggtive.spm.report.dto.GenerateReportRequestDTO;
@@ -19,16 +20,20 @@ public class ReportController {
 
     private final ReportService reportService;
     private final CurrentUserService currentUserService;
+    private final StudentAccessService studentAccessService;
 
-    public ReportController(ReportService reportService, CurrentUserService currentUserService) {
+    public ReportController(ReportService reportService, CurrentUserService currentUserService,
+                             StudentAccessService studentAccessService) {
         this.reportService = reportService;
         this.currentUserService = currentUserService;
+        this.studentAccessService = studentAccessService;
     }
 
     @PostMapping("/students/{studentId}/reports")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ProgressReportDTO> generate(@PathVariable UUID studentId,
                                                     @Valid @RequestBody GenerateReportRequestDTO req) {
+        studentAccessService.verifyAccess(currentUserService.getCurrentUser(), studentId);
         return ApiResponse.ok(reportService.generateReport(studentId, req, currentUserService.getCurrentUser()));
     }
 
@@ -39,6 +44,7 @@ public class ReportController {
 
     @GetMapping("/students/{studentId}/reports")
     public PagedResponse<ProgressReportDTO> listReports(@PathVariable UUID studentId, Pageable pageable) {
+        studentAccessService.verifyAccess(currentUserService.getCurrentUser(), studentId);
         return reportService.listStudentReports(studentId, pageable);
     }
 }

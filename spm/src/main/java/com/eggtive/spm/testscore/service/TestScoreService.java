@@ -8,6 +8,7 @@ import com.eggtive.spm.subject.entity.Topic;
 import com.eggtive.spm.subject.service.SubjectService;
 import com.eggtive.spm.testscore.dto.CreateTestScoreRequestDTO;
 import com.eggtive.spm.testscore.dto.TestScoreDTO;
+import com.eggtive.spm.testscore.dto.TestScoreDetailDTO;
 import com.eggtive.spm.testscore.entity.Question;
 import com.eggtive.spm.testscore.entity.SubQuestion;
 import com.eggtive.spm.testscore.entity.TestScore;
@@ -35,13 +36,16 @@ public class TestScoreService {
     private final UserService userService;
     private final ClassService classService;
     private final SubjectService subjectService;
+    private final com.eggtive.spm.feedback.repository.FeedbackRepository feedbackRepository;
 
     public TestScoreService(TestScoreRepository tsRepo, UserService userService,
-                            ClassService classService, SubjectService subjectService) {
+                            ClassService classService, SubjectService subjectService,
+                            com.eggtive.spm.feedback.repository.FeedbackRepository feedbackRepository) {
         this.testScoreRepository = tsRepo;
         this.userService = userService;
         this.classService = classService;
         this.subjectService = subjectService;
+        this.feedbackRepository = feedbackRepository;
     }
 
     public TestScoreDTO createTestScore(CreateTestScoreRequestDTO req, User currentUser, Teacher teacher) {
@@ -102,6 +106,22 @@ public class TestScoreService {
         TestScore ts = testScoreRepository.findById(testScoreId)
             .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Test score not found"));
         return toDTO(ts);
+    }
+
+    @Transactional(readOnly = true)
+    public TestScoreDetailDTO getTestScoreDetail(UUID testScoreId) {
+        TestScore ts = testScoreRepository.findById(testScoreId)
+            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Test score not found"));
+        TestScoreDTO dto = toDTO(ts);
+        com.eggtive.spm.feedback.dto.FeedbackDTO feedbackDTO = feedbackRepository.findByTestScoreId(testScoreId)
+            .map(f -> {
+                String teacherName = f.getTeacher().getUser().getFirstName() + " " + f.getTeacher().getUser().getLastName();
+                return new com.eggtive.spm.feedback.dto.FeedbackDTO(f.getId(), f.getTestScore().getId(),
+                    f.getTeacher().getId(), teacherName, f.getStudent().getId(),
+                    f.getStrengths(), f.getAreasForImprovement(), f.getRecommendations(),
+                    f.getAdditionalNotes(), f.isEdited(), f.getCreatedAt(), f.getUpdatedAt());
+            }).orElse(null);
+        return TestScoreDetailDTO.from(dto, feedbackDTO);
     }
 
     public void deleteTestScore(UUID testScoreId) {

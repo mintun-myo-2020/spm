@@ -1,7 +1,7 @@
 import { Sidebar as FlowbiteSidebar, SidebarItems, SidebarItemGroup, SidebarItem } from 'flowbite-react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { HiAcademicCap, HiChartBar, HiClipboardList, HiHome, HiUserGroup, HiBookOpen, HiBell } from 'react-icons/hi';
+import { HiAcademicCap, HiChartBar, HiClipboardList, HiHome, HiUserGroup, HiBookOpen, HiBell, HiDocumentReport } from 'react-icons/hi';
 import type { FC, SVGProps } from 'react';
 
 interface NavItem {
@@ -19,12 +19,14 @@ const navByRole: Record<string, NavItem[]> = {
     { label: 'Dashboard', to: '/parent/dashboard', icon: HiHome },
     { label: 'Test Scores', to: '/parent/scores', icon: HiClipboardList },
     { label: 'Progress', to: '/parent/progress', icon: HiChartBar },
+    { label: 'Reports', to: '/parent/reports', icon: HiDocumentReport },
     { label: 'Preferences', to: '/parent/preferences', icon: HiBell },
   ],
   STUDENT: [
     { label: 'Dashboard', to: '/student/dashboard', icon: HiHome },
     { label: 'My Scores', to: '/student/scores', icon: HiClipboardList },
     { label: 'My Progress', to: '/student/progress', icon: HiChartBar },
+    { label: 'Reports', to: '/student/reports', icon: HiDocumentReport },
   ],
   ADMIN: [
     { label: 'Dashboard', to: '/admin/dashboard', icon: HiHome },

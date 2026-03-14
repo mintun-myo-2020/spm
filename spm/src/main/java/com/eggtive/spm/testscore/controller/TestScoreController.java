@@ -1,12 +1,14 @@
 package com.eggtive.spm.testscore.controller;
 
 import com.eggtive.spm.auth.CurrentUserService;
+import com.eggtive.spm.auth.StudentAccessService;
 import com.eggtive.spm.common.dto.ApiResponse;
 import com.eggtive.spm.common.dto.PagedResponse;
 import com.eggtive.spm.common.enums.ErrorCode;
 import com.eggtive.spm.common.exception.AppException;
 import com.eggtive.spm.testscore.dto.CreateTestScoreRequestDTO;
 import com.eggtive.spm.testscore.dto.TestScoreDTO;
+import com.eggtive.spm.testscore.dto.TestScoreDetailDTO;
 import com.eggtive.spm.testscore.service.TestScoreService;
 import com.eggtive.spm.user.entity.Teacher;
 import com.eggtive.spm.user.entity.User;
@@ -28,12 +30,14 @@ public class TestScoreController {
     private final TestScoreService testScoreService;
     private final CurrentUserService currentUserService;
     private final TeacherRepository teacherRepository;
+    private final StudentAccessService studentAccessService;
 
     public TestScoreController(TestScoreService tsService, CurrentUserService currentUserService,
-                                TeacherRepository teacherRepo) {
+                                TeacherRepository teacherRepo, StudentAccessService studentAccessService) {
         this.testScoreService = tsService;
         this.currentUserService = currentUserService;
         this.teacherRepository = teacherRepo;
+        this.studentAccessService = studentAccessService;
     }
 
     @PostMapping("/test-scores")
@@ -53,12 +57,13 @@ public class TestScoreController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) UUID classId,
             Pageable pageable) {
+        studentAccessService.verifyAccess(currentUserService.getCurrentUser(), studentId);
         return testScoreService.getStudentTestScores(studentId, startDate, endDate, classId, pageable);
     }
 
     @GetMapping("/test-scores/{testScoreId}")
-    public ApiResponse<TestScoreDTO> getTestScore(@PathVariable UUID testScoreId) {
-        return ApiResponse.ok(testScoreService.getTestScore(testScoreId));
+    public ApiResponse<TestScoreDetailDTO> getTestScore(@PathVariable UUID testScoreId) {
+        return ApiResponse.ok(testScoreService.getTestScoreDetail(testScoreId));
     }
 
     @DeleteMapping("/test-scores/{testScoreId}")

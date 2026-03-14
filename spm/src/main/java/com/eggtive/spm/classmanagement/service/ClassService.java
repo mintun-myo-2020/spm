@@ -119,6 +119,13 @@ public class ClassService {
             base.currentStudentCount(), base.isActive(), base.createdAt(), students);
     }
 
+    public void verifyTeacherOwnsClass(UUID classId, UUID teacherId) {
+        TuitionClass tc = findClassOrThrow(classId);
+        if (!tc.getTeacher().getId().equals(teacherId)) {
+            throw new AppException(ErrorCode.FORBIDDEN, "You can only manage students in your own classes");
+        }
+    }
+
     public TuitionClass findClassOrThrow(UUID classId) {
         return classRepository.findById(classId)
             .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Class not found"));

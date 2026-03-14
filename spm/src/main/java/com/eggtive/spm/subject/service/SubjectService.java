@@ -65,6 +65,21 @@ public class SubjectService {
         return toTopicDTO(topicRepository.save(t));
     }
 
+    public SubjectDTO updateSubject(UUID subjectId, UpdateSubjectRequestDTO req) {
+        Subject s = findOrThrow(subjectId);
+        s.setName(req.name());
+        if (req.description() != null) s.setDescription(req.description());
+        return toSubjectDTO(subjectRepository.save(s));
+    }
+
+    public TopicDTO updateTopic(UUID topicId, UpdateTopicRequestDTO req) {
+        Topic t = topicRepository.findById(topicId)
+            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Topic not found"));
+        t.setName(req.name());
+        if (req.description() != null) t.setDescription(req.description());
+        return toTopicDTO(topicRepository.save(t));
+    }
+
     public SubjectDTO deactivateSubject(UUID subjectId) {
         Subject s = findOrThrow(subjectId);
         s.setActive(false);

@@ -39,8 +39,12 @@ public class CurrentUserService {
             throw new AppException(ErrorCode.UNAUTHORIZED, "Not authenticated");
         }
         String keycloakId = jwt.getSubject();
-        return userRepository.findByKeycloakId(keycloakId)
+        User user = userRepository.findByKeycloakId(keycloakId)
             .orElseGet(() -> provisionFromToken(jwt));
+        if (!user.isActive()) {
+            throw new AppException(ErrorCode.FORBIDDEN, "Account is deactivated");
+        }
+        return user;
     }
 
     public String getKeycloakId() {
@@ -73,17 +77,21 @@ public class CurrentUserService {
             }
         }
 
-        // Check if a user with this email already exists (e.g. admin-created with pending keycloakId)
+        // Link by email only if the existing user was admin-created (pending keycloakId).
+        // Reject linking if the user already has a real keycloakId to prevent account takeover.
         Optional<User> existing = userRepository.findByEmail(email);
         if (existing.isPresent()) {
             User user = existing.get();
-            user.setKeycloakId(keycloakId);
-            user.setFirstName(firstName);
-            user.setLastName(lastName);
-            if (!roles.isEmpty()) {
-                user.setRoles(roles);
+            if (user.getKeycloakId() != null && user.getKeycloakId().startsWith("pending-")) {
+                user.setKeycloakId(keycloakId);
+                user.setFirstName(firstName);
+                user.setLastName(lastName);
+                if (!roles.isEmpty()) {
+                    user.setRoles(roles);
+                }
+                return userRepository.save(user);
             }
-            return userRepository.save(user);
+            // User exists with a real keycloakId — don't overwrite, create a new record
         }
 
         User user = new User();

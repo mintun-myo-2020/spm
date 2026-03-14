@@ -37,9 +37,11 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Retry on 5xx / network errors
+    // Retry on 5xx / network errors (idempotent methods only)
+    const method = (config.method ?? '').toUpperCase();
+    const isIdempotent = ['GET', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'].includes(method);
     if (!config._retryCount) config._retryCount = 0;
-    if (config._retryCount < MAX_RETRIES && (!error.response || error.response.status >= 500)) {
+    if (isIdempotent && config._retryCount < MAX_RETRIES && (!error.response || error.response.status >= 500)) {
       config._retryCount++;
       await new Promise((r) => setTimeout(r, 1000 * config._retryCount!));
       return apiClient.request(config);

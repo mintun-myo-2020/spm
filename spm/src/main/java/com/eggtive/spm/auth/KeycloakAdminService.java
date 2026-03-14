@@ -28,6 +28,9 @@ public class KeycloakAdminService {
     private final String clientId;
     private final String clientSecret;
 
+    private String cachedToken;
+    private long tokenExpiresAt; // epoch millis
+
     public KeycloakAdminService(
             @Value("${app.keycloak.server-url}") String serverUrl,
             @Value("${app.keycloak.realm}") String realm,
@@ -67,8 +70,31 @@ public class KeycloakAdminService {
         }
     }
 
+    /**
+     * Enables or disables a user in Keycloak.
+     */
+    public void setUserEnabled(String keycloakId, boolean enabled) {
+        try {
+            String token = getAdminToken();
+            restClient.put()
+                .uri(serverUrl + "/admin/realms/{realm}/users/{id}", realm, keycloakId)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("enabled", enabled))
+                .retrieve()
+                .toBodilessEntity();
+        } catch (Exception e) {
+            log.error("Failed to set enabled={} for Keycloak user {}: {}", enabled, keycloakId, e.getMessage());
+        }
+    }
+
     @SuppressWarnings("unchecked")
-    private String getAdminToken() {
+    private synchronized String getAdminToken() {
+        // Return cached token if still valid (with 30s buffer)
+        if (cachedToken != null && System.currentTimeMillis() < tokenExpiresAt - 30_000) {
+            return cachedToken;
+        }
+
         var form = new LinkedMultiValueMap<String, String>();
         form.add("grant_type", "client_credentials");
         form.add("client_id", clientId);
@@ -83,13 +109,19 @@ public class KeycloakAdminService {
                 .body(Map.class);
 
             if (response == null || !response.containsKey("access_token")) {
-                throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to obtain Keycloak admin token");
+                throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to obtain admin token");
             }
-            return (String) response.get("access_token");
+
+            cachedToken = (String) response.get("access_token");
+            int expiresIn = response.containsKey("expires_in") ? ((Number) response.get("expires_in")).intValue() : 60;
+            tokenExpiresAt = System.currentTimeMillis() + (expiresIn * 1000L);
+
+            return cachedToken;
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
-            throw new AppException(ErrorCode.INTERNAL_ERROR, "Keycloak authentication failed: " + e.getMessage());
+            log.error("Keycloak authentication failed", e);
+            throw new AppException(ErrorCode.INTERNAL_ERROR, "Authentication service unavailable");
         }
     }
 
@@ -128,37 +160,33 @@ public class KeycloakAdminService {
         } catch (Exception e) {
             String msg = e.getMessage();
             if (msg != null && msg.contains("409")) {
-                throw new AppException(ErrorCode.CONFLICT, "User already exists in Keycloak");
+                throw new AppException(ErrorCode.CONFLICT, "User already exists in identity provider");
             }
-            throw new AppException(ErrorCode.INTERNAL_ERROR, "Failed to create Keycloak user: " + msg);
+            log.error("Failed to create Keycloak user for email {}", email, e);
+            throw new AppException(ErrorCode.INTERNAL_ERROR, "User creation failed");
         }
     }
 
     @SuppressWarnings("unchecked")
     private void assignRealmRole(String token, String keycloakId, String roleName) {
-        try {
-            // Look up the role representation
-            Map<String, Object> role = restClient.get()
-                .uri(serverUrl + "/admin/realms/{realm}/roles/{role}", realm, roleName)
-                .header("Authorization", "Bearer " + token)
-                .retrieve()
-                .body(Map.class);
+        // Look up the role representation
+        Map<String, Object> role = restClient.get()
+            .uri(serverUrl + "/admin/realms/{realm}/roles/{role}", realm, roleName)
+            .header("Authorization", "Bearer " + token)
+            .retrieve()
+            .body(Map.class);
 
-            if (role == null) {
-                log.warn("Realm role '{}' not found in Keycloak, skipping assignment", roleName);
-                return;
-            }
-
-            // Assign the role to the user
-            restClient.post()
-                .uri(serverUrl + "/admin/realms/{realm}/users/{id}/role-mappings/realm", realm, keycloakId)
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(List.of(role))
-                .retrieve()
-                .toBodilessEntity();
-        } catch (Exception e) {
-            log.warn("Failed to assign role '{}' to Keycloak user {}: {}", roleName, keycloakId, e.getMessage());
+        if (role == null) {
+            throw new AppException(ErrorCode.INTERNAL_ERROR, "Role assignment failed");
         }
+
+        // Assign the role to the user
+        restClient.post()
+            .uri(serverUrl + "/admin/realms/{realm}/users/{id}/role-mappings/realm", realm, keycloakId)
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(List.of(role))
+            .retrieve()
+            .toBodilessEntity();
     }
 }

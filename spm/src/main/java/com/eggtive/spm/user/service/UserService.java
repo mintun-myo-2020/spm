@@ -99,6 +99,10 @@ public class UserService {
         user.setActive(false);
         user.setDeactivatedAt(Instant.now());
         userRepository.save(user);
+        // Also disable in Keycloak so they can't get new tokens
+        if (user.getKeycloakId() != null && !user.getKeycloakId().startsWith("pending-")) {
+            keycloakAdminService.setUserEnabled(user.getKeycloakId(), false);
+        }
     }
 
     public void reactivateUser(UUID userId) {
@@ -106,6 +110,10 @@ public class UserService {
         user.setActive(true);
         user.setDeactivatedAt(null);
         userRepository.save(user);
+        // Re-enable in Keycloak
+        if (user.getKeycloakId() != null && !user.getKeycloakId().startsWith("pending-")) {
+            keycloakAdminService.setUserEnabled(user.getKeycloakId(), true);
+        }
     }
 
     @Transactional(readOnly = true)

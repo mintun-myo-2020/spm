@@ -44,17 +44,14 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
 
   return (
     <>
-      {isOpen && <div className="fixed inset-0 z-30 bg-black/30 lg:hidden" onClick={onClose} />}
+      {isOpen && <div className="fixed inset-0 top-16 z-30 bg-black/30 lg:hidden" onClick={onClose} />}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 transform bg-white shadow-lg transition-transform dark:bg-gray-800 ${
+        className={`fixed top-16 bottom-0 left-0 z-40 w-64 transform bg-white shadow-lg transition-transform dark:bg-gray-800 ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
         data-testid="sidebar"
       >
-        <div className="flex h-16 items-center border-b px-6 dark:border-gray-700">
-          <span className="text-lg font-bold text-blue-600 dark:text-blue-400">SPM</span>
-        </div>
         <FlowbiteSidebar aria-label="Navigation" className="border-none [&>div]:bg-transparent">
           <SidebarItems>
             <SidebarItemGroup>

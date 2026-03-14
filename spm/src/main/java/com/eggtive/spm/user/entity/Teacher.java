@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 @Table(name = "teachers")
 public class Teacher extends BaseEntity {
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 

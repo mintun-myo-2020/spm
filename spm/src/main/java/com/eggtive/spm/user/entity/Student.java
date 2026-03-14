@@ -8,7 +8,7 @@ import java.time.LocalDate;
 @Table(name = "students")
 public class Student extends BaseEntity {
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 

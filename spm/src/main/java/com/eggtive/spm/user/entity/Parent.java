@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 @Table(name = "parents")
 public class Parent extends BaseEntity {
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 

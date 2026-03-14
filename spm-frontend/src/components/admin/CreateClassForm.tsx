@@ -42,6 +42,7 @@ export function CreateClassForm({ onSuccess, onCancel }: { onSuccess: () => void
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" data-testid="create-class-form">
+      <p className="text-sm text-gray-600 dark:text-gray-400">Set up a new class by assigning a teacher, subject, and student capacity.</p>
       <div>
         <Label htmlFor="name">Class Name</Label>
         <TextInput id="name" {...register('name')} color={errors.name ? 'failure' : undefined} data-testid="class-name-input" />

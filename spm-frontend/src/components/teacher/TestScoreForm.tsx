@@ -78,7 +78,10 @@ export function TestScoreForm() {
 
   return (
     <div className="mx-auto max-w-3xl" data-testid="test-score-form">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Record Test Score</h1>
+      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Record Test Score</h1>
+      <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+        Enter the test details below. Each question can have sub-questions mapped to specific topics for detailed performance tracking.
+      </p>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -104,7 +107,10 @@ export function TestScoreForm() {
 
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Questions</h2>
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Questions</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Break down the test into questions and sub-questions. Map each sub-question to a topic for tracking.</p>
+            </div>
             <Button size="sm" color="light" onClick={() => addQuestion({ questionNumber: `Q${questionFields.length + 1}`, maxScore: 20, subQuestions: [{ label: 'a', score: 0, maxScore: 10, topicId: '' }] })} data-testid="add-question-button">+ Add Question</Button>
           </div>
           {questionFields.map((qField, qIdx) => (
@@ -128,22 +134,49 @@ function QuestionBlock({ qIdx, control, register, topics, onRemove }: {
 
   return (
     <Card className="bg-gray-50 dark:bg-gray-800" data-testid={`question-block-${qIdx}`}>
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-4 flex items-start justify-between">
         <div className="flex gap-3">
-          <TextInput sizing="sm" {...register(`questions.${qIdx}.questionNumber`)} placeholder="Q1" className="w-20" />
-          <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.maxScore`, { valueAsNumber: true })} placeholder="Max" className="w-20" />
+          <div>
+            <Label className="mb-1 text-xs text-gray-500 dark:text-gray-400">Question #</Label>
+            <TextInput sizing="sm" {...register(`questions.${qIdx}.questionNumber`)} placeholder="Q1" className="w-20" />
+          </div>
+          <div>
+            <Label className="mb-1 text-xs text-gray-500 dark:text-gray-400">Max Score</Label>
+            <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.maxScore`, { valueAsNumber: true })} placeholder="20" className="w-24" />
+          </div>
         </div>
         <Button size="xs" color="failure" onClick={onRemove}>Remove</Button>
       </div>
+
+      <p className="mb-2 text-xs font-medium text-gray-600 dark:text-gray-400">Sub-questions</p>
+      <div className="mb-2 hidden gap-2 sm:flex">
+        <span className="w-14 text-xs text-gray-400">Label</span>
+        <span className="w-20 text-xs text-gray-400">Score</span>
+        <span className="w-20 text-xs text-gray-400">Max</span>
+        <span className="flex-1 text-xs text-gray-400">Topic</span>
+        <span className="w-8" />
+      </div>
       {subFields.map((sf, sIdx) => (
-        <div key={sf.id} className="mb-2 flex flex-wrap items-center gap-2" data-testid={`sub-question-${qIdx}-${sIdx}`}>
-          <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.label`)} placeholder="a" className="w-12" />
-          <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.score`, { valueAsNumber: true })} placeholder="Score" className="w-20" />
-          <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.maxScore`, { valueAsNumber: true })} placeholder="Max" className="w-20" />
-          <Select sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.topicId`)} className="flex-1" data-testid={`topic-select-${qIdx}-${sIdx}`}>
-            <option value="">Select topic</option>
-            {topics.map((t) => <option key={t.id} value={t.id}>{t.subjectName} - {t.name}</option>)}
-          </Select>
+        <div key={sf.id} className="mb-2 flex flex-wrap items-end gap-2" data-testid={`sub-question-${qIdx}-${sIdx}`}>
+          <div className="sm:w-14">
+            <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Label</Label>
+            <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.label`)} placeholder="a" className="w-14" />
+          </div>
+          <div className="sm:w-20">
+            <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Score</Label>
+            <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.score`, { valueAsNumber: true })} placeholder="0" className="w-20" />
+          </div>
+          <div className="sm:w-20">
+            <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Max</Label>
+            <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.maxScore`, { valueAsNumber: true })} placeholder="10" className="w-20" />
+          </div>
+          <div className="flex-1">
+            <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Topic</Label>
+            <Select sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.topicId`)} className="w-full" data-testid={`topic-select-${qIdx}-${sIdx}`}>
+              <option value="">Select topic</option>
+              {topics.map((t) => <option key={t.id} value={t.id}>{t.subjectName} - {t.name}</option>)}
+            </Select>
+          </div>
           <Button size="xs" color="failure" onClick={() => removeSub(sIdx)}>×</Button>
         </div>
       ))}

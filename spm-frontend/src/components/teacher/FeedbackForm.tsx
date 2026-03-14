@@ -60,7 +60,10 @@ export function FeedbackForm() {
 
   return (
     <div className="mx-auto max-w-2xl" data-testid="feedback-form">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Add Feedback</h1>
+      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Add Feedback</h1>
+      <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
+        Provide feedback on the student's test performance. Use templates for quick entry or write your own.
+      </p>
 
       {templates.length > 0 && (
         <div className="mb-6">

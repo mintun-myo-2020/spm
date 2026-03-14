@@ -50,6 +50,7 @@ export function CreateUserForm({ onSuccess, onCancel }: { onSuccess: () => void;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" data-testid="create-user-form">
+      <p className="text-sm text-gray-600 dark:text-gray-400">Add a new user to the system. Select a role and fill in their details.</p>
       <div>
         <Label htmlFor="role">Role</Label>
         <Select id="role" {...register('role')} data-testid="role-select">

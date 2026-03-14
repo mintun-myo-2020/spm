@@ -95,9 +95,10 @@ STUDENT-1 through STUDENT-3, ADMIN-1 through ADMIN-6, DATA-1, REPORT-1
 - [x] Create `TestScoreController` (REST endpoints)
 
 ### Step 10: Progress Tracking Module
-- [ ] Create progress DTOs: `OverallProgressDTO`, `TopicProgressDTO`, `TopicProgressSummaryDTO`, `ImprovementVelocityDTO`, `TrendDataPointDTO`
-- [ ] Create `ProgressService` (overall trend, topic trend, all topics summary, improvement velocity calculation)
-- [ ] Create `ProgressController` (REST endpoints)
+- [x] Create progress DTOs: `OverallProgressDTO`, `TopicProgressSummaryDTO`, `ImprovementVelocityDTO`, `TrendDataPointDTO`
+- [x] Create `ProgressCalculator` interface + `SimpleProgressCalculator` impl
+- [x] Create `ProgressService` (overall trend, topic trend, all topics summary, improvement velocity calculation)
+- [x] Create `ProgressController` (REST endpoints)
 
 ### Step 11: Feedback Management Module
 - [x] Create `FeedbackRepository`, `FeedbackTemplateRepository`
@@ -106,21 +107,23 @@ STUDENT-1 through STUDENT-3, ADMIN-1 through ADMIN-6, DATA-1, REPORT-1
 - [x] Create `FeedbackController` (REST endpoints)
 
 ### Step 12: Notification Module
-- [ ] Create `NotificationRepository`
-- [ ] Create notification DTOs: `NotificationDTO`, `NotificationPreferencesDTO`, `UpdateNotificationPreferencesRequestDTO`
+- [x] Create `NotificationRepository`
+- [x] Create notification DTOs: `NotificationDTO`
+- [ ] Create notification DTOs: `NotificationPreferencesDTO`, `UpdateNotificationPreferencesRequestDTO`
 - [ ] Create `NotificationEvent` classes (NewTestScoreEvent, NewFeedbackEvent)
 - [ ] Create `NotificationEventHandler` (@EventListener, creates Notification records)
 - [ ] Create `EmailService` (AWS SES integration — no Resilience4j, simple try/catch for MVP)
 - [ ] Create `SmsService` (AWS SNS integration — no Resilience4j, simple try/catch for MVP)
 - [ ] Create `NotificationSender` (async processing of pending notifications)
-- [ ] Create `NotificationController` (get my notifications, update preferences)
+- [x] Create `NotificationService` (basic CRUD)
+- [x] Create `NotificationController` (get my notifications, update preferences)
 
 ### Step 13: Report Generation Module
-- [ ] Create `ProgressReportRepository`
-- [ ] Create report DTOs: `GenerateReportRequestDTO`, `ProgressReportDTO`
-- [ ] Create `ReportGenerationService` (generate HTML report, upload to S3, create record)
-- [ ] Create `S3StorageService` (upload, generate pre-signed URL)
-- [ ] Create `ReportController` (generate report, get report, list student reports)
+- [x] Create `ProgressReportRepository`
+- [x] Create report DTOs: `GenerateReportRequestDTO`, `ProgressReportDTO`
+- [x] Create `ReportService` (generate report, create record — uses `ReportStorage` interface)
+- [x] Create `ReportStorage` interface + `StubReportStorage` impl (S3 deferred)
+- [x] Create `ReportController` (generate report, get report, list student reports)
 
 ### Step 14: Bulk Operations
 - [ ] Create `BulkOperationResultDTO`
@@ -173,8 +176,10 @@ STUDENT-1 through STUDENT-3, ADMIN-1 through ADMIN-6, DATA-1, REPORT-1
 ## Completion Summary
 - **Steps 1-5**: DONE (project setup, common module, auth, migrations, entities)
 - **Steps 6-9**: DONE (user, subject, class, test score — repos, DTOs, services, controllers)
-- **Step 10**: TODO (progress tracking)
+- **Step 10**: DONE (progress tracking — calculator interface, service, controller, DTOs)
 - **Step 11**: DONE (feedback)
-- **Steps 12-15**: TODO (notifications, reports, bulk ops, cross-cutting)
+- **Step 12**: PARTIAL (notification — repo, DTO, service, controller done; event classes, email/SMS services, notification sender still TODO)
+- **Step 13**: DONE (report generation — repo, DTOs, service, storage interface + stub, controller)
+- **Steps 14-15**: TODO (bulk ops, cross-cutting)
 - **Steps 16-18**: TODO (tests, docs)
-- **Estimated completion**: ~60% of core backend code done
+- **Estimated completion**: ~80% of core backend code done

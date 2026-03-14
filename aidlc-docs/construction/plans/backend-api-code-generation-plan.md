@@ -41,9 +41,10 @@ STUDENT-1 through STUDENT-3, ADMIN-1 through ADMIN-6, DATA-1, REPORT-1
 
 ### Step 3: Auth Module - Security Configuration
 - [x] Create `SecurityConfig` (Spring Security 6 filter chain, OAuth2 Resource Server, JWT, CORS)
-- [ ] Create `KeycloakRoleConverter` (extract roles from Keycloak JWT)
-- [ ] Create `CurrentUserService` (extract current user from SecurityContext)
-- [ ] Create `AuthorizationService` (canAccessStudent, canAccessClass, ownership checks)
+- [x] Create `RoleConverter` interface + `KeycloakRoleConverter` impl — decoupled from vendor
+- [x] Create `CurrentUserService` (extract current user from SecurityContext via JWT sub claim)
+- [x] Create `AuthController` (GET /auth/me)
+- [ ] Create `AuthorizationService` (canAccessStudent, canAccessClass, ownership checks) — DEFERRED
 
 ### Step 4: Database Migrations (Flyway)
 - [x] Create `V1__initial_schema.sql` — consolidated ALL tables + indexes into single migration (users, roles, teachers, parents, students, admins, subjects, topics, classes, class_students, test_scores, questions, sub_questions, feedback, feedback_templates, notifications, progress_reports, indexes)
@@ -68,30 +69,30 @@ STUDENT-1 through STUDENT-3, ADMIN-1 through ADMIN-6, DATA-1, REPORT-1
 - [ ] Create `TeacherClassHistory` entity — DEFERRED (not core MVP)
 
 ### Step 6: User Management Module
-- [ ] Create `UserRepository`, `TeacherRepository`, `ParentRepository`, `StudentRepository`, `AdminRepository`, `UserRoleRepository`
-- [ ] Create user DTOs: `UserInfoDTO`, `CreateTeacherRequestDTO`, `TeacherDTO`, `CreateParentRequestDTO`, `ParentDTO`, `CreateStudentRequestDTO`, `StudentDTO`, `UserDTO`
-- [ ] Create `UserService` (create teacher/parent/student, deactivate, reactivate, get user info)
-- [ ] Create `UserController` (REST endpoints for user management)
-- [ ] Create `AuthController` (GET /auth/me endpoint)
+- [x] Create `UserRepository`, `TeacherRepository`, `ParentRepository`, `StudentRepository`
+- [x] Create user DTOs: `UserInfoDTO`, `CreateTeacherRequestDTO`, `TeacherDTO`, `CreateParentRequestDTO`, `ParentDTO`, `CreateStudentRequestDTO`, `StudentDTO`
+- [x] Create `UserService` (create teacher/parent/student, deactivate, reactivate, get user info)
+- [x] Create `UserController` (REST endpoints for user management)
+- [x] Create `AuthController` (GET /auth/me endpoint) — in auth package
 
 ### Step 7: Subject & Topic Management Module
-- [ ] Create `SubjectRepository`, `TopicRepository`
-- [ ] Create subject DTOs: `SubjectDTO`, `SubjectDetailDTO`, `CreateSubjectRequestDTO`, `TopicDTO`, `CreateTopicRequestDTO`
-- [ ] Create `SubjectService` (CRUD, list with topics, deactivate)
-- [ ] Create `SubjectController` (REST endpoints)
-- [ ] Create `DefaultSubjectConfig` (load default subjects from application.yml)
+- [x] Create `SubjectRepository`, `TopicRepository`
+- [x] Create subject DTOs: `SubjectDTO`, `SubjectDetailDTO`, `CreateSubjectRequestDTO`, `TopicDTO`, `CreateTopicRequestDTO`
+- [x] Create `SubjectService` (CRUD, list with topics, deactivate)
+- [x] Create `SubjectController` (REST endpoints)
+- [ ] Create `DefaultSubjectConfig` (load default subjects from application.yml) — DEFERRED
 
 ### Step 8: Class Management Module
-- [ ] Create `ClassRepository` (TuitionClassRepository), `ClassStudentRepository`, `TeacherClassHistoryRepository`
-- [ ] Create class DTOs: `ClassDTO`, `ClassDetailDTO`, `CreateClassRequestDTO`, `EnrollmentDTO`, `EnrollStudentRequestDTO`, `ChangeTeacherRequestDTO`
-- [ ] Create `ClassService` (create class, enroll/withdraw student, change teacher, get teacher's classes)
-- [ ] Create `ClassController` (REST endpoints)
+- [x] Create `TuitionClassRepository`, `ClassStudentRepository`
+- [x] Create class DTOs: `ClassDTO`, `CreateClassRequestDTO`, `EnrollmentDTO`, `EnrollStudentRequestDTO`
+- [x] Create `ClassService` (create class, enroll/withdraw student, change teacher, get teacher's classes)
+- [x] Create `ClassController` (REST endpoints)
 
 ### Step 9: Test Score Management Module
-- [ ] Create `TestScoreRepository`, `QuestionRepository`, `SubQuestionRepository`, `SubQuestionTopicRepository`
-- [ ] Create test score DTOs: `CreateTestScoreRequestDTO`, `TestScoreDTO`, `TestScoreDetailDTO`, `QuestionDTO`, `SubQuestionDTO`, `UpdateTestScoreRequestDTO`
-- [ ] Create `TestScoreService` (create with topic breakdown, update, delete, list by student with filters)
-- [ ] Create `TestScoreController` (REST endpoints)
+- [x] Create `TestScoreRepository`
+- [x] Create test score DTOs: `CreateTestScoreRequestDTO`, `TestScoreDTO` (with nested QuestionDTO, SubQuestionDTO)
+- [x] Create `TestScoreService` (create with topic breakdown, delete, list by student with filters)
+- [x] Create `TestScoreController` (REST endpoints)
 
 ### Step 10: Progress Tracking Module
 - [ ] Create progress DTOs: `OverallProgressDTO`, `TopicProgressDTO`, `TopicProgressSummaryDTO`, `ImprovementVelocityDTO`, `TrendDataPointDTO`
@@ -99,19 +100,18 @@ STUDENT-1 through STUDENT-3, ADMIN-1 through ADMIN-6, DATA-1, REPORT-1
 - [ ] Create `ProgressController` (REST endpoints)
 
 ### Step 11: Feedback Management Module
-- [ ] Create `FeedbackRepository`, `FeedbackTemplateRepository`
-- [ ] Create feedback DTOs: `FeedbackDTO`, `CreateFeedbackRequestDTO`, `UpdateFeedbackRequestDTO`, `FeedbackTemplateDTO`, `CreateFeedbackTemplateRequestDTO`
-- [ ] Create `FeedbackService` (create, update, get templates, create template)
-- [ ] Create `FeedbackController` (REST endpoints)
+- [x] Create `FeedbackRepository`, `FeedbackTemplateRepository`
+- [x] Create feedback DTOs: `FeedbackDTO`, `CreateFeedbackRequestDTO`, `FeedbackTemplateDTO`, `CreateFeedbackTemplateRequestDTO`
+- [x] Create `FeedbackService` (create, update, get templates, create template)
+- [x] Create `FeedbackController` (REST endpoints)
 
 ### Step 12: Notification Module
 - [ ] Create `NotificationRepository`
 - [ ] Create notification DTOs: `NotificationDTO`, `NotificationPreferencesDTO`, `UpdateNotificationPreferencesRequestDTO`
-- [ ] Create `NotificationEvent` classes (NewTestScoreEvent, TestScoreUpdatedEvent, NewFeedbackEvent, FeedbackUpdatedEvent)
-- [ ] Create `NotificationEventPublisher` (Spring Events)
+- [ ] Create `NotificationEvent` classes (NewTestScoreEvent, NewFeedbackEvent)
 - [ ] Create `NotificationEventHandler` (@EventListener, creates Notification records)
-- [ ] Create `EmailService` (AWS SES integration, with Resilience4j retry/circuit breaker)
-- [ ] Create `SmsService` (AWS SNS integration, with Resilience4j retry/circuit breaker)
+- [ ] Create `EmailService` (AWS SES integration — no Resilience4j, simple try/catch for MVP)
+- [ ] Create `SmsService` (AWS SNS integration — no Resilience4j, simple try/catch for MVP)
 - [ ] Create `NotificationSender` (async processing of pending notifications)
 - [ ] Create `NotificationController` (get my notifications, update preferences)
 
@@ -131,8 +131,8 @@ STUDENT-1 through STUDENT-3, ADMIN-1 through ADMIN-6, DATA-1, REPORT-1
 ### Step 15: Cross-Cutting Concerns
 - [ ] Create `CacheConfig` (Caffeine cache manager with named caches)
 - [ ] Create `AsyncConfig` (thread pools for notifications, reports)
-- [ ] Create `Resilience4jConfig` (circuit breaker, retry for external services)
-- [ ] Create `WebConfig` (CORS, request logging)
+- [ ] ~~Create `Resilience4jConfig`~~ — REMOVED (compatibility concerns with Spring Boot 4)
+- [ ] Create `WebConfig` (request logging)
 - [ ] Create `AuditConfig` (JPA auditing with createdBy/updatedBy)
 
 ### Step 16: Unit Tests - Core Services
@@ -161,11 +161,20 @@ STUDENT-1 through STUDENT-3, ADMIN-1 through ADMIN-6, DATA-1, REPORT-1
 ## Execution Notes
 - Steps are executed sequentially (1 → 18)
 - Each step is marked [x] immediately upon completion
-- Code is written to `backend/` directory (never `aidlc-docs/`)
+- Code is written to `spm/` directory (never `aidlc-docs/`)
 - All entities use UUID primary keys
 - All DTOs use Java records where possible
 - Bean Validation annotations on all request DTOs
-- `data-testid` attributes not applicable (backend API only)
-- Greenfield multi-unit structure: `backend/` and `frontend/` directories
+- Auth layer decoupled via `RoleConverter` interface (Keycloak impl swappable)
+- Resilience4j removed — Spring Boot 4 compatibility uncertain, not needed for MVP
+- Docker Compose set up for local Postgres + app container (via `bootBuildImage`, no Dockerfile)
+- Flyway migrations consolidated into single V1 file
 
-## Total Estimated Files: ~120+ Java files, ~9 SQL migrations, build configs, Docker, README
+## Completion Summary
+- **Steps 1-5**: DONE (project setup, common module, auth, migrations, entities)
+- **Steps 6-9**: DONE (user, subject, class, test score — repos, DTOs, services, controllers)
+- **Step 10**: TODO (progress tracking)
+- **Step 11**: DONE (feedback)
+- **Steps 12-15**: TODO (notifications, reports, bulk ops, cross-cutting)
+- **Steps 16-18**: TODO (tests, docs)
+- **Estimated completion**: ~60% of core backend code done

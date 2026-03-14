@@ -19,6 +19,8 @@ repositories {
 }
 
 dependencies {
+
+	// Spring Boot starters
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-cache")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -28,45 +30,46 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
+
+	// Database
 	implementation("org.flywaydb:flyway-database-postgresql")
-	// Caffeine cache
+	runtimeOnly("org.postgresql:postgresql")
+
+	// Cache
 	implementation("com.github.ben-manes.caffeine:caffeine")
 
-	// Resilience4j
-	implementation("io.github.resilience4j:resilience4j-spring-boot4")
-	// AWS SDK v2 (SES, SNS, S3)
+	// AWS SDK v2
 	implementation(platform("software.amazon.awssdk:bom:2.42.12"))
 	implementation("software.amazon.awssdk:ses")
 	implementation("software.amazon.awssdk:sns")
 	implementation("software.amazon.awssdk:s3")
 
-	// Testing extras
-	testImplementation("org.testcontainers:postgresql")
-	testImplementation("org.testcontainers:junit-jupiter")
-	
-	runtimeOnly("org.postgresql:postgresql")
-	// Required for database tests
-	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")
+	// -------------------------
+	// Testing
+	// -------------------------
 
-	// Required for Web & Security tests
-	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-security-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-security-oauth2-client-test")
-
-	// Required for other specialized slices
-	testImplementation("org.springframework.boot:spring-boot-starter-actuator-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-cache-test")
-	testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
-
-	// The core testing framework (JUnit, Mockito, AssertJ)
+	// Spring Boot testing framework
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	// Security testing
+	testImplementation("org.springframework.security:spring-security-test")
+
+	// Testcontainers
+	testImplementation(platform("org.testcontainers:testcontainers-bom:1.21.0"))
+	testImplementation("org.testcontainers:junit-jupiter")
+	testImplementation("org.testcontainers:postgresql")
+
+	// Spring Boot + Testcontainers integration
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
 
+	// JUnit platform launcher
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+tasks.named<org.springframework.boot.gradle.tasks.bundling.BootBuildImage>("bootBuildImage") {
+	imageName.set("spm-app:latest")
 }

@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: spm-postgres
+    environment:
+      POSTGRES_DB: spm
+      POSTGRES_USER: spm
+      POSTGRES_PASSWORD: spm
+    ports:
+      - "5432:5432"
+    volumes:
+      - spm-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U spm"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: spm-app:latest
+    container_name: spm-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/spm
+      DB_USERNAME: spm
+      DB_PASSWORD: spm
+      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/spm
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/spm/protocol/openid-connect/certs
+      CORS_ALLOWED_ORIGINS: http://localhost:5173
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+
+volumes:
+  spm-pgdata:

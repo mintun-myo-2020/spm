@@ -23,60 +23,49 @@ STUDENT-1 through STUDENT-3, ADMIN-1 through ADMIN-6, DATA-1, REPORT-1
 ## Code Generation Steps
 
 ### Step 1: Project Structure Setup
-- [ ] Create Gradle project with Kotlin DSL (`build.gradle.kts`)
-- [ ] Create `settings.gradle.kts`
-- [ ] Create main application class `SpmApplication.java`
-- [ ] Create `application.yml` with profiles (dev, prod)
-- [ ] Create `application-dev.yml` for local development
-- [ ] Create `.env.example` for environment variables
-- [ ] Create `Dockerfile` (multi-stage build)
-- [ ] Create `.dockerignore`
+- [x] Create Gradle project with Kotlin DSL (`build.gradle.kts`) — user set up via Spring Initializr
+- [x] Create `settings.gradle.kts` — created by Spring Initializr
+- [x] Create main application class `SpmApplication.java` — created by Spring Initializr
+- [x] Create `application.yml` with profiles (dev, prod) — created with env var defaults
+- [ ] Create `application-dev.yml` for local development — SKIPPED (env var defaults in application.yml suffice)
+- [ ] Create `.env.example` for environment variables — DEFERRED
+- [ ] Create `Dockerfile` (multi-stage build) — DEFERRED
+- [ ] Create `.dockerignore` — DEFERRED
 
 ### Step 2: Common Module - Shared Infrastructure
-- [ ] Create common exception classes (`NotFoundException`, `ConflictException`, `ForbiddenException`, `BadRequestException`, `ServiceUnavailableException`)
-- [ ] Create `GlobalExceptionHandler` with `@RestControllerAdvice`
-- [ ] Create common DTOs (`ErrorResponseDTO`, `PagedResponseDTO`, `ApiResponseDTO`)
-- [ ] Create base entity class `BaseEntity` with id, createdAt, updatedAt
-- [ ] Create audit entity class `AuditableEntity` extending BaseEntity with createdBy, updatedBy
+- [x] Create common exception classes — simplified to single `AppException` using `ErrorCode` enum
+- [x] Create `GlobalExceptionHandler` with `@RestControllerAdvice`
+- [x] Create common DTOs (`ErrorResponse`, `PagedResponse`, `ApiResponse`) — using Java records
+- [x] Create base entity class `BaseEntity` with id, createdAt, updatedAt
+- [ ] Create audit entity class `AuditableEntity` extending BaseEntity with createdBy, updatedBy — SKIPPED (audit fields handled per-entity where needed)
 
 ### Step 3: Auth Module - Security Configuration
-- [ ] Create `SecurityConfig` (Spring Security 6 filter chain, OAuth2 Resource Server, JWT)
-- [ ] Create `JwtAuthenticationConverter` (extract roles from Keycloak JWT)
-- [ ] Create `AuthorizationService` (canAccessStudent, canAccessClass, ownership checks)
+- [x] Create `SecurityConfig` (Spring Security 6 filter chain, OAuth2 Resource Server, JWT, CORS)
+- [ ] Create `KeycloakRoleConverter` (extract roles from Keycloak JWT)
 - [ ] Create `CurrentUserService` (extract current user from SecurityContext)
-- [ ] Create CORS configuration
+- [ ] Create `AuthorizationService` (canAccessStudent, canAccessClass, ownership checks)
 
 ### Step 4: Database Migrations (Flyway)
-- [ ] Create `V1__initial_schema.sql` - Users, UserRole, Teacher, Parent, Student, Admin tables
-- [ ] Create `V2__academic_structure.sql` - Subject, Topic tables
-- [ ] Create `V3__class_management.sql` - Class, ClassStudent, TeacherClassHistory tables
-- [ ] Create `V4__assessment.sql` - TestScore, Question, SubQuestion, SubQuestionTopic tables
-- [ ] Create `V5__feedback.sql` - Feedback, FeedbackTemplate tables
-- [ ] Create `V6__notifications.sql` - Notification table
-- [ ] Create `V7__reports.sql` - ProgressReport table
-- [ ] Create `V8__indexes.sql` - Performance indexes
-- [ ] Create `V9__default_subjects.sql` - Default subjects and topics seed data
+- [x] Create `V1__initial_schema.sql` — consolidated ALL tables + indexes into single migration (users, roles, teachers, parents, students, admins, subjects, topics, classes, class_students, test_scores, questions, sub_questions, feedback, feedback_templates, notifications, progress_reports, indexes)
 
 ### Step 5: Domain Entities (JPA)
-- [ ] Create `User` entity
-- [ ] Create `UserRole` entity with `Role` enum
-- [ ] Create `Teacher` entity
-- [ ] Create `Parent` entity with `ContactMethod` enum
-- [ ] Create `Student` entity
-- [ ] Create `Admin` entity
-- [ ] Create `Subject` entity
-- [ ] Create `Topic` entity
-- [ ] Create `Class` entity (mapped as `TuitionClass` to avoid Java keyword)
-- [ ] Create `ClassStudent` entity with `EnrollmentStatus` enum
-- [ ] Create `TeacherClassHistory` entity
-- [ ] Create `TestScore` entity
-- [ ] Create `Question` entity
-- [ ] Create `SubQuestion` entity
-- [ ] Create `SubQuestionTopic` entity
-- [ ] Create `Feedback` entity
-- [ ] Create `FeedbackTemplate` entity with `FeedbackCategory` enum
-- [ ] Create `Notification` entity with `NotificationType`, `NotificationChannel`, `NotificationStatus` enums
-- [ ] Create `ProgressReport` entity with `ReportType`, `ReportFormat` enums
+- [x] Create `User` entity (with `@ElementCollection` for roles — no separate UserRole entity needed)
+- [x] Create `Teacher` entity
+- [x] Create `Parent` entity with `ContactMethod` enum
+- [x] Create `Student` entity
+- [x] Create `Admin` entity
+- [x] Create `Subject` entity
+- [x] Create `Topic` entity
+- [x] Create `TuitionClass` entity (mapped to `classes` table)
+- [x] Create `ClassStudent` entity with `EnrollmentStatus` enum
+- [x] Create `TestScore` entity
+- [x] Create `Question` entity
+- [x] Create `SubQuestion` entity (topic linked directly via `@ManyToOne` — no separate SubQuestionTopic join entity)
+- [x] Create `Feedback` entity
+- [x] Create `FeedbackTemplate` entity with `FeedbackCategory` enum
+- [x] Create `Notification` entity with `NotificationType`, `NotificationChannel`, `NotificationStatus` enums
+- [x] Create `ProgressReport` entity
+- [ ] Create `TeacherClassHistory` entity — DEFERRED (not core MVP)
 
 ### Step 6: User Management Module
 - [ ] Create `UserRepository`, `TeacherRepository`, `ParentRepository`, `StudentRepository`, `AdminRepository`, `UserRoleRepository`

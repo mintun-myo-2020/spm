@@ -77,12 +77,14 @@ public class CurrentUserService {
             }
         }
 
-        // Link by email only if the existing user was admin-created (pending keycloakId).
-        // Reject linking if the user already has a real keycloakId to prevent account takeover.
+        // Link by email if the existing user was admin-created (pending keycloakId),
+        // or update keycloakId if the user already exists with a different keycloakId
+        // (e.g. re-created in Keycloak with a new subject ID).
         Optional<User> existing = userRepository.findByEmail(email);
         if (existing.isPresent()) {
             User user = existing.get();
-            if (user.getKeycloakId() != null && user.getKeycloakId().startsWith("pending-")) {
+            if (user.getKeycloakId() == null || user.getKeycloakId().startsWith("pending-")) {
+                // Admin-created user awaiting first login — link to this Keycloak account
                 user.setKeycloakId(keycloakId);
                 user.setFirstName(firstName);
                 user.setLastName(lastName);
@@ -91,7 +93,10 @@ public class CurrentUserService {
                 }
                 return userRepository.save(user);
             }
-            // User exists with a real keycloakId — don't overwrite, create a new record
+            // User already exists with a real keycloakId — update it to the current one
+            // (handles Keycloak user recreation or DB/Keycloak sync mismatches)
+            user.setKeycloakId(keycloakId);
+            return userRepository.save(user);
         }
 
         User user = new User();

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button, Select } from 'flowbite-react';
 import { classService } from '../../services/classService';
 import { userService } from '../../services/userService';
@@ -14,6 +14,7 @@ import type { ClassDetailDTO, ClassStudentDTO, StudentDTO } from '../../types/do
 
 export function AdminClassDetails() {
   const { classId } = useParams<{ classId: string }>();
+  const navigate = useNavigate();
   const { showToast } = useToast();
   const [classDetail, setClassDetail] = useState<ClassDetailDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -86,7 +87,7 @@ export function AdminClassDetails() {
       {classDetail.students.length === 0 ? (
         <EmptyState title="No students enrolled" description="Click 'Enroll Student' to add students to this class." />
       ) : (
-        <DataTable data={classDetail.students} columns={columns} keyExtractor={(row) => row.id} />
+        <DataTable data={classDetail.students} columns={columns} keyExtractor={(row) => row.id} onRowClick={(row) => navigate(`/admin/classes/${classId}/students/${row.id}`)} />
       )}
 
       <Modal isOpen={showEnroll} onClose={() => setShowEnroll(false)} title="Enroll Student">

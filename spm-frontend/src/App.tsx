@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { Login } from './components/auth/Login';
 import { NotFound } from './components/auth/NotFound';
 import { AccessDenied } from './components/auth/AccessDenied';
+import { Logout } from './components/auth/Logout';
 import { DashboardRedirect } from './components/auth/DashboardRedirect';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Layout } from './components/shared/Layout';
@@ -19,6 +20,7 @@ export default function App() {
     <ErrorBoundary>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/logout" element={<Logout />} />
         <Route path="/403" element={<AccessDenied />} />
 
         <Route

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Badge, Button, Card, Label, TextInput } from 'flowbite-react';
+import { Badge, Button, Card, Label, TextInput, Table, TableHead, TableHeadCell, TableBody, TableRow, TableCell } from 'flowbite-react';
+import { HiChevronDown, HiChevronRight, HiPencil, HiPlus } from 'react-icons/hi';
 import { subjectService } from '../../services/subjectService';
 import { PageHeader } from '../shared/PageHeader';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
@@ -16,6 +17,7 @@ export function SubjectManagement() {
   const [subjects, setSubjects] = useState<SubjectDetailDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [showCreate, setShowCreate] = useState(false);
   const [newSubject, setNewSubject] = useState({ name: '', code: '', description: '' });
   const [editSubject, setEditSubject] = useState<SubjectDetailDTO | null>(null);
@@ -24,6 +26,14 @@ export function SubjectManagement() {
   const [editTopicForm, setEditTopicForm] = useState({ name: '', description: '' });
   const [newTopic, setNewTopic] = useState<{ subjectId: string } | null>(null);
   const [newTopicForm, setNewTopicForm] = useState({ name: '', code: '', description: '' });
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const fetchSubjects = () => {
     setLoading(true);
@@ -102,33 +112,93 @@ export function SubjectManagement() {
     <div data-testid="subject-management">
       <PageHeader title="Subject Management" action={{ label: 'Add Subject', onClick: () => setShowCreate(true) }} />
 
-      <div className="space-y-4">
-        {subjects.map((s) => (
-          <Card key={s.id} data-testid={`subject-${s.id}`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">{s.name} <span className="text-sm text-gray-400">({s.code})</span></h3>
-                {s.description && <p className="text-sm text-gray-500 dark:text-gray-400">{s.description}</p>}
-              </div>
-              <div className="flex gap-2">
-                <Button size="xs" color="light" onClick={() => { setEditSubject(s); setEditForm({ name: s.name, description: s.description || '' }); }} data-testid={`edit-subject-${s.id}`}>Edit</Button>
-                <Button size="xs" color="light" onClick={() => setNewTopic({ subjectId: s.id })} data-testid={`add-topic-${s.id}`}>Add Topic</Button>
-                {isAdmin && (
-                  <Button size="xs" color="failure" onClick={() => handleDeactivateSubject(s.id)} data-testid={`deactivate-subject-${s.id}`}>
-                    {s.isActive ? 'Deactivate' : 'Activate'}
+      <div className="space-y-3">
+        {subjects.map((s) => {
+          const isExpanded = expandedIds.has(s.id);
+          return (
+            <Card key={s.id} className="overflow-hidden" data-testid={`subject-${s.id}`}>
+              <div
+                className="flex cursor-pointer items-center justify-between"
+                onClick={() => toggleExpand(s.id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleExpand(s.id); } }}
+                aria-expanded={isExpanded}
+              >
+                <div className="flex items-center gap-3">
+                  {isExpanded ? <HiChevronDown className="h-5 w-5 text-gray-500" /> : <HiChevronRight className="h-5 w-5 text-gray-500" />}
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{s.name}</h3>
+                      <span className="text-sm text-gray-400">({s.code})</span>
+                      <Badge color={s.isActive ? 'success' : 'gray'} size="xs">{s.isActive ? 'Active' : 'Inactive'}</Badge>
+                    </div>
+                    {s.description && <p className="text-sm text-gray-500 dark:text-gray-400">{s.description}</p>}
+                    <p className="text-xs text-gray-400">{s.topics.length} topic{s.topics.length !== 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                  <Button size="xs" color="light" onClick={() => { setEditSubject(s); setEditForm({ name: s.name, description: s.description || '' }); }} data-testid={`edit-subject-${s.id}`}>
+                    <HiPencil className="mr-1 h-3 w-3" /> Edit
                   </Button>
-                )}
+                  {isAdmin && (
+                    <Button size="xs" color="failure" onClick={() => handleDeactivateSubject(s.id)} data-testid={`deactivate-subject-${s.id}`}>
+                      {s.isActive ? 'Deactivate' : 'Activate'}
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {s.topics.map((t) => (
-                <Badge key={t.id} color={t.isActive ? 'info' : 'gray'} className="cursor-pointer" onClick={() => { setEditTopic({ topic: t, subjectId: s.id }); setEditTopicForm({ name: t.name, description: t.description || '' }); }}>
-                  {t.name}
-                </Badge>
-              ))}
-            </div>
-          </Card>
-        ))}
+
+              {isExpanded && (
+                <div className="mt-4 border-t pt-4 dark:border-gray-700">
+                  <div className="mb-3 flex items-center justify-between">
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Topics in {s.name}</h4>
+                    <Button size="xs" color="light" onClick={() => setNewTopic({ subjectId: s.id })} data-testid={`add-topic-${s.id}`}>
+                      <HiPlus className="mr-1 h-3 w-3" /> Add Topic
+                    </Button>
+                  </div>
+                  {s.topics.length === 0 ? (
+                    <p className="text-sm text-gray-400 italic">No topics yet. Add one to get started.</p>
+                  ) : (
+                    <Table>
+                      <TableHead>
+                        <TableHeadCell>Name</TableHeadCell>
+                        <TableHeadCell>Code</TableHeadCell>
+                        <TableHeadCell>Description</TableHeadCell>
+                        <TableHeadCell>Status</TableHeadCell>
+                        <TableHeadCell>Actions</TableHeadCell>
+                      </TableHead>
+                      <TableBody className="divide-y">
+                        {s.topics.map((t) => (
+                          <TableRow key={t.id} className="bg-white dark:bg-gray-800">
+                            <TableCell className="font-medium text-gray-900 dark:text-white">{t.name}</TableCell>
+                            <TableCell className="text-gray-500">{t.code}</TableCell>
+                            <TableCell className="text-gray-500">{t.description || '—'}</TableCell>
+                            <TableCell>
+                              <Badge color={t.isActive ? 'success' : 'gray'} size="xs">{t.isActive ? 'Active' : 'Inactive'}</Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button size="xs" color="light" onClick={() => { setEditTopic({ topic: t, subjectId: s.id }); setEditTopicForm({ name: t.name, description: t.description || '' }); }} data-testid={`edit-topic-${t.id}`}>
+                                  Edit
+                                </Button>
+                                {isAdmin && (
+                                  <Button size="xs" color="failure" onClick={() => handleDeactivateTopic(t.id)} data-testid={`deactivate-topic-${t.id}`}>
+                                    {t.isActive ? 'Deactivate' : 'Activate'}
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </div>
+              )}
+            </Card>
+          );
+        })}
       </div>
 
       {/* Create Subject Modal */}

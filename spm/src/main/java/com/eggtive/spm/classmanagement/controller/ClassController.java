@@ -46,9 +46,16 @@ public class ClassController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ClassDTO> createClass(@Valid @RequestBody CreateClassRequestDTO req) {
+        User user = currentUserService.getCurrentUser();
+        if (user.hasRole(com.eggtive.spm.common.enums.Role.TEACHER)) {
+            Teacher teacher = teacherRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher profile not found"));
+            // Teachers can only create classes for themselves
+            req = new CreateClassRequestDTO(req.name(), req.subjectId(), teacher.getId(), req.description(), req.maxStudents());
+        }
         return ApiResponse.ok(classService.createClass(req));
     }
 

@@ -10,7 +10,7 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
   const { user, logout } = useAuth();
 
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-white px-4 shadow-sm dark:border-gray-700 dark:bg-gray-800" data-testid="navbar">
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-white px-4 shadow-sm dark:border-gray-700 dark:bg-gray-800" data-testid="navbar">
       <button
         onClick={onMenuToggle}
         className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 lg:hidden dark:text-gray-400 dark:hover:bg-gray-700"

@@ -15,9 +15,10 @@ interface Props {
   studentId: string;
   studentName?: string;
   canGenerate?: boolean;
+  backTo?: string;
 }
 
-export function ReportList({ studentId, studentName, canGenerate = false }: Props) {
+export function ReportList({ studentId, studentName, canGenerate = false, backTo }: Props) {
   const { showToast } = useToast();
   const { pagination, setPage, updateFromResponse } = usePagination();
   const [reports, setReports] = useState<ProgressReportDTO[]>([]);
@@ -61,7 +62,7 @@ export function ReportList({ studentId, studentName, canGenerate = false }: Prop
 
   return (
     <div data-testid="report-list">
-      <PageHeader title={studentName ? `Reports: ${studentName}` : 'Progress Reports'} action={canGenerate ? { label: 'Generate Report', onClick: () => setShowGenerate(true) } : undefined} />
+      <PageHeader title={studentName ? `Reports: ${studentName}` : 'Progress Reports'} backTo={backTo} action={canGenerate ? { label: 'Generate Report', onClick: () => setShowGenerate(true) } : undefined} />
       {reports.length === 0 ? (
         <EmptyState title="No reports yet" description={canGenerate ? 'Generate a progress report to get started.' : 'Reports will appear here once generated.'} />
       ) : (

@@ -82,7 +82,7 @@ export function ClassDetails() {
 
   return (
     <div data-testid="class-details">
-      <PageHeader title={classDetail.name} subtitle={`${classDetail.subjectName} · ${classDetail.currentStudentCount} students`} action={{ label: 'Enroll Student', onClick: openEnrollModal }} />
+      <PageHeader title={classDetail.name} subtitle={`${classDetail.subjectName} · ${classDetail.currentStudentCount} students`} backTo="/teacher/classes" action={{ label: 'Enroll Student', onClick: openEnrollModal }} />
 
       {classDetail.students.length === 0 ? (
         <EmptyState title="No students enrolled" description="Students will appear here once enrolled." />

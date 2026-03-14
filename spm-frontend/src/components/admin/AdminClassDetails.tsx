@@ -81,7 +81,7 @@ export function AdminClassDetails() {
 
   return (
     <div data-testid="admin-class-details">
-      <PageHeader title={classDetail.name} subtitle={`${classDetail.subjectName} · ${classDetail.teacherName} · ${classDetail.currentStudentCount}/${classDetail.maxStudents} students`} action={{ label: 'Enroll Student', onClick: openEnrollModal }} />
+      <PageHeader title={classDetail.name} subtitle={`${classDetail.subjectName} · ${classDetail.teacherName} · ${classDetail.currentStudentCount}/${classDetail.maxStudents} students`} backTo="/admin/classes" action={{ label: 'Enroll Student', onClick: openEnrollModal }} />
 
       {classDetail.students.length === 0 ? (
         <EmptyState title="No students enrolled" description="Click 'Enroll Student' to add students to this class." />

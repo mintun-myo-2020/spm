@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Badge, Button, Label, Textarea } from 'flowbite-react';
 import { feedbackService } from '../../services/feedbackService';
+import { PageHeader } from '../shared/PageHeader';
 import { useToast } from '../shared/Toast';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import type { FeedbackTemplateDTO } from '../../types/domain';
@@ -19,7 +20,7 @@ const feedbackSchema = z.object({
 type FeedbackFormValues = z.infer<typeof feedbackSchema>;
 
 export function FeedbackForm() {
-  const { testScoreId } = useParams<{ testScoreId: string }>();
+  const { classId, studentId, testScoreId } = useParams<{ classId: string; studentId: string; testScoreId: string }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [templates, setTemplates] = useState<FeedbackTemplateDTO[]>([]);
@@ -60,10 +61,7 @@ export function FeedbackForm() {
 
   return (
     <div className="mx-auto max-w-2xl" data-testid="feedback-form">
-      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Add Feedback</h1>
-      <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
-        Provide feedback on the student's test performance. Use templates for quick entry or write your own.
-      </p>
+      <PageHeader title="Add Feedback" subtitle="Provide feedback on the student's test performance." backTo={`/teacher/classes/${classId}/students/${studentId}`} />
 
       {templates.length > 0 && (
         <div className="mb-6">

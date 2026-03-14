@@ -9,7 +9,7 @@ import { ErrorMessage } from '../shared/ErrorMessage';
 import type { OverallProgressDTO, TopicProgressSummaryDTO } from '../../types/domain';
 
 export function StudentProgress() {
-  const { studentId } = useParams<{ studentId: string }>();
+  const { classId, studentId } = useParams<{ classId: string; studentId: string }>();
   const [overall, setOverall] = useState<OverallProgressDTO | null>(null);
   const [topics, setTopics] = useState<TopicProgressSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,7 @@ export function StudentProgress() {
 
   return (
     <div data-testid="student-progress">
-      <PageHeader title={`Progress: ${overall.studentName}`} subtitle={`Average: ${overall.averageScore.toFixed(1)}${overall.improvementVelocity ? ` · Improvement: ${overall.improvementVelocity.improvement >= 0 ? '+' : ''}${overall.improvementVelocity.improvement.toFixed(1)}` : ''}`} />
+      <PageHeader title={`Progress: ${overall.studentName}`} subtitle={`Average: ${overall.averageScore.toFixed(1)}${overall.improvementVelocity ? ` · Improvement: ${overall.improvementVelocity.improvement >= 0 ? '+' : ''}${overall.improvementVelocity.improvement.toFixed(1)}` : ''}`} backTo={`/teacher/classes/${classId}/students/${studentId}`} />
 
       <Card className="mb-8">
         <Chart data={chartData} xAxisKey="date" lines={[{ dataKey: 'score', name: 'Score', color: '#2563eb' }]} title="Overall Score Trend" />

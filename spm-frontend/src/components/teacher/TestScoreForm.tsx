@@ -7,6 +7,7 @@ import { Button, Card, Label, Select, TextInput } from 'flowbite-react';
 import { testScoreService } from '../../services/testScoreService';
 import { subjectService } from '../../services/subjectService';
 import { classService } from '../../services/classService';
+import { PageHeader } from '../shared/PageHeader';
 import { useToast } from '../shared/Toast';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import type { TopicDTO } from '../../types/domain';
@@ -80,10 +81,7 @@ export function TestScoreForm() {
 
   return (
     <div className="mx-auto max-w-3xl" data-testid="test-score-form">
-      <h1 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">Record Test Score</h1>
-      <p className="mb-6 text-sm text-gray-600 dark:text-gray-400">
-        Enter the test details below. Topics are filtered to the class subject{subjectName ? `: ${subjectName}` : ''}.
-      </p>
+      <PageHeader title="Record Test Score" subtitle={subjectName ? `Subject: ${subjectName}` : 'Enter the test details below.'} backTo={`/teacher/classes/${classId}/students/${studentId}`} />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>

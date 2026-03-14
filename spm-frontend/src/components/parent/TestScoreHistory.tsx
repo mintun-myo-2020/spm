@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Select } from 'flowbite-react';
 import { useAuth } from '../../hooks/useAuth';
 import { testScoreService } from '../../services/testScoreService';
@@ -7,18 +8,15 @@ import { DataTable, type Column } from '../shared/DataTable';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { ErrorMessage } from '../shared/ErrorMessage';
 import { usePagination } from '../../hooks/usePagination';
-import { Modal } from '../shared/Modal';
-import { TestScoreDetail } from '../shared/TestScoreDetail';
-import type { TestScoreDTO, TestScoreDetailDTO } from '../../types/domain';
+import type { TestScoreDTO } from '../../types/domain';
 
 export function TestScoreHistory() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { pagination, setPage, updateFromResponse } = usePagination();
   const [scores, setScores] = useState<TestScoreDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedScore, setSelectedScore] = useState<TestScoreDetailDTO | null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
 
   const linkedStudents = user?.linkedStudents ?? [];
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -38,15 +36,6 @@ export function TestScoreHistory() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [selectedStudentId, pagination.page, pagination.size, updateFromResponse]);
-
-  const handleRowClick = async (row: TestScoreDTO) => {
-    setDetailLoading(true);
-    try {
-      const res = await testScoreService.getTestScoreDetails(row.id);
-      setSelectedScore(res.data.data);
-    } catch { /* ignore */ }
-    finally { setDetailLoading(false); }
-  };
 
   const columns: Column<TestScoreDTO>[] = [
     { key: 'testName', header: 'Test' },
@@ -72,12 +61,16 @@ export function TestScoreHistory() {
       {loading && <LoadingSpinner />}
       {error && <ErrorMessage message={error} />}
       {!loading && !error && (
-        <DataTable data={scores} columns={columns} keyExtractor={(r) => r.id} currentPage={pagination.page} totalPages={pagination.totalPages} onPageChange={setPage} onRowClick={handleRowClick} />
+        <DataTable
+          data={scores}
+          columns={columns}
+          keyExtractor={(r) => r.id}
+          currentPage={pagination.page}
+          totalPages={pagination.totalPages}
+          onPageChange={setPage}
+          onRowClick={(row) => navigate(`/parent/scores/${row.id}`)}
+        />
       )}
-
-      <Modal isOpen={!!selectedScore || detailLoading} onClose={() => setSelectedScore(null)} title={selectedScore?.testName ?? 'Loading...'}>
-        {detailLoading ? <LoadingSpinner /> : selectedScore && <TestScoreDetail score={selectedScore} />}
-      </Modal>
     </div>
   );
 }

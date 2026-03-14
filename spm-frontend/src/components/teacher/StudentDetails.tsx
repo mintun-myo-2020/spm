@@ -17,6 +17,7 @@ export function StudentDetails() {
   const [scores, setScores] = useState<TestScoreDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [studentName, setStudentName] = useState('');
 
   useEffect(() => {
     if (!studentId) return;
@@ -26,6 +27,9 @@ export function StudentDetails() {
       .then((res) => {
         setScores(res.data.content);
         updateFromResponse(res.data.totalElements, res.data.totalPages);
+        if (res.data.content.length > 0) {
+          setStudentName(res.data.content[0].studentName);
+        }
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -43,7 +47,9 @@ export function StudentDetails() {
   return (
     <div data-testid="student-details">
       <PageHeader
-        title="Student Scores"
+        title={studentName || 'Student Scores'}
+        subtitle="Test Scores"
+        backTo={`/teacher/classes/${classId}`}
         action={{ label: 'Record Score', onClick: () => navigate(`/teacher/classes/${classId}/students/${studentId}/scores/new`) }}
       />
 
@@ -64,6 +70,7 @@ export function StudentDetails() {
           data={scores}
           columns={columns}
           keyExtractor={(row) => row.id}
+          onRowClick={(row) => navigate(`/teacher/classes/${classId}/students/${studentId}/scores/${row.id}`)}
           currentPage={pagination.page}
           totalPages={pagination.totalPages}
           onPageChange={setPage}

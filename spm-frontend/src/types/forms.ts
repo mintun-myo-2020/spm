@@ -2,6 +2,7 @@ export interface CreateTeacherForm {
   email: string;
   firstName: string;
   lastName: string;
+  password: string;
   phoneNumber?: string;
   specialization?: string;
 }
@@ -10,6 +11,7 @@ export interface CreateParentForm {
   email: string;
   firstName: string;
   lastName: string;
+  password: string;
   phoneNumber?: string;
   studentId: string;
 }
@@ -18,6 +20,7 @@ export interface CreateStudentForm {
   email: string;
   firstName: string;
   lastName: string;
+  password: string;
   dateOfBirth?: string;
   grade?: string;
 }

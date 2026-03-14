@@ -54,14 +54,15 @@ public class CurrentUserService {
     /**
      * First-login provisioning: creates a User row (and matching profile row)
      * from the Keycloak JWT so the app DB stays in sync with Keycloak users.
+     * If a user with the same email already exists (e.g. admin-created with pending keycloakId),
+     * links the existing record to this Keycloak account instead of creating a duplicate.
      */
     @SuppressWarnings("unchecked")
     private User provisionFromToken(Jwt jwt) {
-        User user = new User();
-        user.setKeycloakId(jwt.getSubject());
-        user.setEmail(jwt.getClaimAsString("email") != null ? jwt.getClaimAsString("email") : jwt.getSubject());
-        user.setFirstName(jwt.getClaimAsString("given_name") != null ? jwt.getClaimAsString("given_name") : "");
-        user.setLastName(jwt.getClaimAsString("family_name") != null ? jwt.getClaimAsString("family_name") : "");
+        String keycloakId = jwt.getSubject();
+        String email = jwt.getClaimAsString("email") != null ? jwt.getClaimAsString("email") : keycloakId;
+        String firstName = jwt.getClaimAsString("given_name") != null ? jwt.getClaimAsString("given_name") : "";
+        String lastName = jwt.getClaimAsString("family_name") != null ? jwt.getClaimAsString("family_name") : "";
 
         Set<Role> roles = new HashSet<>();
         Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
@@ -71,6 +72,25 @@ public class CurrentUserService {
                 catch (IllegalArgumentException ignored) { /* skip unmapped roles */ }
             }
         }
+
+        // Check if a user with this email already exists (e.g. admin-created with pending keycloakId)
+        Optional<User> existing = userRepository.findByEmail(email);
+        if (existing.isPresent()) {
+            User user = existing.get();
+            user.setKeycloakId(keycloakId);
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+            if (!roles.isEmpty()) {
+                user.setRoles(roles);
+            }
+            return userRepository.save(user);
+        }
+
+        User user = new User();
+        user.setKeycloakId(keycloakId);
+        user.setEmail(email);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
         user.setRoles(roles);
         user = userRepository.save(user);
 

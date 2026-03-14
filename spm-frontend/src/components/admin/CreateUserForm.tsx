@@ -11,6 +11,7 @@ const schema = z.object({
   email: z.string().email('Valid email required'),
   firstName: z.string().min(1, 'Required').max(255),
   lastName: z.string().min(1, 'Required').max(255),
+  password: z.string().min(8, 'At least 8 characters'),
   phoneNumber: z.string().optional(),
   specialization: z.string().optional(),
   studentId: z.string().optional(),
@@ -34,11 +35,11 @@ export function CreateUserForm({ onSuccess, onCancel }: { onSuccess: () => void;
     setSubmitting(true);
     try {
       if (data.role === 'teacher') {
-        await userService.createTeacher({ email: data.email, firstName: data.firstName, lastName: data.lastName, phoneNumber: data.phoneNumber, specialization: data.specialization });
+        await userService.createTeacher({ email: data.email, firstName: data.firstName, lastName: data.lastName, password: data.password, phoneNumber: data.phoneNumber, specialization: data.specialization });
       } else if (data.role === 'student') {
-        await userService.createStudent({ email: data.email, firstName: data.firstName, lastName: data.lastName, dateOfBirth: data.dateOfBirth, grade: data.grade });
+        await userService.createStudent({ email: data.email, firstName: data.firstName, lastName: data.lastName, password: data.password, dateOfBirth: data.dateOfBirth, grade: data.grade });
       } else {
-        await userService.createParent({ email: data.email, firstName: data.firstName, lastName: data.lastName, phoneNumber: data.phoneNumber, studentId: data.studentId ?? '' });
+        await userService.createParent({ email: data.email, firstName: data.firstName, lastName: data.lastName, password: data.password, phoneNumber: data.phoneNumber, studentId: data.studentId ?? '' });
       }
       onSuccess();
     } catch {
@@ -75,6 +76,11 @@ export function CreateUserForm({ onSuccess, onCancel }: { onSuccess: () => void;
           <TextInput id="lastName" {...register('lastName')} color={errors.lastName ? 'failure' : undefined} data-testid="last-name-input" />
           {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>}
         </div>
+      </div>
+      <div>
+        <Label htmlFor="password">Password</Label>
+        <TextInput id="password" type="password" {...register('password')} color={errors.password ? 'failure' : undefined} data-testid="password-input" />
+        {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
       </div>
       {role === 'parent' && (
         <div>

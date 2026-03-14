@@ -6,27 +6,26 @@ const keycloak = new Keycloak({
   clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
 });
 
-let initialized = false;
+let initPromise: Promise<boolean> | null = null;
 
 export const keycloakService = {
   async init(): Promise<boolean> {
-    if (initialized) return keycloak.authenticated ?? false;
-    try {
-      const authenticated = await keycloak.init({
-        onLoad: 'check-sso',
-        silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
-        pkceMethod: 'S256',
-      });
-      initialized = true;
-
+    if (initPromise) return initPromise;
+    initPromise = keycloak.init({
+      onLoad: 'check-sso',
+      silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
+      pkceMethod: 'S256',
+    }).then((authenticated) => {
       if (authenticated) {
         this.scheduleTokenRefresh();
       }
       return authenticated;
-    } catch {
-      if (import.meta.env.DEV) console.error('Keycloak init failed');
+    }).catch((error) => {
+      if (import.meta.env.DEV) console.error('Keycloak init failed', error);
+      initPromise = null;
       return false;
-    }
+    });
+    return initPromise;
   },
 
   login(): void {

@@ -52,11 +52,24 @@
       "name": "SPM Backend",
       "enabled": true,
       "publicClient": false,
-      "bearerOnly": true,
-      "protocol": "openid-connect"
+      "bearerOnly": false,
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "spm-backend-secret",
+      "protocol": "openid-connect",
+      "defaultClientScopes": ["basic", "web-origins", "acr", "profile", "roles", "email"]
     }
   ],
   "users": [
+    {
+      "username": "service-account-spm-backend",
+      "enabled": true,
+      "serviceAccountClientId": "spm-backend",
+      "clientRoles": {
+        "realm-management": ["manage-users", "view-users", "manage-realm", "view-realm"]
+      }
+    },
     {
       "username": "admin",
       "email": "admin@spm.local",

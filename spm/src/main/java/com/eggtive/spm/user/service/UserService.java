@@ -1,5 +1,6 @@
 package com.eggtive.spm.user.service;
 
+import com.eggtive.spm.auth.KeycloakAdminService;
 import com.eggtive.spm.common.dto.PagedResponse;
 import com.eggtive.spm.common.enums.ErrorCode;
 import com.eggtive.spm.common.enums.Role;
@@ -27,46 +28,70 @@ public class UserService {
     private final TeacherRepository teacherRepository;
     private final StudentRepository studentRepository;
     private final ParentRepository parentRepository;
+    private final KeycloakAdminService keycloakAdminService;
 
     public UserService(UserRepository userRepo, TeacherRepository teacherRepo,
-                       StudentRepository studentRepo, ParentRepository parentRepo) {
+                       StudentRepository studentRepo, ParentRepository parentRepo,
+                       KeycloakAdminService keycloakAdminService) {
         this.userRepository = userRepo;
         this.teacherRepository = teacherRepo;
         this.studentRepository = studentRepo;
         this.parentRepository = parentRepo;
+        this.keycloakAdminService = keycloakAdminService;
     }
 
     public TeacherDTO createTeacher(CreateTeacherRequestDTO req) {
         assertEmailAvailable(req.email());
-        User user = createUser(req.email(), req.firstName(), req.lastName(), req.phoneNumber(), Role.TEACHER);
-        Teacher teacher = new Teacher();
-        teacher.setUser(user);
-        teacher.setSpecialization(req.specialization());
-        return toTeacherDTO(teacherRepository.save(teacher));
+        String keycloakId = keycloakAdminService.createUser(
+            req.email(), req.firstName(), req.lastName(), req.password(), "TEACHER");
+        try {
+            User user = createUser(req.email(), req.firstName(), req.lastName(), req.phoneNumber(), Role.TEACHER, keycloakId);
+            Teacher teacher = new Teacher();
+            teacher.setUser(user);
+            teacher.setSpecialization(req.specialization());
+            return toTeacherDTO(teacherRepository.save(teacher));
+        } catch (Exception e) {
+            keycloakAdminService.deleteUser(keycloakId);
+            throw e;
+        }
     }
 
     public StudentDTO createStudent(CreateStudentRequestDTO req) {
         assertEmailAvailable(req.email());
-        User user = createUser(req.email(), req.firstName(), req.lastName(), null, Role.STUDENT);
-        Student student = new Student();
-        student.setUser(user);
-        student.setDateOfBirth(req.dateOfBirth());
-        student.setGrade(req.grade());
-        student.setEnrollmentDate(LocalDate.now());
-        return toStudentDTO(studentRepository.save(student));
+        String keycloakId = keycloakAdminService.createUser(
+            req.email(), req.firstName(), req.lastName(), req.password(), "STUDENT");
+        try {
+            User user = createUser(req.email(), req.firstName(), req.lastName(), null, Role.STUDENT, keycloakId);
+            Student student = new Student();
+            student.setUser(user);
+            student.setDateOfBirth(req.dateOfBirth());
+            student.setGrade(req.grade());
+            student.setEnrollmentDate(LocalDate.now());
+            return toStudentDTO(studentRepository.save(student));
+        } catch (Exception e) {
+            keycloakAdminService.deleteUser(keycloakId);
+            throw e;
+        }
     }
 
     public ParentDTO createParent(CreateParentRequestDTO req) {
         assertEmailAvailable(req.email());
         Student student = studentRepository.findById(req.studentId())
             .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Student not found"));
-        User user = createUser(req.email(), req.firstName(), req.lastName(), req.phoneNumber(), Role.PARENT);
-        Parent parent = new Parent();
-        parent.setUser(user);
-        parent = parentRepository.save(parent);
-        student.setParent(parent);
-        studentRepository.save(student);
-        return toParentDTO(parent, student);
+        String keycloakId = keycloakAdminService.createUser(
+            req.email(), req.firstName(), req.lastName(), req.password(), "PARENT");
+        try {
+            User user = createUser(req.email(), req.firstName(), req.lastName(), req.phoneNumber(), Role.PARENT, keycloakId);
+            Parent parent = new Parent();
+            parent.setUser(user);
+            parent = parentRepository.save(parent);
+            student.setParent(parent);
+            studentRepository.save(student);
+            return toParentDTO(parent, student);
+        } catch (Exception e) {
+            keycloakAdminService.deleteUser(keycloakId);
+            throw e;
+        }
     }
 
     public void deactivateUser(UUID userId) {
@@ -112,13 +137,13 @@ public class UserService {
 
     // --- helpers ---
 
-    private User createUser(String email, String firstName, String lastName, String phone, Role role) {
+    private User createUser(String email, String firstName, String lastName, String phone, Role role, String keycloakId) {
         User user = new User();
         user.setEmail(email);
         user.setFirstName(firstName);
         user.setLastName(lastName);
         user.setPhoneNumber(phone);
-        user.setKeycloakId("pending-" + UUID.randomUUID());
+        user.setKeycloakId(keycloakId);
         user.setRoles(Set.of(role));
         return userRepository.save(user);
     }

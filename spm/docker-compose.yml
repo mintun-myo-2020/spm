@@ -51,6 +51,8 @@ services:
       KC_DB_USERNAME: ${KC_DB_USERNAME:-keycloak}
       KC_DB_PASSWORD: ${KC_DB_PASSWORD:-keycloak}
       KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8180
       KC_HTTP_ENABLED: "true"
       KC_HEALTH_ENABLED: "true"
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
@@ -78,8 +80,12 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-spm}
       DB_USERNAME: ${DB_USERNAME:-spm}
       DB_PASSWORD: ${DB_PASSWORD:-spm}
-      KEYCLOAK_ISSUER_URI: http://keycloak:8080/realms/spm
+      KEYCLOAK_ISSUER_URI: http://localhost:8180/realms/spm
       KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/spm/protocol/openid-connect/certs
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_REALM: spm
+      KEYCLOAK_ADMIN_CLIENT_ID: spm-backend
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-spm-backend-secret}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:5173}
       SERVER_PORT: ${SERVER_PORT:-8080}
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}

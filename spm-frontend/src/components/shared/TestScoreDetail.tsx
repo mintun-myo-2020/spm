@@ -1,11 +1,40 @@
+import { useMemo } from 'react';
 import { Badge, Card } from 'flowbite-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import type { TestScoreDetailDTO } from '../../types/domain';
 
 interface Props {
   score: TestScoreDetailDTO;
 }
 
+function getBarColor(pct: number) {
+  if (pct >= 70) return '#22c55e';
+  if (pct >= 40) return '#f59e0b';
+  return '#ef4444';
+}
+
 export function TestScoreDetail({ score }: Props) {
+  const topicChartData = useMemo(() => {
+    const map = new Map<string, { score: number; maxScore: number }>();
+    for (const q of score.questions) {
+      for (const sq of q.subQuestions) {
+        const existing = map.get(sq.topicName);
+        if (existing) {
+          existing.score += sq.score;
+          existing.maxScore += sq.maxScore;
+        } else {
+          map.set(sq.topicName, { score: sq.score, maxScore: sq.maxScore });
+        }
+      }
+    }
+    return Array.from(map.entries()).map(([topic, { score: s, maxScore: ms }]) => ({
+      topic,
+      percentage: ms > 0 ? Math.round((s / ms) * 100) : 0,
+      score: s,
+      maxScore: ms,
+    }));
+  }, [score.questions]);
+
   return (
     <div className="space-y-4" data-testid="test-score-detail">
       <div className="grid grid-cols-2 gap-3 text-sm">
@@ -15,9 +44,28 @@ export function TestScoreDetail({ score }: Props) {
         <div><span className="text-gray-500 dark:text-gray-400">Teacher:</span> {score.teacherName}</div>
       </div>
 
+      {topicChartData.length > 0 && (
+        <div>
+          <h4 className="mb-2 font-medium text-gray-900 dark:text-white">Performance by Topic</h4>
+          <ResponsiveContainer width="100%" height={Math.max(200, topicChartData.length * 40 + 60)}>
+            <BarChart data={topicChartData} layout="vertical" margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" domain={[0, 100]} tickFormatter={(v) => `${v}%`} />
+              <YAxis type="category" dataKey="topic" width={120} tick={{ fontSize: 12 }} />
+              <Tooltip formatter={(value) => [`${value}%`, 'Score']} />
+              <Bar dataKey="percentage" name="Score %" radius={[0, 4, 4, 0]}>
+                {topicChartData.map((entry) => (
+                  <Cell key={entry.topic} fill={getBarColor(entry.percentage)} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
       {score.questions.length > 0 && (
         <div>
-          <h4 className="mb-2 font-medium text-gray-900 dark:text-white">Topic Breakdown</h4>
+          <h4 className="mb-2 font-medium text-gray-900 dark:text-white">Question Breakdown</h4>
           <div className="space-y-2">
             {score.questions.map((q) => (
               <div key={q.id} className="rounded border p-2 dark:border-gray-600">

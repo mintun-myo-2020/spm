@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Badge } from 'flowbite-react';
+import { Badge, Button } from 'flowbite-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { progressService } from '../../services/progressService';
 import { Modal } from './Modal';
@@ -17,6 +17,7 @@ export function TopicProgressModal({ studentId, topic, onClose }: Props) {
   const [data, setData] = useState<TopicProgressDTO | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sortLatestFirst, setSortLatestFirst] = useState(true);
 
   useEffect(() => {
     if (!topic) { setData(null); return; }
@@ -29,12 +30,19 @@ export function TopicProgressModal({ studentId, topic, onClose }: Props) {
   }, [studentId, topic]);
 
   const chartData = data?.trendData.map((d) => ({
+    rawDate: d.testDate,
     date: new Date(d.testDate).toLocaleDateString(),
     testName: d.testName,
     percentage: d.percentage,
     score: d.topicScore,
     maxScore: d.topicMaxScore,
   })) ?? [];
+
+  const sortedBreakdown = [...chartData].sort((a, b) =>
+    sortLatestFirst
+      ? new Date(b.rawDate).getTime() - new Date(a.rawDate).getTime()
+      : new Date(a.rawDate).getTime() - new Date(b.rawDate).getTime()
+  );
 
   return (
     <Modal isOpen={!!topic} onClose={onClose} title={topic?.topicName ?? ''}>
@@ -64,11 +72,19 @@ export function TopicProgressModal({ studentId, topic, onClose }: Props) {
           )}
 
           <div>
-            <h4 className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Test-by-Test Breakdown</h4>
+            <div className="mb-2 flex items-center justify-between">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Test-by-Test Breakdown</h4>
+              <Button size="xs" color="light" onClick={() => setSortLatestFirst((v) => !v)}>
+                {sortLatestFirst ? '↓ Latest First' : '↑ Earliest First'}
+              </Button>
+            </div>
             <div className="max-h-48 space-y-1 overflow-y-auto">
-              {chartData.map((d, i) => (
+              {sortedBreakdown.map((d, i) => (
                 <div key={i} className="flex items-center justify-between rounded px-2 py-1 text-sm odd:bg-gray-50 dark:odd:bg-gray-800">
-                  <span className="text-gray-700 dark:text-gray-300">{d.testName}</span>
+                  <div>
+                    <span className="text-gray-700 dark:text-gray-300">{d.testName}</span>
+                    <span className="ml-2 text-xs text-gray-400">{d.date}</span>
+                  </div>
                   <span className="text-gray-500 dark:text-gray-400">{d.score}/{d.maxScore} ({d.percentage}%)</span>
                 </div>
               ))}

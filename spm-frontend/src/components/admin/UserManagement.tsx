@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from 'flowbite-react';
 import { userService } from '../../services/userService';
 import { PageHeader } from '../shared/PageHeader';
@@ -16,11 +17,18 @@ type UserRow = { id: string; email: string; firstName: string; lastName: string;
 export function UserManagement() {
   const { showToast } = useToast();
   const { pagination, setPage, updateFromResponse } = usePagination();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [roleFilter, setRoleFilter] = useState<'teachers' | 'students' | 'parents'>('teachers');
+  const tabParam = searchParams.get('tab');
+  const validTabs = ['teachers', 'students', 'parents'] as const;
+  const roleFilter = validTabs.includes(tabParam as typeof validTabs[number]) ? (tabParam as typeof validTabs[number]) : 'teachers';
   const [showCreate, setShowCreate] = useState(false);
+
+  const setRoleFilter = (tab: typeof validTabs[number]) => {
+    setSearchParams({ tab });
+  };
 
   const fetchUsers = () => {
     setLoading(true);

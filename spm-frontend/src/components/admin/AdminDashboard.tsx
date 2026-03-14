@@ -31,9 +31,9 @@ export function AdminDashboard() {
   if (error) return <ErrorMessage message={error} />;
 
   const cards = [
-    { label: 'Teachers', value: stats.teachers, path: '/admin/users' },
-    { label: 'Students', value: stats.students, path: '/admin/users' },
-    { label: 'Parents', value: stats.parents, path: '/admin/users' },
+    { label: 'Teachers', value: stats.teachers, path: '/admin/users?tab=teachers' },
+    { label: 'Students', value: stats.students, path: '/admin/users?tab=students' },
+    { label: 'Parents', value: stats.parents, path: '/admin/users?tab=parents' },
     { label: 'Classes', value: stats.classes, path: '/admin/classes' },
   ];
 

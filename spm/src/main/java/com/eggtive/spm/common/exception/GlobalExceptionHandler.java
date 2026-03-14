@@ -14,28 +14,11 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-            .body(ErrorResponse.of(ErrorCode.NOT_FOUND, ex.getMessage()));
-    }
-
-    @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ErrorResponse> handleConflict(ConflictException ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-            .body(ErrorResponse.of(ErrorCode.CONFLICT, ex.getMessage()));
-    }
-
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-            .body(ErrorResponse.of(ErrorCode.INVALID_INPUT, ex.getMessage()));
-    }
-
-    @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ErrorResponse> handleForbidden(ForbiddenException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-            .body(ErrorResponse.of(ErrorCode.FORBIDDEN, ex.getMessage()));
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ErrorResponse> handleAppException(AppException ex) {
+        HttpStatus status = mapToHttpStatus(ex.getErrorCode());
+        return ResponseEntity.status(status)
+            .body(ErrorResponse.of(ex.getErrorCode(), ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -45,5 +28,17 @@ public class GlobalExceptionHandler {
             details.put(e.getField(), e.getDefaultMessage()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(ErrorResponse.of(ErrorCode.VALIDATION_FAILED, "Validation failed", details));
+    }
+
+    private HttpStatus mapToHttpStatus(ErrorCode code) {
+        return switch (code) {
+            case NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case CONFLICT -> HttpStatus.CONFLICT;
+            case FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
+            case INVALID_INPUT, INVALID_SCORE, INVALID_DATE, VALIDATION_FAILED -> HttpStatus.BAD_REQUEST;
+            case CLASS_FULL -> HttpStatus.CONFLICT;
+            case INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
+        };
     }
 }

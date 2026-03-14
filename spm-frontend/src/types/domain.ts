@@ -251,3 +251,22 @@ export interface ProgressReportDTO {
   generatedAt: string;
   expiresAt: string;
 }
+
+export interface ClassSummaryDTO {
+  classId: string;
+  studentCount: number;
+  testCount: number;
+  meanScore: number;
+  medianScore: number;
+  strongestTopic: TopicStat | null;
+  weakestTopic: TopicStat | null;
+  topicStats: TopicStat[];
+  overallTrend: 'IMPROVING' | 'DECLINING' | 'STABLE';
+}
+
+export interface TopicStat {
+  topicId: string;
+  topicName: string;
+  averagePercentage: number;
+  trend: 'IMPROVING' | 'DECLINING' | 'STABLE';
+}

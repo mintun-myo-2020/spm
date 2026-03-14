@@ -138,6 +138,10 @@ public class TestScoreService {
     public List<TestScore> findByStudentOrderByDateAsc(UUID studentId) {
         return testScoreRepository.findByStudentIdOrderByTestDateAsc(studentId);
     }
+    @Transactional(readOnly = true)
+    public List<TestScore> findByClassOrderByDateAsc(UUID classId) {
+        return testScoreRepository.findByClassIdOrderByTestDateAsc(classId);
+    }
 
     private void buildQuestions(TestScore ts, CreateTestScoreRequestDTO req) {
         if (req.questions() != null) {

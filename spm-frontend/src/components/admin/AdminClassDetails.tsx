@@ -10,6 +10,7 @@ import { ErrorMessage } from '../shared/ErrorMessage';
 import { EmptyState } from '../shared/EmptyState';
 import { useToast } from '../shared/Toast';
 import { Modal } from '../shared/Modal';
+import { ClassSummaryPanel } from '../shared/ClassSummaryPanel';
 import type { ClassDetailDTO, ClassStudentDTO, StudentDTO } from '../../types/domain';
 
 export function AdminClassDetails() {
@@ -114,6 +115,8 @@ export function AdminClassDetails() {
   return (
     <div data-testid="admin-class-details">
       <PageHeader title={classDetail.name} subtitle={`${classDetail.subjectName} · ${classDetail.teacherName} · ${classDetail.currentStudentCount}/${classDetail.maxStudents} students`} backTo="/admin/classes" action={{ label: 'Enroll Student', onClick: openEnrollModal }} />
+
+      <ClassSummaryPanel classId={classId!} />
 
       {classDetail.students.length === 0 ? (
         <EmptyState title="No students enrolled" description="Click 'Enroll Student' to add students to this class." />

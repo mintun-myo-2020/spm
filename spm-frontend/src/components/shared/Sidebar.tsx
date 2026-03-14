@@ -1,5 +1,5 @@
 import { Sidebar as FlowbiteSidebar, SidebarItems, SidebarItemGroup, SidebarItem } from 'flowbite-react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { HiAcademicCap, HiChartBar, HiClipboardList, HiHome, HiUserGroup, HiBookOpen, HiBell, HiDocumentReport } from 'react-icons/hi';
 import type { FC, SVGProps } from 'react';
@@ -39,6 +39,7 @@ const navByRole: Record<string, NavItem[]> = {
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const { user } = useAuth();
+  const location = useLocation();
   const role = user?.profileType ?? '';
   const items = navByRole[role] ?? [];
 
@@ -55,13 +56,22 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         <FlowbiteSidebar aria-label="Navigation" className="border-none [&>div]:bg-transparent">
           <SidebarItems>
             <SidebarItemGroup>
-              {items.map((item) => (
-                <NavLink key={item.to} to={item.to} onClick={onClose} className={({ isActive }) => isActive ? '[&>*]:bg-gray-100 [&>*]:dark:bg-gray-700' : ''} data-testid={`sidebar-link-${item.label.toLowerCase().replace(/\s/g, '-')}`}>
-                  <SidebarItem icon={item.icon}>
+              {items.map((item) => {
+                const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
+                return (
+                  <SidebarItem
+                    key={item.to}
+                    as={NavLink}
+                    to={item.to}
+                    icon={item.icon}
+                    onClick={onClose}
+                    active={isActive}
+                    data-testid={`sidebar-link-${item.label.toLowerCase().replace(/\s/g, '-')}`}
+                  >
                     {item.label}
                   </SidebarItem>
-                </NavLink>
-              ))}
+                );
+              })}
             </SidebarItemGroup>
           </SidebarItems>
         </FlowbiteSidebar>

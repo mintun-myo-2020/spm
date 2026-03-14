@@ -211,5 +211,76 @@ public class ProgressService {
 
 
     private record SubQuestionData(BigDecimal score, BigDecimal maxScore, java.time.LocalDate testDate) {}
+    public ClassSummaryDTO getClassSummary(UUID classId) {
+        List<TestScore> scores = testScoreService.findByClassOrderByDateAsc(classId);
+
+        if (scores.isEmpty()) {
+            return new ClassSummaryDTO(classId, 0, 0, BigDecimal.ZERO, BigDecimal.ZERO,
+                null, null, List.of(), "STABLE");
+        }
+
+        int studentCount = (int) scores.stream()
+            .map(ts -> ts.getStudent().getId()).distinct().count();
+
+        // Mean and median of overall score percentages
+        List<BigDecimal> allPercentages = scores.stream()
+            .map(ts -> ts.getOverallScore().multiply(BigDecimal.valueOf(100))
+                .divide(ts.getMaxScore(), 2, RoundingMode.HALF_UP))
+            .toList();
+
+        BigDecimal mean = calculator.average(allPercentages);
+
+        List<BigDecimal> sorted = allPercentages.stream().sorted().toList();
+        BigDecimal median;
+        int size = sorted.size();
+        if (size % 2 == 0) {
+            median = sorted.get(size / 2 - 1).add(sorted.get(size / 2))
+                .divide(BigDecimal.valueOf(2), 2, RoundingMode.HALF_UP);
+        } else {
+            median = sorted.get(size / 2);
+        }
+
+        // Topic-level aggregation across all students
+        Map<UUID, List<BigDecimal>> topicPercentages = new LinkedHashMap<>();
+        Map<UUID, String> topicNames = new HashMap<>();
+
+        for (TestScore ts : scores) {
+            for (var q : ts.getQuestions()) {
+                for (SubQuestion sq : q.getSubQuestions()) {
+                    UUID topicId = sq.getTopic().getId();
+                    topicNames.putIfAbsent(topicId, sq.getTopic().getName());
+                    BigDecimal pct = sq.getMaxScore().compareTo(BigDecimal.ZERO) > 0
+                        ? sq.getScore().multiply(BigDecimal.valueOf(100))
+                            .divide(sq.getMaxScore(), 2, RoundingMode.HALF_UP)
+                        : BigDecimal.ZERO;
+                    topicPercentages.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
+                }
+            }
+        }
+
+        List<ClassSummaryDTO.TopicStat> topicStats = topicPercentages.entrySet().stream()
+            .map(e -> new ClassSummaryDTO.TopicStat(
+                e.getKey(),
+                topicNames.get(e.getKey()),
+                calculator.average(e.getValue()),
+                calculator.determineTrend(e.getValue())
+            ))
+            .toList();
+
+        ClassSummaryDTO.TopicStat strongest = topicStats.stream()
+            .max(Comparator.comparing(ClassSummaryDTO.TopicStat::averagePercentage))
+            .orElse(null);
+        ClassSummaryDTO.TopicStat weakest = topicStats.stream()
+            .min(Comparator.comparing(ClassSummaryDTO.TopicStat::averagePercentage))
+            .orElse(null);
+
+        // Overall trend from all score percentages chronologically
+        String overallTrend = calculator.determineTrend(new ArrayList<>(allPercentages));
+
+        return new ClassSummaryDTO(classId, studentCount, scores.size(), mean, median,
+            strongest, weakest, topicStats, overallTrend);
+    }
+
+
 }
 

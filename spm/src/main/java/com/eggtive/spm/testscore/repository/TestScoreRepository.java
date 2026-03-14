@@ -24,4 +24,6 @@ public interface TestScoreRepository extends JpaRepository<TestScore, UUID> {
 
     @Query("SELECT ts FROM TestScore ts WHERE ts.student.id = :studentId ORDER BY ts.testDate ASC")
     java.util.List<TestScore> findByStudentIdOrderByTestDateAsc(UUID studentId);
+    @Query("SELECT ts FROM TestScore ts WHERE ts.tuitionClass.id = :classId ORDER BY ts.testDate ASC")
+    java.util.List<TestScore> findByClassIdOrderByTestDateAsc(UUID classId);
 }

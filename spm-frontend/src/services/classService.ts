@@ -1,6 +1,6 @@
 import { apiClient } from './apiClient';
 import type { ApiResponse, PagedResponse, PaginationParams } from '../types/api';
-import type { ClassDTO, ClassDetailDTO, EnrollmentDTO } from '../types/domain';
+import type { ClassDTO, ClassDetailDTO, ClassSummaryDTO, EnrollmentDTO } from '../types/domain';
 import type { CreateClassForm } from '../types/forms';
 
 export const classService = {
@@ -42,5 +42,9 @@ export const classService = {
 
   changeTeacher(classId: string, newTeacherId: string) {
     return apiClient.put<ApiResponse<ClassDTO>>(`/classes/${classId}/teacher`, { newTeacherId });
+  },
+
+  getClassSummary(classId: string) {
+    return apiClient.get<ApiResponse<ClassSummaryDTO>>(`/classes/${classId}/summary`);
   },
 };

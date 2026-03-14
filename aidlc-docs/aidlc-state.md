@@ -49,11 +49,11 @@
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: Functional Design (Unit 2 - Frontend Application)
-- **Next Stage**: NFR Requirements (Unit 2)
+- **Current Stage**: Code Generation (Unit 1 - Backend API) - Part 1 Planning
+- **Next Stage**: Code Generation (Unit 2 - Frontend Application)
 - **Status**: In Progress
 
 ## Unit Progress
-- **Unit 1 (Backend API)**: Functional Design ✓, NFR Requirements ✓, NFR Design ✓, Infrastructure Design (pending), Code Generation (pending)
-- **Unit 2 (Frontend)**: Functional Design (in progress)
+- **Unit 1 (Backend API)**: Functional Design ✓, NFR Requirements ✓, NFR Design ✓, Infrastructure Design (skipped), Code Generation (in progress)
+- **Unit 2 (Frontend)**: Functional Design ✓, NFR Requirements ✓, NFR Design ✓, Infrastructure Design (skipped), Code Generation (pending)
 

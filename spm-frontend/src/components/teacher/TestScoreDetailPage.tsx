@@ -35,8 +35,16 @@ export function TestScoreDetailPage() {
         backTo={`/teacher/classes/${classId}/students/${studentId}`}
       />
       <TestScoreDetail score={score} />
-      {!score.feedback && (
-        <div className="mt-6">
+      <div className="mt-6 flex gap-3">
+        <Button
+          color="light"
+          size="sm"
+          onClick={() => navigate(`/teacher/classes/${classId}/students/${studentId}/scores/${testScoreId}/edit`)}
+          data-testid="edit-score-button"
+        >
+          Edit Score
+        </Button>
+        {!score.feedback && (
           <Button
             color="blue"
             size="sm"
@@ -45,8 +53,8 @@ export function TestScoreDetailPage() {
           >
             Add Feedback
           </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

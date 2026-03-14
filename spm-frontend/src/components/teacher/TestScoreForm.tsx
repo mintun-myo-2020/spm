@@ -36,14 +36,15 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function TestScoreForm() {
-  const { classId, studentId } = useParams<{ classId: string; studentId: string }>();
+  const { classId, studentId, testScoreId } = useParams<{ classId: string; studentId: string; testScoreId?: string }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [topics, setTopics] = useState<TopicDTO[]>([]);
   const [subjectName, setSubjectName] = useState('');
   const [loading, setLoading] = useState(true);
+  const isEdit = !!testScoreId;
 
-  const { register, control, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
+  const { register, control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       testName: '', testDate: '', overallScore: 0, maxScore: 100,
@@ -55,22 +56,53 @@ export function TestScoreForm() {
 
   useEffect(() => {
     if (!classId) return;
-    classService.getClassDetails(classId)
-      .then((res) => {
-        const cls = res.data.data;
+    const loadData = async () => {
+      try {
+        const classRes = await classService.getClassDetails(classId);
+        const cls = classRes.data.data;
         setSubjectName(cls.subjectName);
-        return subjectService.getSubjectWithTopics(String(cls.subjectId));
-      })
-      .then((res) => setTopics(res.data.data.topics))
-      .catch(() => showToast('Failed to load class subject', 'error'))
-      .finally(() => setLoading(false));
-  }, [classId, showToast]);
+        const subjectRes = await subjectService.getSubjectWithTopics(String(cls.subjectId));
+        setTopics(subjectRes.data.data.topics);
+
+        if (isEdit && testScoreId) {
+          const scoreRes = await testScoreService.getTestScoreDetails(testScoreId);
+          const score = scoreRes.data.data;
+          reset({
+            testName: score.testName,
+            testDate: score.testDate,
+            overallScore: score.overallScore,
+            maxScore: score.maxScore,
+            questions: score.questions.map((q) => ({
+              questionNumber: q.questionNumber,
+              maxScore: q.maxScore,
+              subQuestions: q.subQuestions.map((sq) => ({
+                label: sq.label,
+                score: sq.score,
+                maxScore: sq.maxScore,
+                topicId: sq.topicId,
+              })),
+            })),
+          });
+        }
+      } catch {
+        showToast('Failed to load data', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, [classId, testScoreId, isEdit, reset, showToast]);
 
   const onSubmit = async (data: FormValues) => {
     if (!studentId || !classId) return;
     try {
-      await testScoreService.createTestScore({ ...data, studentId, classId });
-      showToast('Test score recorded', 'success');
+      if (isEdit && testScoreId) {
+        await testScoreService.updateTestScore(testScoreId, { ...data, studentId, classId });
+        showToast('Test score updated', 'success');
+      } else {
+        await testScoreService.createTestScore({ ...data, studentId, classId });
+        showToast('Test score recorded', 'success');
+      }
       navigate(`/teacher/classes/${classId}/students/${studentId}`);
     } catch {
       showToast('Failed to save test score', 'error');
@@ -81,7 +113,7 @@ export function TestScoreForm() {
 
   return (
     <div className="mx-auto max-w-3xl" data-testid="test-score-form">
-      <PageHeader title="Record Test Score" subtitle={subjectName ? `Subject: ${subjectName}` : 'Enter the test details below.'} backTo={`/teacher/classes/${classId}/students/${studentId}`} />
+      <PageHeader title={isEdit ? 'Edit Test Score' : 'Record Test Score'} subtitle={subjectName ? `Subject: ${subjectName}` : 'Enter the test details below.'} backTo={isEdit ? `/teacher/classes/${classId}/students/${studentId}/scores/${testScoreId}` : `/teacher/classes/${classId}/students/${studentId}`} />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -120,7 +152,7 @@ export function TestScoreForm() {
 
         <div className="flex justify-end gap-3">
           <Button color="gray" onClick={() => navigate(-1)} data-testid="cancel-button">Cancel</Button>
-          <Button type="submit" disabled={isSubmitting} data-testid="submit-score-button">{isSubmitting ? 'Saving...' : 'Save Score'}</Button>
+          <Button type="submit" disabled={isSubmitting} data-testid="submit-score-button">{isSubmitting ? 'Saving...' : isEdit ? 'Update Score' : 'Save Score'}</Button>
         </div>
       </form>
     </div>

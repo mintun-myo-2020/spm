@@ -7,6 +7,51 @@ import com.eggtive.spm.common.exception.AppException;
 import com.eggtive.spm.subject.entity.Topic;
 import com.eggtive.spm.subject.service.SubjectService;
 import com.eggtive.spm.testscore.dto.CreateTestScoreRequestDTO;
+
+public TestScoreDTO updateTestScore(UUID testScoreId, CreateTestScoreRequestDTO req, User currentUser) {
+    TestScore ts = testScoreRepository.findById(testScoreId)
+        .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Test score not found"));
+
+    if (req.overallScore().compareTo(req.maxScore() != null ? req.maxScore() : new BigDecimal("100.00")) > 0) {
+        throw new AppException(ErrorCode.INVALID_SCORE, "Overall score cannot exceed max score");
+    }
+
+    ts.setTestName(req.testName());
+    ts.setTestDate(req.testDate());
+    ts.setOverallScore(req.overallScore());
+    ts.setMaxScore(req.maxScore() != null ? req.maxScore() : new BigDecimal("100.00"));
+    ts.setUpdatedBy(currentUser);
+
+    // Clear existing questions and rebuild
+    ts.getQuestions().clear();
+
+    if (req.questions() != null) {
+        for (var qReq : req.questions()) {
+            Question q = new Question();
+            q.setTestScore(ts);
+            q.setQuestionNumber(qReq.questionNumber());
+            q.setMaxScore(qReq.maxScore());
+            ts.getQuestions().add(q);
+
+            if (qReq.subQuestions() != null) {
+                for (var sqReq : qReq.subQuestions()) {
+                    Topic topic = subjectService.findTopicOrThrow(sqReq.topicId());
+                    SubQuestion sq = new SubQuestion();
+                    sq.setQuestion(q);
+                    sq.setSubQuestionLabel(sqReq.label());
+                    sq.setScore(sqReq.score());
+                    sq.setMaxScore(sqReq.maxScore());
+                    sq.setTopic(topic);
+                    q.getSubQuestions().add(sq);
+                }
+            }
+        }
+    }
+
+    ts = testScoreRepository.save(ts);
+    return toDTO(ts);
+}
+
 import com.eggtive.spm.testscore.dto.TestScoreDTO;
 import com.eggtive.spm.testscore.dto.TestScoreDetailDTO;
 import com.eggtive.spm.testscore.entity.Question;

@@ -19,6 +19,7 @@ export default function TeacherRoutes() {
       <Route path="classes/:classId/students/:studentId" element={<StudentDetails />} />
       <Route path="classes/:classId/students/:studentId/scores/new" element={<TestScoreForm />} />
       <Route path="classes/:classId/students/:studentId/scores/:testScoreId" element={<TestScoreDetailPage />} />
+      <Route path="classes/:classId/students/:studentId/scores/:testScoreId/edit" element={<TestScoreForm />} />
       <Route path="classes/:classId/students/:studentId/progress" element={<StudentProgress />} />
       <Route path="classes/:classId/students/:studentId/scores/:testScoreId/feedback" element={<FeedbackForm />} />
       <Route path="classes/:classId/students/:studentId/reports" element={<StudentReports />} />

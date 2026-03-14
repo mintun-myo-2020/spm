@@ -9,7 +9,7 @@ import com.eggtive.spm.feedback.entity.FeedbackTemplate;
 import com.eggtive.spm.feedback.repository.FeedbackRepository;
 import com.eggtive.spm.feedback.repository.FeedbackTemplateRepository;
 import com.eggtive.spm.testscore.entity.TestScore;
-import com.eggtive.spm.testscore.repository.TestScoreRepository;
+import com.eggtive.spm.testscore.service.TestScoreService;
 import com.eggtive.spm.user.entity.Teacher;
 import com.eggtive.spm.user.entity.User;
 import org.springframework.stereotype.Service;
@@ -18,25 +18,25 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
+
 @Service
 @Transactional
 public class FeedbackService {
 
     private final FeedbackRepository feedbackRepository;
     private final FeedbackTemplateRepository templateRepository;
-    private final TestScoreRepository testScoreRepository;
+    private final TestScoreService testScoreService;
 
     public FeedbackService(FeedbackRepository fbRepo, FeedbackTemplateRepository tplRepo,
-                           TestScoreRepository tsRepo) {
+                           TestScoreService testScoreService) {
         this.feedbackRepository = fbRepo;
         this.templateRepository = tplRepo;
-        this.testScoreRepository = tsRepo;
+        this.testScoreService = testScoreService;
     }
 
     public FeedbackDTO createFeedback(UUID testScoreId, CreateFeedbackRequestDTO req,
                                        User currentUser, Teacher teacher) {
-        TestScore ts = testScoreRepository.findById(testScoreId)
-            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Test score not found"));
+        TestScore ts = testScoreService.findTestScoreOrThrow(testScoreId);
 
         Feedback fb = new Feedback();
         fb.setTestScore(ts);
@@ -92,3 +92,4 @@ public class FeedbackService {
             ft.getTeacher() != null ? ft.getTeacher().getId() : null);
     }
 }
+

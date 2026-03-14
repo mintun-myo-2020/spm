@@ -1,21 +1,21 @@
 package com.eggtive.spm.testscore.service;
 
+import com.eggtive.spm.classmanagement.service.ClassService;
 import com.eggtive.spm.common.dto.PagedResponse;
 import com.eggtive.spm.common.enums.ErrorCode;
 import com.eggtive.spm.common.exception.AppException;
 import com.eggtive.spm.subject.entity.Topic;
-import com.eggtive.spm.subject.repository.TopicRepository;
+import com.eggtive.spm.subject.service.SubjectService;
 import com.eggtive.spm.testscore.dto.CreateTestScoreRequestDTO;
 import com.eggtive.spm.testscore.dto.TestScoreDTO;
 import com.eggtive.spm.testscore.entity.Question;
 import com.eggtive.spm.testscore.entity.SubQuestion;
 import com.eggtive.spm.testscore.entity.TestScore;
 import com.eggtive.spm.testscore.repository.TestScoreRepository;
-import com.eggtive.spm.classmanagement.repository.TuitionClassRepository;
 import com.eggtive.spm.user.entity.Student;
 import com.eggtive.spm.user.entity.Teacher;
 import com.eggtive.spm.user.entity.User;
-import com.eggtive.spm.user.repository.StudentRepository;
+import com.eggtive.spm.user.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,30 +23,30 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
+
 
 @Service
 @Transactional
 public class TestScoreService {
 
     private final TestScoreRepository testScoreRepository;
-    private final StudentRepository studentRepository;
-    private final TuitionClassRepository classRepository;
-    private final TopicRepository topicRepository;
+    private final UserService userService;
+    private final ClassService classService;
+    private final SubjectService subjectService;
 
-    public TestScoreService(TestScoreRepository tsRepo, StudentRepository studentRepo,
-                            TuitionClassRepository classRepo, TopicRepository topicRepo) {
+    public TestScoreService(TestScoreRepository tsRepo, UserService userService,
+                            ClassService classService, SubjectService subjectService) {
         this.testScoreRepository = tsRepo;
-        this.studentRepository = studentRepo;
-        this.classRepository = classRepo;
-        this.topicRepository = topicRepo;
+        this.userService = userService;
+        this.classService = classService;
+        this.subjectService = subjectService;
     }
 
     public TestScoreDTO createTestScore(CreateTestScoreRequestDTO req, User currentUser, Teacher teacher) {
-        Student student = studentRepository.findById(req.studentId())
-            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Student not found"));
-        var tuitionClass = classRepository.findById(req.classId())
-            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Class not found"));
+        Student student = userService.findStudentOrThrow(req.studentId());
+        var tuitionClass = classService.findClassOrThrow(req.classId());
 
         if (req.overallScore().compareTo(req.maxScore() != null ? req.maxScore() : new BigDecimal("100.00")) > 0) {
             throw new AppException(ErrorCode.INVALID_SCORE, "Overall score cannot exceed max score");
@@ -73,8 +73,7 @@ public class TestScoreService {
 
                 if (qReq.subQuestions() != null) {
                     for (var sqReq : qReq.subQuestions()) {
-                        Topic topic = topicRepository.findById(sqReq.topicId())
-                            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Topic not found"));
+                        Topic topic = subjectService.findTopicOrThrow(sqReq.topicId());
                         SubQuestion sq = new SubQuestion();
                         sq.setQuestion(q);
                         sq.setSubQuestionLabel(sqReq.label());
@@ -112,6 +111,19 @@ public class TestScoreService {
         testScoreRepository.deleteById(testScoreId);
     }
 
+    // --- module-boundary lookups (used by other modules' services) ---
+
+    @Transactional(readOnly = true)
+    public TestScore findTestScoreOrThrow(UUID testScoreId) {
+        return testScoreRepository.findById(testScoreId)
+            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Test score not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<TestScore> findByStudentOrderByDateAsc(UUID studentId) {
+        return testScoreRepository.findByStudentIdOrderByTestDateAsc(studentId);
+    }
+
     private TestScoreDTO toDTO(TestScore ts) {
         var questions = ts.getQuestions().stream().map(q -> {
             var subs = q.getSubQuestions().stream().map(sq ->
@@ -133,3 +145,4 @@ public class TestScoreService {
             ts.getCreatedAt(), ts.getUpdatedAt());
     }
 }
+

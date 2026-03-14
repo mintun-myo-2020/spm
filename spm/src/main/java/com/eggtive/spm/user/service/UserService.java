@@ -147,4 +147,25 @@ public class UserService {
             p.getPreferredContactMethod().name(), p.isEmailNotificationsEnabled(),
             p.isSmsNotificationsEnabled(), u.isActive(), p.getCreatedAt());
     }
+
+
+    // --- module-boundary lookups (used by other modules' services) ---
+
+    @Transactional(readOnly = true)
+    public Student findStudentOrThrow(UUID studentId) {
+        return studentRepository.findById(studentId)
+            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Student not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public Teacher findTeacherOrThrow(UUID teacherId) {
+        return teacherRepository.findById(teacherId)
+            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public boolean studentExists(UUID studentId) {
+        return studentRepository.existsById(studentId);
+    }
+
 }

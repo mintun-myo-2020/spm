@@ -10,11 +10,10 @@ import com.eggtive.spm.common.enums.EnrollmentStatus;
 import com.eggtive.spm.common.enums.ErrorCode;
 import com.eggtive.spm.common.exception.AppException;
 import com.eggtive.spm.subject.entity.Subject;
-import com.eggtive.spm.subject.repository.SubjectRepository;
+import com.eggtive.spm.subject.service.SubjectService;
 import com.eggtive.spm.user.entity.Student;
 import com.eggtive.spm.user.entity.Teacher;
-import com.eggtive.spm.user.repository.StudentRepository;
-import com.eggtive.spm.user.repository.TeacherRepository;
+import com.eggtive.spm.user.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,31 +22,27 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.UUID;
 
+
 @Service
 @Transactional
 public class ClassService {
 
     private final TuitionClassRepository classRepository;
     private final ClassStudentRepository classStudentRepository;
-    private final SubjectRepository subjectRepository;
-    private final TeacherRepository teacherRepository;
-    private final StudentRepository studentRepository;
+    private final SubjectService subjectService;
+    private final UserService userService;
 
     public ClassService(TuitionClassRepository classRepo, ClassStudentRepository csRepo,
-                        SubjectRepository subjectRepo, TeacherRepository teacherRepo,
-                        StudentRepository studentRepo) {
+                        SubjectService subjectService, UserService userService) {
         this.classRepository = classRepo;
         this.classStudentRepository = csRepo;
-        this.subjectRepository = subjectRepo;
-        this.teacherRepository = teacherRepo;
-        this.studentRepository = studentRepo;
+        this.subjectService = subjectService;
+        this.userService = userService;
     }
 
     public ClassDTO createClass(CreateClassRequestDTO req) {
-        Subject subject = subjectRepository.findById(req.subjectId())
-            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Subject not found"));
-        Teacher teacher = teacherRepository.findById(req.teacherId())
-            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher not found"));
+        Subject subject = subjectService.findSubjectOrThrow(req.subjectId());
+        Teacher teacher = userService.findTeacherOrThrow(req.teacherId());
 
         TuitionClass tc = new TuitionClass();
         tc.setName(req.name());
@@ -67,8 +62,7 @@ public class ClassService {
 
     public EnrollmentDTO enrollStudent(UUID classId, UUID studentId) {
         TuitionClass tc = findClassOrThrow(classId);
-        Student student = studentRepository.findById(studentId)
-            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Student not found"));
+        Student student = userService.findStudentOrThrow(studentId);
 
         long count = classRepository.countActiveStudents(classId);
         if (count >= tc.getMaxStudents()) {
@@ -97,13 +91,12 @@ public class ClassService {
 
     public ClassDTO changeTeacher(UUID classId, UUID newTeacherId) {
         TuitionClass tc = findClassOrThrow(classId);
-        Teacher newTeacher = teacherRepository.findById(newTeacherId)
-            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher not found"));
+        Teacher newTeacher = userService.findTeacherOrThrow(newTeacherId);
         tc.setTeacher(newTeacher);
         return toClassDTO(classRepository.save(tc));
     }
 
-    private TuitionClass findClassOrThrow(UUID classId) {
+    public TuitionClass findClassOrThrow(UUID classId) {
         return classRepository.findById(classId)
             .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Class not found"));
     }
@@ -124,3 +117,4 @@ public class ClassService {
             name, cs.getEnrollmentDate(), cs.getStatus().name());
     }
 }
+

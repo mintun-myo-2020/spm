@@ -92,4 +92,19 @@ public class SubjectService {
         return new TopicDTO(t.getId(), t.getName(), t.getCode(), t.getDescription(),
             t.isDefault(), t.isActive());
     }
+
+
+    // --- module-boundary lookups (used by other modules' services) ---
+
+    @Transactional(readOnly = true)
+    public Subject findSubjectOrThrow(UUID subjectId) {
+        return findOrThrow(subjectId);
+    }
+
+    @Transactional(readOnly = true)
+    public Topic findTopicOrThrow(UUID topicId) {
+        return topicRepository.findById(topicId)
+            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Topic not found"));
+    }
+
 }

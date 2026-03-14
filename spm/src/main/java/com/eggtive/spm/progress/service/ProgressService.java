@@ -6,9 +6,9 @@ import com.eggtive.spm.progress.calculator.ProgressCalculator;
 import com.eggtive.spm.progress.dto.*;
 import com.eggtive.spm.testscore.entity.SubQuestion;
 import com.eggtive.spm.testscore.entity.TestScore;
-import com.eggtive.spm.testscore.repository.TestScoreRepository;
+import com.eggtive.spm.testscore.service.TestScoreService;
 import com.eggtive.spm.user.entity.Student;
-import com.eggtive.spm.user.repository.StudentRepository;
+import com.eggtive.spm.user.service.UserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,27 +18,27 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 @Service
 @Transactional(readOnly = true)
 public class ProgressService {
 
-    private final TestScoreRepository testScoreRepository;
-    private final StudentRepository studentRepository;
+    private final TestScoreService testScoreService;
+    private final UserService userService;
     private final ProgressCalculator calculator;
 
-    public ProgressService(TestScoreRepository tsRepo, StudentRepository studentRepo,
+    public ProgressService(TestScoreService testScoreService, UserService userService,
                            ProgressCalculator calculator) {
-        this.testScoreRepository = tsRepo;
-        this.studentRepository = studentRepo;
+        this.testScoreService = testScoreService;
+        this.userService = userService;
         this.calculator = calculator;
     }
 
     public OverallProgressDTO getOverallProgress(UUID studentId) {
-        Student student = studentRepository.findById(studentId)
-            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Student not found"));
+        Student student = userService.findStudentOrThrow(studentId);
         String name = student.getUser().getFirstName() + " " + student.getUser().getLastName();
 
-        List<TestScore> scores = testScoreRepository.findByStudentIdOrderByTestDateAsc(studentId);
+        List<TestScore> scores = testScoreService.findByStudentOrderByDateAsc(studentId);
         if (scores.isEmpty()) {
             return new OverallProgressDTO(studentId, name, List.of(), BigDecimal.ZERO, null);
         }
@@ -58,11 +58,11 @@ public class ProgressService {
     }
 
     public List<TopicProgressSummaryDTO> getAllTopicsProgress(UUID studentId) {
-        if (!studentRepository.existsById(studentId)) {
+        if (!userService.studentExists(studentId)) {
             throw new AppException(ErrorCode.NOT_FOUND, "Student not found");
         }
 
-        List<TestScore> scores = testScoreRepository.findByStudentIdOrderByTestDateAsc(studentId);
+        List<TestScore> scores = testScoreService.findByStudentOrderByDateAsc(studentId);
 
         // Collect all sub-question scores grouped by topic
         Map<UUID, List<SubQuestionData>> topicData = new LinkedHashMap<>();
@@ -99,3 +99,4 @@ public class ProgressService {
 
     private record SubQuestionData(BigDecimal score, BigDecimal maxScore, java.time.LocalDate testDate) {}
 }
+

@@ -10,7 +10,7 @@ import com.eggtive.spm.report.repository.ProgressReportRepository;
 import com.eggtive.spm.report.storage.ReportStorage;
 import com.eggtive.spm.user.entity.Student;
 import com.eggtive.spm.user.entity.User;
-import com.eggtive.spm.user.repository.StudentRepository;
+import com.eggtive.spm.user.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,24 +20,24 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
+
 @Service
 @Transactional
 public class ReportService {
 
     private final ProgressReportRepository reportRepository;
-    private final StudentRepository studentRepository;
+    private final UserService userService;
     private final ReportStorage reportStorage;
 
-    public ReportService(ProgressReportRepository reportRepo, StudentRepository studentRepo,
+    public ReportService(ProgressReportRepository reportRepo, UserService userService,
                          ReportStorage reportStorage) {
         this.reportRepository = reportRepo;
-        this.studentRepository = studentRepo;
+        this.userService = userService;
         this.reportStorage = reportStorage;
     }
 
     public ProgressReportDTO generateReport(UUID studentId, GenerateReportRequestDTO req, User currentUser) {
-        Student student = studentRepository.findById(studentId)
-            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Student not found"));
+        Student student = userService.findStudentOrThrow(studentId);
 
         String s3Key = "reports/" + studentId + "/" + UUID.randomUUID() + ".html";
         String s3Bucket = "spm-reports";
@@ -80,3 +80,4 @@ public class ReportService {
             r.getStartDate(), r.getEndDate(), url, r.getGeneratedAt(), r.getExpiresAt());
     }
 }
+

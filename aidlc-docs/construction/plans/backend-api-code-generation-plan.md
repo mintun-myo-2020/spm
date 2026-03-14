@@ -3,8 +3,8 @@
 ## Unit Context
 - **Unit**: Backend API (Spring Boot 4.x Modular Monolith)
 - **Technology**: Java 25, Spring Boot 4.x, Spring Security 6, PostgreSQL 18, Gradle (Kotlin DSL)
-- **Code Location**: `backend/` directory in workspace root
-- **Package Base**: `com.tuitioncentre.spm`
+- **Code Location**: `spm/` directory in workspace root
+- **Package Base**: `com.eggtive.spm`
 - **Deployment**: Single Spring Boot application with feature-based modules
 
 ## Stories Implemented

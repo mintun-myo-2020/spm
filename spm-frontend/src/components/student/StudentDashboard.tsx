@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button, Card } from 'flowbite-react';
 import { useAuth } from '../../hooks/useAuth';
 import { testScoreService } from '../../services/testScoreService';
 import { progressService } from '../../services/progressService';
@@ -41,42 +42,50 @@ export function StudentDashboard() {
 
       {progress && (
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <div className="rounded-lg border bg-white p-4">
-            <p className="text-sm text-gray-500">Average Score</p>
-            <p className="text-2xl font-bold text-gray-900">{progress.averageScore.toFixed(1)}</p>
-          </div>
-          <div className="rounded-lg border bg-white p-4">
-            <p className="text-sm text-gray-500">Improvement</p>
-            <p className={`text-2xl font-bold ${progress.improvementVelocity.improvement >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {progress.improvementVelocity.improvement >= 0 ? '+' : ''}{progress.improvementVelocity.improvement.toFixed(1)}
-            </p>
-          </div>
-          <div className="rounded-lg border bg-white p-4">
-            <p className="text-sm text-gray-500">Tests Taken</p>
-            <p className="text-2xl font-bold text-gray-900">{progress.trendData.length}</p>
-          </div>
+          <Card>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Average Score</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{progress.averageScore.toFixed(1)}</p>
+          </Card>
+          <Card>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Improvement</p>
+            {progress.improvementVelocity ? (
+              <p className={`text-2xl font-bold ${progress.improvementVelocity.improvement >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {progress.improvementVelocity.improvement >= 0 ? '+' : ''}{progress.improvementVelocity.improvement.toFixed(1)}
+              </p>
+            ) : (
+              <p className="text-2xl font-bold text-gray-400">—</p>
+            )}
+          </Card>
+          <Card>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Tests Taken</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">{progress.trendData.length}</p>
+          </Card>
         </div>
       )}
 
       {chartData.length > 0 && (
-        <div className="mb-6 rounded-lg border bg-white p-4">
+        <Card className="mb-6">
           <Chart data={chartData} xAxisKey="date" lines={[{ dataKey: 'score', name: 'Score', color: '#2563eb' }]} title="My Score Trend" />
-        </div>
+        </Card>
       )}
 
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">Recent Scores</h2>
-        <button onClick={() => navigate('/student/scores')} className="text-sm font-medium text-blue-600 hover:text-blue-800" data-testid="view-all-scores">View All →</button>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Scores</h2>
+        <Button size="sm" color="light" onClick={() => navigate('/student/scores')} data-testid="view-all-scores">View All →</Button>
       </div>
       <div className="mt-3 space-y-2">
-        {scores.map((s) => (
-          <div key={s.id} className="flex items-center justify-between rounded-lg border bg-white px-4 py-3">
+        {scores.length === 0 ? (
+          <Card>
+            <p className="text-center text-gray-500 dark:text-gray-400">No test scores yet. Your scores will appear here once your teacher records them.</p>
+          </Card>
+        ) : scores.map((s) => (
+          <Card key={s.id} className="flex-row items-center justify-between">
             <div>
-              <p className="font-medium text-gray-900">{s.testName}</p>
-              <p className="text-xs text-gray-500">{new Date(s.testDate).toLocaleDateString()} · {s.className}</p>
+              <p className="font-medium text-gray-900 dark:text-white">{s.testName}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(s.testDate).toLocaleDateString()} · {s.className}</p>
             </div>
-            <span className="text-lg font-bold text-gray-900">{s.overallScore}/{s.maxScore}</span>
-          </div>
+            <span className="text-lg font-bold text-gray-900 dark:text-white">{s.overallScore}/{s.maxScore}</span>
+          </Card>
         ))}
       </div>
     </div>

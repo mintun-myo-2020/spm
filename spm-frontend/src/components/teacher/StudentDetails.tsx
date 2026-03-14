@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from 'flowbite-react';
 import { testScoreService } from '../../services/testScoreService';
 import { PageHeader } from '../shared/PageHeader';
 import { DataTable, type Column } from '../shared/DataTable';
@@ -47,13 +48,9 @@ export function StudentDetails() {
       />
 
       <div className="mb-4">
-        <button
-          onClick={() => navigate(`/teacher/classes/${classId}/students/${studentId}/progress`)}
-          className="text-sm font-medium text-blue-600 hover:text-blue-800"
-          data-testid="view-progress-link"
-        >
+        <Button size="sm" color="light" onClick={() => navigate(`/teacher/classes/${classId}/students/${studentId}/progress`)} data-testid="view-progress-link">
           View Progress Charts →
-        </button>
+        </Button>
       </div>
 
       {scores.length === 0 ? (

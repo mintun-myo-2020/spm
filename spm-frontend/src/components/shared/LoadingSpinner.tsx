@@ -1,7 +1,9 @@
+import { Spinner } from 'flowbite-react';
+
 export function LoadingSpinner({ className = '' }: { className?: string }) {
   return (
     <div className={`flex items-center justify-center p-8 ${className}`} data-testid="loading-spinner">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
+      <Spinner size="lg" color="info" />
     </div>
   );
 }

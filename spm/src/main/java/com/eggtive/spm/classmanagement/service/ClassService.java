@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 
@@ -52,6 +53,12 @@ public class ClassService {
         if (req.maxStudents() != null) tc.setMaxStudents(req.maxStudents());
         tc = classRepository.save(tc);
         return toClassDTO(tc);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<ClassDTO> getAllClasses(Pageable pageable) {
+        Page<TuitionClass> page = classRepository.findAll(pageable);
+        return PagedResponse.from(page, page.getContent().stream().map(this::toClassDTO).toList());
     }
 
     @Transactional(readOnly = true)
@@ -94,6 +101,22 @@ public class ClassService {
         Teacher newTeacher = userService.findTeacherOrThrow(newTeacherId);
         tc.setTeacher(newTeacher);
         return toClassDTO(classRepository.save(tc));
+    }
+
+    @Transactional(readOnly = true)
+    public ClassDetailDTO getClassDetail(UUID classId) {
+        TuitionClass tc = findClassOrThrow(classId);
+        ClassDTO base = toClassDTO(tc);
+        List<ClassStudentDTO> students = classStudentRepository.findByTuitionClassId(classId).stream()
+            .map(cs -> {
+                Student s = cs.getStudent();
+                String name = s.getUser().getFirstName() + " " + s.getUser().getLastName();
+                return new ClassStudentDTO(s.getId(), name, s.getUser().getEmail(),
+                    cs.getEnrollmentDate(), cs.getStatus().name());
+            }).toList();
+        return new ClassDetailDTO(base.id(), base.name(), base.subjectId(), base.subjectName(),
+            base.teacherId(), base.teacherName(), base.description(), base.maxStudents(),
+            base.currentStudentCount(), base.isActive(), base.createdAt(), students);
     }
 
     public TuitionClass findClassOrThrow(UUID classId) {

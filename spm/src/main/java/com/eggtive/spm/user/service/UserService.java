@@ -1,16 +1,20 @@
 package com.eggtive.spm.user.service;
 
+import com.eggtive.spm.common.dto.PagedResponse;
 import com.eggtive.spm.common.enums.ErrorCode;
 import com.eggtive.spm.common.enums.Role;
 import com.eggtive.spm.common.exception.AppException;
 import com.eggtive.spm.user.dto.*;
 import com.eggtive.spm.user.entity.*;
 import com.eggtive.spm.user.repository.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -83,12 +87,19 @@ public class UserService {
     public UserInfoDTO getUserInfo(User user) {
         UUID profileId = null;
         String profileType = null;
+        List<UserInfoDTO.LinkedStudentDTO> linkedStudents = List.of();
         if (user.hasRole(Role.TEACHER)) {
             profileId = teacherRepository.findByUserId(user.getId()).map(Teacher::getId).orElse(null);
             profileType = "TEACHER";
         } else if (user.hasRole(Role.PARENT)) {
             profileId = parentRepository.findByUserId(user.getId()).map(Parent::getId).orElse(null);
             profileType = "PARENT";
+            if (profileId != null) {
+                linkedStudents = studentRepository.findByParentId(profileId).stream()
+                    .map(s -> new UserInfoDTO.LinkedStudentDTO(s.getId(),
+                        s.getUser().getFirstName() + " " + s.getUser().getLastName()))
+                    .toList();
+            }
         } else if (user.hasRole(Role.STUDENT)) {
             profileId = studentRepository.findByUserId(user.getId()).map(Student::getId).orElse(null);
             profileType = "STUDENT";
@@ -96,7 +107,7 @@ public class UserService {
             profileType = "ADMIN";
         }
         return new UserInfoDTO(user.getId(), user.getEmail(), user.getFirstName(), user.getLastName(),
-            user.getRoles().stream().map(Enum::name).collect(Collectors.toSet()), profileId, profileType);
+            user.getRoles().stream().map(Enum::name).collect(Collectors.toSet()), profileId, profileType, linkedStudents);
     }
 
     // --- helpers ---
@@ -142,14 +153,39 @@ public class UserService {
     private ParentDTO toParentDTO(Parent p, Student s) {
         User u = p.getUser();
         return new ParentDTO(p.getId(), u.getId(), u.getEmail(), u.getFirstName(), u.getLastName(),
-            u.getPhoneNumber(), s.getId(),
-            s.getUser().getFirstName() + " " + s.getUser().getLastName(),
+            u.getPhoneNumber(), s != null ? s.getId() : null,
+            s != null ? s.getUser().getFirstName() + " " + s.getUser().getLastName() : null,
             p.getPreferredContactMethod().name(), p.isEmailNotificationsEnabled(),
             p.isSmsNotificationsEnabled(), u.isActive(), p.getCreatedAt());
     }
 
 
     // --- module-boundary lookups (used by other modules' services) ---
+
+    @Transactional(readOnly = true)
+    public PagedResponse<TeacherDTO> getTeachers(Pageable pageable) {
+        Page<Teacher> page = teacherRepository.findAll(pageable);
+        List<TeacherDTO> content = page.getContent().stream().map(this::toTeacherDTO).toList();
+        return PagedResponse.from(page, content);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<StudentDTO> getStudents(Pageable pageable) {
+        Page<Student> page = studentRepository.findAll(pageable);
+        List<StudentDTO> content = page.getContent().stream().map(this::toStudentDTO).toList();
+        return PagedResponse.from(page, content);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<ParentDTO> getParents(Pageable pageable) {
+        Page<Parent> page = parentRepository.findAll(pageable);
+        List<ParentDTO> content = page.getContent().stream().map(p -> {
+            List<Student> children = studentRepository.findByParentId(p.getId());
+            Student firstChild = children.isEmpty() ? null : children.getFirst();
+            return toParentDTO(p, firstChild);
+        }).toList();
+        return PagedResponse.from(page, content);
+    }
 
     @Transactional(readOnly = true)
     public Student findStudentOrThrow(UUID studentId) {

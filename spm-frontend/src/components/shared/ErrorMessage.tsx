@@ -1,3 +1,5 @@
+import { Alert, Button } from 'flowbite-react';
+
 interface ErrorMessageProps {
   message: string;
   onRetry?: () => void;
@@ -5,17 +7,13 @@ interface ErrorMessageProps {
 
 export function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
   return (
-    <div className="rounded-lg border border-red-200 bg-red-50 p-4" role="alert" data-testid="error-message">
-      <p className="text-sm text-red-700">{message}</p>
+    <Alert color="failure" data-testid="error-message">
+      <span>{message}</span>
       {onRetry && (
-        <button
-          onClick={onRetry}
-          className="mt-2 text-sm font-medium text-red-600 hover:text-red-800"
-          data-testid="error-retry-button"
-        >
+        <Button size="xs" color="failure" onClick={onRetry} className="mt-2" data-testid="error-retry-button">
           Try again
-        </button>
+        </Button>
       )}
-    </div>
+    </Alert>
   );
 }

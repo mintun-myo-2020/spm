@@ -1,9 +1,11 @@
 package com.eggtive.spm.user.controller;
 
 import com.eggtive.spm.common.dto.ApiResponse;
+import com.eggtive.spm.common.dto.PagedResponse;
 import com.eggtive.spm.user.dto.*;
 import com.eggtive.spm.user.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +20,24 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    @GetMapping("/teachers")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public PagedResponse<TeacherDTO> getTeachers(Pageable pageable) {
+        return userService.getTeachers(pageable);
+    }
+
+    @GetMapping("/students")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public PagedResponse<StudentDTO> getStudents(Pageable pageable) {
+        return userService.getStudents(pageable);
+    }
+
+    @GetMapping("/parents")
+    @PreAuthorize("hasRole('ADMIN')")
+    public PagedResponse<ParentDTO> getParents(Pageable pageable) {
+        return userService.getParents(pageable);
     }
 
     @PostMapping("/teachers")

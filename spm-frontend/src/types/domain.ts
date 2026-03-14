@@ -6,6 +6,12 @@ export interface UserInfo {
   roles: string[];
   profileId: string;
   profileType: 'TEACHER' | 'PARENT' | 'STUDENT' | 'ADMIN';
+  linkedStudents: LinkedStudent[];
+}
+
+export interface LinkedStudent {
+  studentId: string;
+  studentName: string;
 }
 
 export interface TeacherDTO {
@@ -175,7 +181,7 @@ export interface OverallProgressDTO {
   studentName: string;
   trendData: TrendDataPoint[];
   averageScore: number;
-  improvementVelocity: ImprovementVelocity;
+  improvementVelocity: ImprovementVelocity | null;
 }
 
 export interface TrendDataPoint {

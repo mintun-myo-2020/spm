@@ -14,7 +14,6 @@ describe('useAuth', () => {
       login: vi.fn(),
       logout: vi.fn(),
       hasRole: vi.fn(() => true),
-      token: 'test-token',
     };
 
     const wrapper = ({ children }: { children: ReactNode }) =>
@@ -22,7 +21,6 @@ describe('useAuth', () => {
 
     const { result } = renderHook(() => useAuth(), { wrapper });
     expect(result.current.isAuthenticated).toBe(true);
-    expect(result.current.token).toBe('test-token');
     expect(typeof result.current.login).toBe('function');
     expect(typeof result.current.logout).toBe('function');
   });

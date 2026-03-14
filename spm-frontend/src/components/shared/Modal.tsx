@@ -1,4 +1,4 @@
-import { Dialog, DialogPanel, DialogTitle, DialogBackdrop } from '@headlessui/react';
+import { Modal as FlowbiteModal, ModalHeader, ModalBody } from 'flowbite-react';
 import type { ReactNode } from 'react';
 
 interface ModalProps {
@@ -10,14 +10,9 @@ interface ModalProps {
 
 export function Modal({ isOpen, onClose, title, children }: ModalProps) {
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <DialogBackdrop className="fixed inset-0 bg-black/30" />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <DialogPanel className="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl" data-testid="modal">
-          <DialogTitle className="text-lg font-semibold text-gray-900">{title}</DialogTitle>
-          <div className="mt-4">{children}</div>
-        </DialogPanel>
-      </div>
-    </Dialog>
+    <FlowbiteModal show={isOpen} onClose={onClose} data-testid="modal">
+      <ModalHeader>{title}</ModalHeader>
+      <ModalBody>{children}</ModalBody>
+    </FlowbiteModal>
   );
 }

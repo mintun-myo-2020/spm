@@ -1,3 +1,4 @@
+import { Button } from 'flowbite-react';
 import { Modal } from './Modal';
 
 interface ConfirmDialogProps {
@@ -11,20 +12,12 @@ interface ConfirmDialogProps {
 }
 
 export function ConfirmDialog({ isOpen, onClose, onConfirm, title, message, confirmLabel = 'Confirm', variant = 'default' }: ConfirmDialogProps) {
-  const btnClass = variant === 'danger'
-    ? 'bg-red-600 hover:bg-red-700'
-    : 'bg-blue-600 hover:bg-blue-700';
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <p className="text-sm text-gray-600">{message}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-400">{message}</p>
       <div className="mt-6 flex justify-end gap-3">
-        <button onClick={onClose} className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100" data-testid="confirm-cancel">
-          Cancel
-        </button>
-        <button onClick={onConfirm} className={`rounded-md px-4 py-2 text-sm font-medium text-white ${btnClass}`} data-testid="confirm-ok">
-          {confirmLabel}
-        </button>
+        <Button color="gray" onClick={onClose} data-testid="confirm-cancel">Cancel</Button>
+        <Button color={variant === 'danger' ? 'failure' : 'blue'} onClick={onConfirm} data-testid="confirm-ok">{confirmLabel}</Button>
       </div>
     </Modal>
   );

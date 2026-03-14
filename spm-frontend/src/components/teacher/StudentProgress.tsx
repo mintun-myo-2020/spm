@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Badge, Card } from 'flowbite-react';
 import { progressService } from '../../services/progressService';
 import { PageHeader } from '../shared/PageHeader';
 import { Chart } from '../shared/Chart';
@@ -36,24 +37,20 @@ export function StudentProgress() {
 
   return (
     <div data-testid="student-progress">
-      <PageHeader title={`Progress: ${overall.studentName}`} subtitle={`Average: ${overall.averageScore.toFixed(1)} · Improvement: ${overall.improvementVelocity.improvement >= 0 ? '+' : ''}${overall.improvementVelocity.improvement.toFixed(1)}`} />
+      <PageHeader title={`Progress: ${overall.studentName}`} subtitle={`Average: ${overall.averageScore.toFixed(1)}${overall.improvementVelocity ? ` · Improvement: ${overall.improvementVelocity.improvement >= 0 ? '+' : ''}${overall.improvementVelocity.improvement.toFixed(1)}` : ''}`} />
 
-      <div className="mb-8 rounded-lg border bg-white p-4">
+      <Card className="mb-8">
         <Chart data={chartData} xAxisKey="date" lines={[{ dataKey: 'score', name: 'Score', color: '#2563eb' }]} title="Overall Score Trend" />
-      </div>
+      </Card>
 
-      <h2 className="mb-4 text-lg font-semibold text-gray-900">Topic Performance</h2>
+      <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Topic Performance</h2>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {topics.map((t) => (
-          <div key={t.topicId} className="rounded-lg border bg-white p-4" data-testid={`topic-card-${t.topicId}`}>
-            <h3 className="font-medium text-gray-900">{t.topicName}</h3>
-            <p className="mt-1 text-sm text-gray-500">{t.testCount} tests · Avg: {t.averagePercentage.toFixed(1)}%</p>
-            <span className={`mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-              t.trend === 'IMPROVING' ? 'bg-green-100 text-green-700' : t.trend === 'DECLINING' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
-            }`}>
-              {t.trend}
-            </span>
-          </div>
+          <Card key={t.topicId} data-testid={`topic-card-${t.topicId}`}>
+            <h3 className="font-medium text-gray-900 dark:text-white">{t.topicName}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t.testCount} tests · Avg: {t.averagePercentage.toFixed(1)}%</p>
+            <Badge color={t.trend === 'IMPROVING' ? 'success' : t.trend === 'DECLINING' ? 'failure' : 'gray'} className="w-fit">{t.trend}</Badge>
+          </Card>
         ))}
       </div>
     </div>

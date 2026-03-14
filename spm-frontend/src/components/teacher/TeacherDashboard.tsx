@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Card } from 'flowbite-react';
 import { classService } from '../../services/classService';
 import { PageHeader } from '../shared/PageHeader';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
@@ -26,19 +27,13 @@ export function TeacherDashboard() {
   return (
     <div data-testid="teacher-dashboard">
       <PageHeader title="Teacher Dashboard" subtitle={`${classes.length} class(es) assigned`} />
-
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {classes.map((cls) => (
-          <div
-            key={cls.id}
-            onClick={() => navigate(`/teacher/classes/${cls.id}`)}
-            className="cursor-pointer rounded-lg border bg-white p-4 shadow-sm hover:shadow-md"
-            data-testid={`class-card-${cls.id}`}
-          >
-            <h3 className="font-semibold text-gray-900">{cls.name}</h3>
-            <p className="mt-1 text-sm text-gray-500">{cls.subjectName}</p>
-            <p className="mt-2 text-sm text-gray-600">{cls.currentStudentCount} students</p>
-          </div>
+          <Card key={cls.id} className="cursor-pointer" onClick={() => navigate(`/teacher/classes/${cls.id}`)} data-testid={`class-card-${cls.id}`}>
+            <h3 className="font-semibold text-gray-900 dark:text-white">{cls.name}</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{cls.subjectName}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">{cls.currentStudentCount} students</p>
+          </Card>
         ))}
       </div>
     </div>

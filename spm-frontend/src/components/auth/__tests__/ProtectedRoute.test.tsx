@@ -12,7 +12,6 @@ function renderWithAuth(authValue: Partial<AuthContextValue>, requiredRoles?: st
     login: vi.fn(),
     logout: vi.fn(),
     hasRole: vi.fn(() => false),
-    token: null,
   };
   return render(
     <MemoryRouter>

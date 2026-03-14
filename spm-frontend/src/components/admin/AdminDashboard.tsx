@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Card } from 'flowbite-react';
 import { userService } from '../../services/userService';
 import { classService } from '../../services/classService';
 import { PageHeader } from '../shared/PageHeader';
@@ -41,10 +42,10 @@ export function AdminDashboard() {
       <PageHeader title="Admin Dashboard" />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
-          <div key={c.label} onClick={() => navigate(c.path)} className="cursor-pointer rounded-lg border bg-white p-6 shadow-sm hover:shadow-md" data-testid={`stat-card-${c.label.toLowerCase()}`}>
-            <p className="text-sm text-gray-500">{c.label}</p>
-            <p className="mt-1 text-3xl font-bold text-gray-900">{c.value}</p>
-          </div>
+          <Card key={c.label} className="cursor-pointer" onClick={() => navigate(c.path)} data-testid={`stat-card-${c.label.toLowerCase()}`}>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{c.label}</p>
+            <p className="text-3xl font-bold text-gray-900 dark:text-white">{c.value}</p>
+          </Card>
         ))}
       </div>
     </div>

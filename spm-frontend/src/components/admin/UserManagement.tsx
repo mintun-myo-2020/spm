@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Button } from 'flowbite-react';
 import { userService } from '../../services/userService';
 import { PageHeader } from '../shared/PageHeader';
 import { DataTable, type Column } from '../shared/DataTable';
@@ -57,9 +58,9 @@ export function UserManagement() {
     { key: 'email', header: 'Email' },
     { key: 'isActive', header: 'Status', render: (r) => r.isActive ? 'Active' : 'Inactive' },
     { key: 'actions', header: '', render: (r) => (
-      <button onClick={(e) => { e.stopPropagation(); handleDeactivate(r.id); }} className="text-xs text-red-600 hover:text-red-800" data-testid={`deactivate-${r.id}`}>
+      <Button size="xs" color="failure" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleDeactivate(r.id); }} data-testid={`deactivate-${r.id}`}>
         {r.isActive ? 'Deactivate' : 'Reactivate'}
-      </button>
+      </Button>
     )},
   ];
 
@@ -69,9 +70,9 @@ export function UserManagement() {
 
       <div className="mb-4 flex gap-2">
         {(['teachers', 'students', 'parents'] as const).map((r) => (
-          <button key={r} onClick={() => setRoleFilter(r)} className={`rounded-md px-3 py-1.5 text-sm font-medium ${roleFilter === r ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`} data-testid={`filter-${r}`}>
+          <Button key={r} size="sm" color={roleFilter === r ? 'blue' : 'gray'} onClick={() => setRoleFilter(r)} data-testid={`filter-${r}`}>
             {r.charAt(0).toUpperCase() + r.slice(1)}
-          </button>
+          </Button>
         ))}
       </div>
 

@@ -1,5 +1,6 @@
 package com.eggtive.spm.user.dto;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -10,5 +11,8 @@ public record UserInfoDTO(
     String lastName,
     Set<String> roles,
     UUID profileId,
-    String profileType
-) {}
+    String profileType,
+    List<LinkedStudentDTO> linkedStudents
+) {
+    public record LinkedStudentDTO(UUID studentId, String studentName) {}
+}

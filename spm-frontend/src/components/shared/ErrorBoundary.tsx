@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Button } from 'flowbite-react';
 
 interface Props {
   children: ReactNode;
@@ -18,7 +19,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error('ErrorBoundary caught:', error, info);
+    if (import.meta.env.DEV) console.error('ErrorBoundary caught:', error, info);
   }
 
   render() {
@@ -27,13 +28,8 @@ export class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="flex min-h-[400px] flex-col items-center justify-center p-8">
           <h2 className="text-lg font-semibold text-gray-900">Something went wrong</h2>
-          <p className="mt-2 text-sm text-gray-500">{this.state.error?.message}</p>
-          <button
-            onClick={() => this.setState({ hasError: false, error: null })}
-            className="mt-4 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            Try again
-          </button>
+          <p className="mt-2 text-sm text-gray-500">An unexpected error occurred. Please try again or contact support.</p>
+          <Button className="mt-4" onClick={() => this.setState({ hasError: false, error: null })}>Try again</Button>
         </div>
       );
     }

@@ -10,7 +10,6 @@ export interface AuthContextValue {
   login: () => void;
   logout: () => void;
   hasRole: (role: string) => boolean;
-  token: string | null;
 }
 
 export const AuthContext = createContext<AuthContextValue>({
@@ -20,7 +19,6 @@ export const AuthContext = createContext<AuthContextValue>({
   login: () => {},
   logout: () => {},
   hasRole: () => false,
-  token: null,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -37,8 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const response = await apiClient.get<{ success: boolean; data: UserInfo }>('/auth/me');
           setUser(response.data.data);
-        } catch (err) {
-          console.error('Failed to fetch user info:', err);
+        } catch {
+          if (import.meta.env.DEV) console.error('Failed to fetch user info');
         }
       }
       setIsLoading(false);
@@ -54,10 +52,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     keycloakService.logout();
   };
   const hasRole = (role: string) => keycloakService.hasRole(role);
-  const token = keycloakService.getToken();
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, login, logout, hasRole, token }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, user, login, logout, hasRole }}>
       {children}
     </AuthContext.Provider>
   );

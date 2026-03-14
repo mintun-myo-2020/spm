@@ -1,11 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Badge, Button, Label, Textarea } from 'flowbite-react';
 import { feedbackService } from '../../services/feedbackService';
 import { useToast } from '../shared/Toast';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import type { FeedbackTemplateDTO } from '../../types/domain';
-import type { CreateFeedbackForm } from '../../types/forms';
+
+const feedbackSchema = z.object({
+  strengths: z.string().max(5000, 'Maximum 5000 characters').optional(),
+  areasForImprovement: z.string().max(5000, 'Maximum 5000 characters').optional(),
+  recommendations: z.string().max(5000, 'Maximum 5000 characters').optional(),
+  additionalNotes: z.string().max(2000, 'Maximum 2000 characters').optional(),
+});
+
+type FeedbackFormValues = z.infer<typeof feedbackSchema>;
 
 export function FeedbackForm() {
   const { testScoreId } = useParams<{ testScoreId: string }>();
@@ -14,7 +25,8 @@ export function FeedbackForm() {
   const [templates, setTemplates] = useState<FeedbackTemplateDTO[]>([]);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
 
-  const { register, handleSubmit, setValue, formState: { isSubmitting } } = useForm<CreateFeedbackForm>({
+  const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<FeedbackFormValues>({
+    resolver: zodResolver(feedbackSchema),
     defaultValues: { strengths: '', areasForImprovement: '', recommendations: '', additionalNotes: '' },
   });
 
@@ -33,7 +45,7 @@ export function FeedbackForm() {
     setValue(field, template.content);
   };
 
-  const onSubmit = async (data: CreateFeedbackForm) => {
+  const onSubmit = async (data: FeedbackFormValues) => {
     if (!testScoreId) return;
     try {
       await feedbackService.createFeedback(testScoreId, data);
@@ -48,16 +60,14 @@ export function FeedbackForm() {
 
   return (
     <div className="mx-auto max-w-2xl" data-testid="feedback-form">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900">Add Feedback</h1>
+      <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Add Feedback</h1>
 
       {templates.length > 0 && (
         <div className="mb-6">
-          <p className="mb-2 text-sm font-medium text-gray-700">Quick templates:</p>
+          <p className="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Quick templates:</p>
           <div className="flex flex-wrap gap-2">
             {templates.map((t) => (
-              <button key={t.id} type="button" onClick={() => applyTemplate(t)} className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700 hover:bg-gray-200" data-testid={`template-${t.id}`}>
-                {t.title}
-              </button>
+              <Badge key={t.id} color="gray" className="cursor-pointer" onClick={() => applyTemplate(t)} data-testid={`template-${t.id}`}>{t.title}</Badge>
             ))}
           </div>
         </div>
@@ -65,24 +75,28 @@ export function FeedbackForm() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label htmlFor="strengths" className="block text-sm font-medium text-gray-700">Strengths</label>
-          <textarea id="strengths" rows={3} {...register('strengths')} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" data-testid="strengths-input" />
+          <Label htmlFor="strengths">Strengths</Label>
+          <Textarea id="strengths" rows={3} {...register('strengths')} maxLength={5000} color={errors.strengths ? 'failure' : undefined} data-testid="strengths-input" />
+          {errors.strengths && <p className="mt-1 text-sm text-red-600">{errors.strengths.message}</p>}
         </div>
         <div>
-          <label htmlFor="areasForImprovement" className="block text-sm font-medium text-gray-700">Areas for Improvement</label>
-          <textarea id="areasForImprovement" rows={3} {...register('areasForImprovement')} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" data-testid="improvements-input" />
+          <Label htmlFor="areasForImprovement">Areas for Improvement</Label>
+          <Textarea id="areasForImprovement" rows={3} {...register('areasForImprovement')} maxLength={5000} color={errors.areasForImprovement ? 'failure' : undefined} data-testid="improvements-input" />
+          {errors.areasForImprovement && <p className="mt-1 text-sm text-red-600">{errors.areasForImprovement.message}</p>}
         </div>
         <div>
-          <label htmlFor="recommendations" className="block text-sm font-medium text-gray-700">Recommendations</label>
-          <textarea id="recommendations" rows={3} {...register('recommendations')} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" data-testid="recommendations-input" />
+          <Label htmlFor="recommendations">Recommendations</Label>
+          <Textarea id="recommendations" rows={3} {...register('recommendations')} maxLength={5000} color={errors.recommendations ? 'failure' : undefined} data-testid="recommendations-input" />
+          {errors.recommendations && <p className="mt-1 text-sm text-red-600">{errors.recommendations.message}</p>}
         </div>
         <div>
-          <label htmlFor="additionalNotes" className="block text-sm font-medium text-gray-700">Additional Notes</label>
-          <textarea id="additionalNotes" rows={2} {...register('additionalNotes')} className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" data-testid="notes-input" />
+          <Label htmlFor="additionalNotes">Additional Notes</Label>
+          <Textarea id="additionalNotes" rows={2} {...register('additionalNotes')} maxLength={2000} color={errors.additionalNotes ? 'failure' : undefined} data-testid="notes-input" />
+          {errors.additionalNotes && <p className="mt-1 text-sm text-red-600">{errors.additionalNotes.message}</p>}
         </div>
         <div className="flex justify-end gap-3">
-          <button type="button" onClick={() => navigate(-1)} className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100" data-testid="feedback-cancel">Cancel</button>
-          <button type="submit" disabled={isSubmitting} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50" data-testid="feedback-submit">{isSubmitting ? 'Saving...' : 'Save Feedback'}</button>
+          <Button color="gray" onClick={() => navigate(-1)} data-testid="feedback-cancel">Cancel</Button>
+          <Button type="submit" disabled={isSubmitting} data-testid="feedback-submit">{isSubmitting ? 'Saving...' : 'Save Feedback'}</Button>
         </div>
       </form>
     </div>

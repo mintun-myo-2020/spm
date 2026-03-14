@@ -23,8 +23,8 @@ export const keycloakService = {
         this.scheduleTokenRefresh();
       }
       return authenticated;
-    } catch (error) {
-      console.error('Keycloak init failed:', error);
+    } catch {
+      if (import.meta.env.DEV) console.error('Keycloak init failed');
       return false;
     }
   },
@@ -34,6 +34,7 @@ export const keycloakService = {
   },
 
   logout(): void {
+    this.clearTokenRefresh();
     keycloak.logout({ redirectUri: window.location.origin });
   },
 
@@ -73,8 +74,18 @@ export const keycloakService = {
     }
   },
 
+  _refreshIntervalId: null as ReturnType<typeof setInterval> | null,
+
+  clearTokenRefresh(): void {
+    if (this._refreshIntervalId) {
+      clearInterval(this._refreshIntervalId);
+      this._refreshIntervalId = null;
+    }
+  },
+
   scheduleTokenRefresh(): void {
-    setInterval(async () => {
+    this.clearTokenRefresh();
+    this._refreshIntervalId = setInterval(async () => {
       if (keycloak.authenticated) {
         await this.refreshToken();
       }

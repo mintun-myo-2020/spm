@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Badge, Button, Card, Label, TextInput } from 'flowbite-react';
 import { subjectService } from '../../services/subjectService';
 import { PageHeader } from '../shared/PageHeader';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
@@ -55,35 +56,42 @@ export function SubjectManagement() {
 
       <div className="space-y-4">
         {subjects.map((s) => (
-          <div key={s.id} className="rounded-lg border bg-white p-4" data-testid={`subject-${s.id}`}>
+          <Card key={s.id} data-testid={`subject-${s.id}`}>
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-gray-900">{s.name} <span className="text-sm text-gray-400">({s.code})</span></h3>
-                {s.description && <p className="text-sm text-gray-500">{s.description}</p>}
+                <h3 className="font-semibold text-gray-900 dark:text-white">{s.name} <span className="text-sm text-gray-400">({s.code})</span></h3>
+                {s.description && <p className="text-sm text-gray-500 dark:text-gray-400">{s.description}</p>}
               </div>
-              <button onClick={() => handleDeactivateSubject(s.id)} className="text-xs text-red-600 hover:text-red-800" data-testid={`deactivate-subject-${s.id}`}>
+              <Button size="xs" color="failure" onClick={() => handleDeactivateSubject(s.id)} data-testid={`deactivate-subject-${s.id}`}>
                 {s.isActive ? 'Deactivate' : 'Activate'}
-              </button>
+              </Button>
             </div>
-            <div className="mt-3 flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               {s.topics.map((t) => (
-                <span key={t.id} className={`rounded-full px-2 py-0.5 text-xs ${t.isActive ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'}`}>
-                  {t.name}
-                </span>
+                <Badge key={t.id} color={t.isActive ? 'info' : 'gray'}>{t.name}</Badge>
               ))}
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
       <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Create Subject">
         <div className="space-y-3">
-          <input value={newSubject.name} onChange={(e) => setNewSubject((p) => ({ ...p, name: e.target.value }))} placeholder="Subject name" className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" data-testid="new-subject-name" />
-          <input value={newSubject.code} onChange={(e) => setNewSubject((p) => ({ ...p, code: e.target.value }))} placeholder="Code (e.g. MATH)" className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" data-testid="new-subject-code" />
-          <input value={newSubject.description} onChange={(e) => setNewSubject((p) => ({ ...p, description: e.target.value }))} placeholder="Description (optional)" className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm" data-testid="new-subject-description" />
+          <div>
+            <Label htmlFor="new-subject-name">Subject name</Label>
+            <TextInput id="new-subject-name" value={newSubject.name} onChange={(e) => setNewSubject((p) => ({ ...p, name: e.target.value }))} data-testid="new-subject-name" />
+          </div>
+          <div>
+            <Label htmlFor="new-subject-code">Code (e.g. MATH)</Label>
+            <TextInput id="new-subject-code" value={newSubject.code} onChange={(e) => setNewSubject((p) => ({ ...p, code: e.target.value }))} data-testid="new-subject-code" />
+          </div>
+          <div>
+            <Label htmlFor="new-subject-desc">Description (optional)</Label>
+            <TextInput id="new-subject-desc" value={newSubject.description} onChange={(e) => setNewSubject((p) => ({ ...p, description: e.target.value }))} data-testid="new-subject-description" />
+          </div>
           <div className="flex justify-end gap-3">
-            <button onClick={() => setShowCreate(false)} className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Cancel</button>
-            <button onClick={handleCreateSubject} className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" data-testid="create-subject-submit">Create</button>
+            <Button color="gray" onClick={() => setShowCreate(false)}>Cancel</Button>
+            <Button onClick={handleCreateSubject} data-testid="create-subject-submit">Create</Button>
           </div>
         </div>
       </Modal>

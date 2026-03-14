@@ -22,11 +22,12 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const config = error.config as InternalAxiosRequestConfig & { _retryCount?: number };
+    const config = error.config as InternalAxiosRequestConfig & { _retryCount?: number; _authRetried?: boolean };
     if (!config) return Promise.reject(error);
 
-    // 401: try token refresh
-    if (error.response?.status === 401) {
+    // 401: try token refresh (once only)
+    if (error.response?.status === 401 && !config._authRetried) {
+      config._authRetried = true;
       const refreshed = await keycloakService.refreshToken();
       if (refreshed) {
         config.headers.Authorization = `Bearer ${keycloakService.getToken()}`;

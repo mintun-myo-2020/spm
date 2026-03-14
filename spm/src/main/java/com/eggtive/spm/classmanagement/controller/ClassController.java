@@ -33,6 +33,18 @@ public class ClassController {
         this.teacherRepository = teacherRepository;
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public PagedResponse<ClassDTO> getAllClasses(Pageable pageable) {
+        return classService.getAllClasses(pageable);
+    }
+
+    @GetMapping("/{classId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ApiResponse<ClassDetailDTO> getClassDetails(@PathVariable UUID classId) {
+        return ApiResponse.ok(classService.getClassDetail(classId));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @ResponseStatus(HttpStatus.CREATED)

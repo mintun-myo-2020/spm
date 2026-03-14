@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Badge, Button } from 'flowbite-react';
+import { Badge } from 'flowbite-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { progressService } from '../../services/progressService';
 import { Modal } from './Modal';
@@ -72,22 +72,35 @@ export function TopicProgressModal({ studentId, topic, onClose }: Props) {
           )}
 
           <div>
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2 flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700">
               <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Test-by-Test Breakdown</h4>
-              <Button size="xs" color="light" onClick={() => setSortLatestFirst((v) => !v)}>
-                {sortLatestFirst ? '↓ Latest First' : '↑ Earliest First'}
-              </Button>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 rounded-full border border-gray-300 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-blue-400"
+                onClick={() => setSortLatestFirst((v) => !v)}
+              >
+                {sortLatestFirst ? '↓ Latest first' : '↑ Earliest first'}
+              </button>
             </div>
-            <div className="max-h-48 space-y-1 overflow-y-auto">
-              {sortedBreakdown.map((d, i) => (
-                <div key={i} className="flex items-center justify-between rounded px-2 py-1 text-sm odd:bg-gray-50 dark:odd:bg-gray-800">
-                  <div>
-                    <span className="text-gray-700 dark:text-gray-300">{d.testName}</span>
-                    <span className="ml-2 text-xs text-gray-400">{d.date}</span>
-                  </div>
-                  <span className="text-gray-500 dark:text-gray-400">{d.score}/{d.maxScore} ({d.percentage}%)</span>
-                </div>
-              ))}
+            <div className="max-h-48 overflow-y-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-gray-500 dark:text-gray-400">
+                    <th className="pb-1 font-medium">Test</th>
+                    <th className="pb-1 font-medium">Date</th>
+                    <th className="pb-1 text-right font-medium">Score</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedBreakdown.map((d, i) => (
+                    <tr key={i} className="border-t border-gray-100 dark:border-gray-800">
+                      <td className="py-1.5 text-gray-900 dark:text-white">{d.testName}</td>
+                      <td className="py-1.5 text-gray-600 dark:text-gray-400">{d.date}</td>
+                      <td className="py-1.5 text-right text-gray-700 dark:text-gray-300">{d.score}/{d.maxScore} ({d.percentage}%)</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

@@ -57,6 +57,76 @@ public class ProgressService {
         return new OverallProgressDTO(studentId, name, trendData, avg, velocity);
     }
 
+    public OverallProgressDTO getProgressByClass(UUID studentId, UUID classId) {
+        Student student = userService.findStudentOrThrow(studentId);
+        String name = student.getUser().getFirstName() + " " + student.getUser().getLastName();
+
+        List<TestScore> allScores = testScoreService.findByStudentOrderByDateAsc(studentId);
+        List<TestScore> scores = allScores.stream()
+            .filter(ts -> ts.getTuitionClass().getId().equals(classId))
+            .toList();
+
+        if (scores.isEmpty()) {
+            return new OverallProgressDTO(studentId, name, List.of(), BigDecimal.ZERO, null);
+        }
+
+        List<TrendDataPointDTO> trendData = scores.stream()
+            .map(ts -> new TrendDataPointDTO(ts.getTestDate(), ts.getTestName(), ts.getOverallScore()))
+            .toList();
+
+        List<BigDecimal> scoreValues = scores.stream().map(TestScore::getOverallScore).toList();
+        BigDecimal avg = calculator.average(scoreValues);
+
+        long months = ChronoUnit.MONTHS.between(
+            scores.getFirst().getTestDate(), scores.getLast().getTestDate());
+        ImprovementVelocityDTO velocity = calculator.calculateVelocity(scoreValues, Math.max(months, 1));
+
+        return new OverallProgressDTO(studentId, name, trendData, avg, velocity);
+    }
+
+    public List<TopicProgressSummaryDTO> getTopicsProgressByClass(UUID studentId, UUID classId) {
+        if (!userService.studentExists(studentId)) {
+            throw new AppException(ErrorCode.NOT_FOUND, "Student not found");
+        }
+
+        List<TestScore> allScores = testScoreService.findByStudentOrderByDateAsc(studentId);
+        List<TestScore> scores = allScores.stream()
+            .filter(ts -> ts.getTuitionClass().getId().equals(classId))
+            .toList();
+
+        Map<UUID, List<SubQuestionData>> topicData = new LinkedHashMap<>();
+        Map<UUID, String> topicNames = new HashMap<>();
+
+        for (TestScore ts : scores) {
+            for (var q : ts.getQuestions()) {
+                for (SubQuestion sq : q.getSubQuestions()) {
+                    UUID topicId = sq.getTopic().getId();
+                    topicNames.putIfAbsent(topicId, sq.getTopic().getName());
+                    topicData.computeIfAbsent(topicId, k -> new ArrayList<>())
+                        .add(new SubQuestionData(sq.getScore(), sq.getMaxScore(), ts.getTestDate()));
+                }
+            }
+        }
+
+        return topicData.entrySet().stream().map(entry -> {
+            UUID topicId = entry.getKey();
+            List<SubQuestionData> data = entry.getValue();
+
+            List<BigDecimal> percentages = data.stream()
+                .map(d -> d.score.multiply(BigDecimal.valueOf(100))
+                    .divide(d.maxScore, 2, RoundingMode.HALF_UP))
+                .toList();
+
+            BigDecimal avgPct = calculator.average(percentages);
+            BigDecimal latestPct = percentages.getLast();
+            String trend = calculator.determineTrend(percentages);
+
+            return new TopicProgressSummaryDTO(topicId, topicNames.get(topicId),
+                data.size(), avgPct, latestPct, trend);
+        }).toList();
+    }
+
+
     public List<TopicProgressSummaryDTO> getAllTopicsProgress(UUID studentId) {
         if (!userService.studentExists(studentId)) {
             throw new AppException(ErrorCode.NOT_FOUND, "Student not found");

@@ -134,6 +134,15 @@ public class ClassService {
             base.currentStudentCount(), base.isActive(), base.createdAt(), students);
     }
 
+    @Transactional(readOnly = true)
+    public List<ClassDTO> getStudentEnrolledClasses(UUID studentId) {
+        userService.findStudentOrThrow(studentId);
+        return classStudentRepository.findByStudentIdAndStatus(studentId, EnrollmentStatus.ACTIVE).stream()
+            .map(cs -> toClassDTO(cs.getTuitionClass()))
+            .toList();
+    }
+
+
     public void verifyTeacherOwnsClass(UUID classId, UUID teacherId) {
         TuitionClass tc = findClassOrThrow(classId);
         if (!tc.getTeacher().getId().equals(teacherId)) {

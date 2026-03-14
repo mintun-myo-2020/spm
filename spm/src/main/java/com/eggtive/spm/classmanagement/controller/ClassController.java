@@ -25,24 +25,21 @@ public class ClassController {
     private final ClassService classService;
     private final CurrentUserService currentUserService;
     private final TeacherRepository teacherRepository;
+    private final com.eggtive.spm.user.repository.StudentRepository studentRepository;
 
     public ClassController(ClassService classService, CurrentUserService currentUserService,
-                           TeacherRepository teacherRepository) {
+                           TeacherRepository teacherRepository,
+                           com.eggtive.spm.user.repository.StudentRepository studentRepository) {
         this.classService = classService;
         this.currentUserService = currentUserService;
         this.teacherRepository = teacherRepository;
+        this.studentRepository = studentRepository;
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public PagedResponse<ClassDTO> getAllClasses(Pageable pageable) {
         return classService.getAllClasses(pageable);
-    }
-
-    @GetMapping("/{classId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
-    public ApiResponse<ClassDetailDTO> getClassDetails(@PathVariable UUID classId) {
-        return ApiResponse.ok(classService.getClassDetail(classId));
     }
 
     @PostMapping
@@ -53,7 +50,6 @@ public class ClassController {
         if (user.hasRole(com.eggtive.spm.common.enums.Role.TEACHER)) {
             Teacher teacher = teacherRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher profile not found"));
-            // Teachers can only create classes for themselves
             req = new CreateClassRequestDTO(req.name(), req.subjectId(), teacher.getId(), req.description(), req.maxStudents());
         }
         return ApiResponse.ok(classService.createClass(req));
@@ -67,6 +63,22 @@ public class ClassController {
             .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher profile not found"));
         return classService.getTeacherClasses(teacher.getId(), pageable);
     }
+
+    @GetMapping("/my-enrollments")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER', 'STUDENT')")
+    public ApiResponse<java.util.List<com.eggtive.spm.classmanagement.dto.ClassDTO>> myEnrollments() {
+        User user = currentUserService.getCurrentUser();
+        com.eggtive.spm.user.entity.Student student = studentRepository.findByUserId(user.getId())
+            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Student profile not found"));
+        return ApiResponse.ok(classService.getStudentEnrolledClasses(student.getId()));
+    }
+
+    @GetMapping("/{classId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ApiResponse<ClassDetailDTO> getClassDetails(@PathVariable UUID classId) {
+        return ApiResponse.ok(classService.getClassDetail(classId));
+    }
+
 
     @PostMapping("/{classId}/students")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")

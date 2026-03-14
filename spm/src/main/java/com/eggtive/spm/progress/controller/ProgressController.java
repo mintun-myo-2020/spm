@@ -33,6 +33,19 @@ public class ProgressController {
         return ApiResponse.ok(progressService.getOverallProgress(studentId));
     }
 
+    @GetMapping("/by-class/{classId}")
+    public ApiResponse<OverallProgressDTO> progressByClass(@PathVariable UUID studentId, @PathVariable UUID classId) {
+        studentAccessService.verifyAccess(currentUserService.getCurrentUser(), studentId);
+        return ApiResponse.ok(progressService.getProgressByClass(studentId, classId));
+    }
+
+    @GetMapping("/by-class/{classId}/topics")
+    public ApiResponse<List<TopicProgressSummaryDTO>> topicsProgressByClass(
+            @PathVariable UUID studentId, @PathVariable UUID classId) {
+        studentAccessService.verifyAccess(currentUserService.getCurrentUser(), studentId);
+        return ApiResponse.ok(progressService.getTopicsProgressByClass(studentId, classId));
+    }
+
     @GetMapping("/topics")
     public ApiResponse<List<TopicProgressSummaryDTO>> allTopicsProgress(@PathVariable UUID studentId) {
         studentAccessService.verifyAccess(currentUserService.getCurrentUser(), studentId);
@@ -45,5 +58,4 @@ public class ProgressController {
         studentAccessService.verifyAccess(currentUserService.getCurrentUser(), studentId);
         return ApiResponse.ok(progressService.getTopicProgress(studentId, topicId));
     }
-
 }

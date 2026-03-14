@@ -7,11 +7,19 @@ export const progressService = {
     return apiClient.get<ApiResponse<OverallProgressDTO>>(`/students/${studentId}/progress/overall`);
   },
 
+  getProgressByClass(studentId: string, classId: string) {
+    return apiClient.get<ApiResponse<OverallProgressDTO>>(`/students/${studentId}/progress/by-class/${classId}`);
+  },
+
   getTopicProgress(studentId: string, topicId: string) {
     return apiClient.get<ApiResponse<TopicProgressDTO>>(`/students/${studentId}/progress/topics/${topicId}`);
   },
 
   getAllTopicsProgress(studentId: string) {
     return apiClient.get<ApiResponse<TopicProgressSummaryDTO[]>>(`/students/${studentId}/progress/topics`);
+  },
+
+  getTopicsProgressByClass(studentId: string, classId: string) {
+    return apiClient.get<ApiResponse<TopicProgressSummaryDTO[]>>(`/students/${studentId}/progress/by-class/${classId}/topics`);
   },
 };

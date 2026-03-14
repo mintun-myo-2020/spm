@@ -17,4 +17,6 @@ public interface ClassStudentRepository extends JpaRepository<ClassStudent, UUID
     @Query("SELECT CASE WHEN COUNT(cs) > 0 THEN true ELSE false END FROM ClassStudent cs " +
            "WHERE cs.student.id = :studentId AND cs.tuitionClass.teacher.id = :teacherId AND cs.status = 'ACTIVE'")
     boolean existsByStudentIdAndTeacherId(UUID studentId, UUID teacherId);
+
+    List<ClassStudent> findByStudentIdAndStatus(UUID studentId, EnrollmentStatus status);
 }

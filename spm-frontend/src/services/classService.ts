@@ -8,6 +8,10 @@ export const classService = {
     return apiClient.get<PagedResponse<ClassDTO>>('/classes/my-classes', { params });
   },
 
+  getMyEnrollments() {
+    return apiClient.get<ApiResponse<ClassDTO[]>>('/classes/my-enrollments');
+  },
+
   getAllClasses(params?: PaginationParams) {
     return apiClient.get<PagedResponse<ClassDTO>>('/classes', { params });
   },

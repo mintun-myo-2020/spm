@@ -1,27 +1,27 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Card, Select } from 'flowbite-react';
+import { Badge, Button, Card, Select } from 'flowbite-react';
 import { useAuth } from '../../hooks/useAuth';
-import { testScoreService } from '../../services/testScoreService';
 import { progressService } from '../../services/progressService';
 import { PageHeader } from '../shared/PageHeader';
 import { Chart } from '../shared/Chart';
+import { TopicProgressModal } from '../shared/TopicProgressModal';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { ErrorMessage } from '../shared/ErrorMessage';
-import type { TestScoreDTO, OverallProgressDTO } from '../../types/domain';
+import type { OverallProgressDTO, TopicProgressSummaryDTO } from '../../types/domain';
 
 export function ParentDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [scores, setScores] = useState<TestScoreDTO[]>([]);
-  const [progress, setProgress] = useState<OverallProgressDTO | null>(null);
+  const [overall, setOverall] = useState<OverallProgressDTO | null>(null);
+  const [topics, setTopics] = useState<TopicProgressSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<TopicProgressSummaryDTO | null>(null);
 
   const linkedStudents = user?.linkedStudents ?? [];
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
-  // Auto-select first child
   useEffect(() => {
     if (linkedStudents.length > 0 && !selectedStudentId) {
       setSelectedStudentId(linkedStudents[0].studentId);
@@ -33,10 +33,10 @@ export function ParentDashboard() {
     setLoading(true);
     setError(null);
     Promise.all([
-      testScoreService.getStudentTestScores(selectedStudentId, { size: 5 }).then((r) => r.data.content),
       progressService.getOverallProgress(selectedStudentId).then((r) => r.data.data),
+      progressService.getAllTopicsProgress(selectedStudentId).then((r) => r.data.data),
     ])
-      .then(([s, p]) => { setScores(s); setProgress(p); })
+      .then(([o, t]) => { setOverall(o); setTopics(t); })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [selectedStudentId]);
@@ -53,7 +53,7 @@ export function ParentDashboard() {
   }
 
   const selectedName = linkedStudents.find((s) => s.studentId === selectedStudentId)?.studentName;
-  const chartData = progress?.trendData.map((d) => ({ date: new Date(d.testDate).toLocaleDateString(), score: d.score })) ?? [];
+  const chartData = overall?.trendData.map((d) => ({ date: new Date(d.testDate).toLocaleDateString(), score: d.score })) ?? [];
 
   return (
     <div data-testid="parent-dashboard">
@@ -73,22 +73,28 @@ export function ParentDashboard() {
         </div>
       )}
 
+      <div className="mb-6 flex gap-3">
+        <Button color="blue" onClick={() => navigate('/parent/scores')} data-testid="view-all-scores">
+          View Recent Tests →
+        </Button>
+      </div>
+
       {loading && <LoadingSpinner />}
       {error && <ErrorMessage message={error} />}
 
       {!loading && !error && (
         <>
-          {progress && (
+          {overall && (
             <div className="mb-6 grid gap-4 sm:grid-cols-3">
               <Card>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Average Score</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{progress.averageScore.toFixed(1)}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{overall.averageScore.toFixed(1)}</p>
               </Card>
               <Card>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Improvement</p>
-                {progress.improvementVelocity ? (
-                  <p className={`text-2xl font-bold ${progress.improvementVelocity.improvement >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {progress.improvementVelocity.improvement >= 0 ? '+' : ''}{progress.improvementVelocity.improvement.toFixed(1)}
+                {overall.improvementVelocity ? (
+                  <p className={`text-2xl font-bold ${overall.improvementVelocity.improvement >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {overall.improvementVelocity.improvement >= 0 ? '+' : ''}{overall.improvementVelocity.improvement.toFixed(1)}
                   </p>
                 ) : (
                   <p className="text-2xl font-bold text-gray-400">—</p>
@@ -96,7 +102,7 @@ export function ParentDashboard() {
               </Card>
               <Card>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Tests Taken</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{progress.trendData.length}</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-white">{overall.trendData.length}</p>
               </Card>
             </div>
           )}
@@ -107,25 +113,22 @@ export function ParentDashboard() {
             </Card>
           )}
 
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Scores</h2>
-            <Button size="sm" color="light" onClick={() => navigate('/parent/scores')} data-testid="view-all-scores">View All →</Button>
-          </div>
-          <div className="mt-3 space-y-2">
-            {scores.length === 0 ? (
-              <Card>
-                <p className="text-center text-gray-500 dark:text-gray-400">No test scores recorded yet for this child.</p>
-              </Card>
-            ) : scores.map((s) => (
-              <Card key={s.id} className="flex-row items-center justify-between">
-                <div>
-                  <p className="font-medium text-gray-900 dark:text-white">{s.testName}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(s.testDate).toLocaleDateString()} · {s.className}</p>
-                </div>
-                <span className="text-lg font-bold text-gray-900 dark:text-white">{s.overallScore}/{s.maxScore}</span>
-              </Card>
-            ))}
-          </div>
+          {topics.length > 0 && (
+            <>
+              <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">Topic Performance</h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {topics.map((t) => (
+                  <Card key={t.topicId} className="cursor-pointer transition-shadow hover:shadow-md" onClick={() => setSelectedTopic(t)}>
+                    <h3 className="font-medium text-gray-900 dark:text-white">{t.topicName}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Avg: {t.averagePercentage.toFixed(1)}% · {t.testCount} tests</p>
+                    <Badge color={t.trend === 'IMPROVING' ? 'success' : t.trend === 'DECLINING' ? 'failure' : 'gray'} className="w-fit">{t.trend}</Badge>
+                  </Card>
+                ))}
+              </div>
+
+              {selectedStudentId && <TopicProgressModal studentId={selectedStudentId} topic={selectedTopic} onClose={() => setSelectedTopic(null)} />}
+            </>
+          )}
         </>
       )}
     </div>

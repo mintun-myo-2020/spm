@@ -3,6 +3,7 @@ import { TeacherDashboard } from './TeacherDashboard';
 import { ClassList } from './ClassList';
 import { ClassDetails } from './ClassDetails';
 import { StudentDetails } from './StudentDetails';
+import { StudentScores } from './StudentScores';
 import { TestScoreForm } from './TestScoreForm';
 import { TestScoreDetailPage } from './TestScoreDetailPage';
 import { StudentProgress } from './StudentProgress';
@@ -17,6 +18,7 @@ export default function TeacherRoutes() {
       <Route path="classes" element={<ClassList />} />
       <Route path="classes/:classId" element={<ClassDetails />} />
       <Route path="classes/:classId/students/:studentId" element={<StudentDetails />} />
+      <Route path="classes/:classId/students/:studentId/scores" element={<StudentScores />} />
       <Route path="classes/:classId/students/:studentId/scores/new" element={<TestScoreForm />} />
       <Route path="classes/:classId/students/:studentId/scores/:testScoreId" element={<TestScoreDetailPage />} />
       <Route path="classes/:classId/students/:studentId/scores/:testScoreId/edit" element={<TestScoreForm />} />

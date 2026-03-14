@@ -51,6 +51,7 @@
       "clientId": "spm-backend",
       "name": "SPM Backend",
       "enabled": true,
+      "publicClient": false,
       "bearerOnly": true,
       "protocol": "openid-connect"
     }
@@ -69,31 +70,141 @@
     {
       "username": "teacher1",
       "email": "teacher1@spm.local",
-      "firstName": "Test",
-      "lastName": "Teacher",
+      "firstName": "Sarah",
+      "lastName": "Lim",
       "enabled": true,
       "emailVerified": true,
       "credentials": [{ "type": "password", "value": "teacher1", "temporary": false }],
       "realmRoles": ["TEACHER"]
     },
     {
+      "username": "teacher2",
+      "email": "teacher2@spm.local",
+      "firstName": "James",
+      "lastName": "Tan",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "teacher2", "temporary": false }],
+      "realmRoles": ["TEACHER"]
+    },
+    {
       "username": "parent1",
       "email": "parent1@spm.local",
-      "firstName": "Test",
-      "lastName": "Parent",
+      "firstName": "David",
+      "lastName": "Wong",
       "enabled": true,
       "emailVerified": true,
       "credentials": [{ "type": "password", "value": "parent1", "temporary": false }],
       "realmRoles": ["PARENT"]
     },
     {
+      "username": "parent2",
+      "email": "parent2@spm.local",
+      "firstName": "Linda",
+      "lastName": "Chen",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "parent2", "temporary": false }],
+      "realmRoles": ["PARENT"]
+    },
+    {
       "username": "student1",
       "email": "student1@spm.local",
-      "firstName": "Test",
-      "lastName": "Student",
+      "firstName": "GoodStudent",
+      "lastName": "Alice",
       "enabled": true,
       "emailVerified": true,
       "credentials": [{ "type": "password", "value": "student1", "temporary": false }],
+      "realmRoles": ["STUDENT"]
+    },
+    {
+      "username": "student2",
+      "email": "student2@spm.local",
+      "firstName": "GoodStudent",
+      "lastName": "Ben",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "student2", "temporary": false }],
+      "realmRoles": ["STUDENT"]
+    },
+    {
+      "username": "student3",
+      "email": "student3@spm.local",
+      "firstName": "GoodStudent",
+      "lastName": "Clara",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "student3", "temporary": false }],
+      "realmRoles": ["STUDENT"]
+    },
+    {
+      "username": "student4",
+      "email": "student4@spm.local",
+      "firstName": "GoodStudent",
+      "lastName": "Daniel",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "student4", "temporary": false }],
+      "realmRoles": ["STUDENT"]
+    },
+    {
+      "username": "student5",
+      "email": "student5@spm.local",
+      "firstName": "StrugglingStudent",
+      "lastName": "Ethan",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "student5", "temporary": false }],
+      "realmRoles": ["STUDENT"]
+    },
+    {
+      "username": "student6",
+      "email": "student6@spm.local",
+      "firstName": "StrugglingStudent",
+      "lastName": "Fiona",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "student6", "temporary": false }],
+      "realmRoles": ["STUDENT"]
+    },
+    {
+      "username": "student7",
+      "email": "student7@spm.local",
+      "firstName": "GoodStudent",
+      "lastName": "Grace",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "student7", "temporary": false }],
+      "realmRoles": ["STUDENT"]
+    },
+    {
+      "username": "student8",
+      "email": "student8@spm.local",
+      "firstName": "GoodStudent",
+      "lastName": "Henry",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "student8", "temporary": false }],
+      "realmRoles": ["STUDENT"]
+    },
+    {
+      "username": "student9",
+      "email": "student9@spm.local",
+      "firstName": "StrugglingStudent",
+      "lastName": "Irene",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "student9", "temporary": false }],
+      "realmRoles": ["STUDENT"]
+    },
+    {
+      "username": "student10",
+      "email": "student10@spm.local",
+      "firstName": "StrugglingStudent",
+      "lastName": "Jack",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [{ "type": "password", "value": "student10", "temporary": false }],
       "realmRoles": ["STUDENT"]
     }
   ]

@@ -95,6 +95,21 @@ public class ClassService {
         cs.setWithdrawalDate(LocalDate.now());
         return toEnrollmentDTO(classStudentRepository.save(cs));
     }
+    public EnrollmentDTO reEnrollStudent(UUID classId, UUID studentId) {
+        ClassStudent cs = classStudentRepository.findByTuitionClassIdAndStudentId(classId, studentId)
+            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Enrollment not found"));
+        if (cs.getStatus() != EnrollmentStatus.WITHDRAWN) {
+            throw new AppException(ErrorCode.CONFLICT, "Student is not in withdrawn status");
+        }
+        TuitionClass tc = findClassOrThrow(classId);
+        long count = classRepository.countActiveStudents(classId);
+        if (count >= tc.getMaxStudents()) {
+            throw new AppException(ErrorCode.CLASS_FULL, "Class is at maximum capacity");
+        }
+        cs.setStatus(EnrollmentStatus.ACTIVE);
+        cs.setWithdrawalDate(null);
+        return toEnrollmentDTO(classStudentRepository.save(cs));
+    }
 
     public ClassDTO changeTeacher(UUID classId, UUID newTeacherId) {
         TuitionClass tc = findClassOrThrow(classId);

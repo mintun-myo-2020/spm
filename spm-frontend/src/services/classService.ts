@@ -32,6 +32,10 @@ export const classService = {
     return apiClient.put<ApiResponse<EnrollmentDTO>>(`/classes/${classId}/students/${studentId}/withdraw`);
   },
 
+  reEnrollStudent(classId: string, studentId: string) {
+    return apiClient.put<ApiResponse<EnrollmentDTO>>(`/classes/${classId}/students/${studentId}/re-enroll`);
+  },
+
   changeTeacher(classId: string, newTeacherId: string) {
     return apiClient.put<ApiResponse<ClassDTO>>(`/classes/${classId}/teacher`, { newTeacherId });
   },

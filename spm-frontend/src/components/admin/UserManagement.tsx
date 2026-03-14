@@ -52,23 +52,41 @@ export function UserManagement() {
 
   useEffect(() => { fetchUsers(); }, [roleFilter, pagination.page, pagination.size]);
 
-  const handleDeactivate = async (userId: string) => {
+  const handleDeactivate = async (userId: string, isActive: boolean) => {
     try {
-      await userService.deactivateUser(userId);
-      showToast('User deactivated', 'success');
+      if (isActive) {
+        await userService.deactivateUser(userId);
+        showToast('User deactivated', 'success');
+      } else {
+        await userService.reactivateUser(userId);
+        showToast('User reactivated', 'success');
+      }
       fetchUsers();
-    } catch { showToast('Failed to deactivate user', 'error'); }
+    } catch { showToast(isActive ? 'Failed to deactivate user' : 'Failed to reactivate user', 'error'); }
   };
 
   const columns: Column<UserRow>[] = [
     { key: 'firstName', header: 'First Name' },
     { key: 'lastName', header: 'Last Name' },
     { key: 'email', header: 'Email' },
-    { key: 'isActive', header: 'Status', render: (r) => r.isActive ? 'Active' : 'Inactive' },
+    { key: 'isActive', header: 'Status', render: (r) => (
+      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${r.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+        {r.isActive ? 'Active' : 'Inactive'}
+      </span>
+    )},
     { key: 'actions', header: '', render: (r) => (
-      <Button size="xs" color="failure" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleDeactivate(r.id); }} data-testid={`deactivate-${r.id}`}>
+      <button
+        type="button"
+        className={`inline-flex items-center rounded-md px-3 py-1.5 text-xs font-medium text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+          r.isActive
+            ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
+            : 'bg-green-600 hover:bg-green-700 focus:ring-green-500'
+        }`}
+        onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleDeactivate(r.id, r.isActive); }}
+        data-testid={`deactivate-${r.id}`}
+      >
         {r.isActive ? 'Deactivate' : 'Reactivate'}
-      </Button>
+      </button>
     )},
   ];
 

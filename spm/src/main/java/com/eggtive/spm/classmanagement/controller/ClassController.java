@@ -94,6 +94,18 @@ public class ClassController {
         }
         return ApiResponse.ok(classService.withdrawStudent(classId, studentId));
     }
+    @PutMapping("/{classId}/students/{studentId}/re-enroll")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ApiResponse<EnrollmentDTO> reEnrollStudent(@PathVariable UUID classId,
+                                                       @PathVariable UUID studentId) {
+        User user = currentUserService.getCurrentUser();
+        if (user.hasRole(com.eggtive.spm.common.enums.Role.TEACHER)) {
+            Teacher teacher = teacherRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher profile not found"));
+            classService.verifyTeacherOwnsClass(classId, teacher.getId());
+        }
+        return ApiResponse.ok(classService.reEnrollStudent(classId, studentId));
+    }
 
     @PutMapping("/{classId}/teacher")
     @PreAuthorize("hasRole('ADMIN')")

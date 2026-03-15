@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Badge, Card } from 'flowbite-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import type { TestScoreDetailDTO } from '../../types/domain';
+import type { TestScoreDetailDTO, QuestionDTO } from '../../types/domain';
 
 interface Props {
   score: TestScoreDetailDTO;
@@ -13,25 +13,32 @@ function getBarColor(pct: number) {
   return '#ef4444';
 }
 
+function getQuestionScore(q: QuestionDTO) {
+  return q.subQuestions.reduce((sum, sq) => sum + sq.score, 0);
+}
+
+function getScoreBadgeColor(score: number, max: number) {
+  const pct = max > 0 ? score / max : 0;
+  if (pct >= 0.7) return 'success';
+  if (pct >= 0.4) return 'warning';
+  return 'failure';
+}
+
 export function TestScoreDetail({ score }: Props) {
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const toggle = (id: string) => setExpandedId((prev) => (prev === id ? null : id));
+
   const topicChartData = useMemo(() => {
     const map = new Map<string, { score: number; maxScore: number }>();
     for (const q of score.questions) {
       for (const sq of q.subQuestions) {
         const existing = map.get(sq.topicName);
-        if (existing) {
-          existing.score += sq.score;
-          existing.maxScore += sq.maxScore;
-        } else {
-          map.set(sq.topicName, { score: sq.score, maxScore: sq.maxScore });
-        }
+        if (existing) { existing.score += sq.score; existing.maxScore += sq.maxScore; }
+        else { map.set(sq.topicName, { score: sq.score, maxScore: sq.maxScore }); }
       }
     }
     return Array.from(map.entries()).map(([topic, { score: s, maxScore: ms }]) => ({
-      topic,
-      percentage: ms > 0 ? Math.round((s / ms) * 100) : 0,
-      score: s,
-      maxScore: ms,
+      topic, percentage: ms > 0 ? Math.round((s / ms) * 100) : 0, score: s, maxScore: ms,
     }));
   }, [score.questions]);
 
@@ -66,60 +73,85 @@ export function TestScoreDetail({ score }: Props) {
       {score.questions.length > 0 && (
         <div>
           <h4 className="mb-2 font-medium text-gray-900 dark:text-white">Question Breakdown</h4>
-          <div className="space-y-3">
-            {score.questions.map((q) => (
-              <div key={q.id} className="rounded-lg border p-3 dark:border-gray-600">
-                <div className="flex items-start justify-between">
-                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Q{q.questionNumber} (max: {q.maxScore})
-                    {q.questionType === 'MCQ' && (
-                      <Badge color="purple" className="ml-2 inline">MCQ</Badge>
-                    )}
-                  </p>
-                </div>
+          <p className="mb-2 text-xs text-gray-400">Click a question to see details</p>
+          <div className="space-y-2">
+            {score.questions.map((q) => {
+              const qScore = getQuestionScore(q);
+              const isOpen = expandedId === q.id;
+              return (
+                <div key={q.id} className="rounded-lg border dark:border-gray-600 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => toggle(q.id)}
+                    className="flex w-full items-center justify-between px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    aria-expanded={isOpen}
+                  >
+                    <span className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Q{q.questionNumber}
+                      {q.questionType === 'MCQ' && <Badge color="purple" size="xs">MCQ</Badge>}
+                    </span>
+                    <span className="flex items-center gap-2">
+                      <Badge color={getScoreBadgeColor(qScore, q.maxScore)} size="sm">{qScore}/{q.maxScore}</Badge>
+                      <svg className={`h-4 w-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </span>
+                  </button>
 
-                {q.questionText && (
-                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 italic">{q.questionText}</p>
-                )}
-
-                {q.questionType === 'MCQ' && q.mcqOptions && q.mcqOptions.length > 0 && (
-                  <div className="mt-2 space-y-1">
-                    {q.mcqOptions.map((opt) => {
-                      const isSelected = q.subQuestions.some((sq) => sq.studentAnswer === opt.key);
-                      return (
-                        <div
-                          key={opt.key}
-                          className={`flex items-center gap-2 rounded px-2 py-1 text-sm ${
-                            isSelected
-                              ? 'bg-blue-50 font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
-                              : 'text-gray-600 dark:text-gray-400'
-                          }`}
-                        >
-                          <span className="font-mono font-semibold">{opt.key}.</span>
-                          <span>{opt.text}</span>
-                          {isSelected && <Badge color="info" className="ml-auto">Selected</Badge>}
+                  {isOpen && (
+                    <div className="border-t px-3 py-3 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/30 space-y-3">
+                      {q.questionText && (
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Question:</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-300">{q.questionText}</p>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
-
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {q.subQuestions.map((sq) => (
-                    <div key={sq.id} className="space-y-1">
-                      <Badge color={sq.score >= sq.maxScore * 0.7 ? 'success' : sq.score >= sq.maxScore * 0.4 ? 'warning' : 'failure'}>
-                        {sq.topicName}: {sq.score}/{sq.maxScore}
-                      </Badge>
-                      {q.questionType !== 'MCQ' && sq.studentAnswer && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 pl-1">
-                          Answer: <span className="text-gray-700 dark:text-gray-300">{sq.studentAnswer}</span>
-                        </p>
                       )}
+
+                      {q.questionType === 'MCQ' && q.mcqOptions && q.mcqOptions.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Options:</p>
+                          <div className="space-y-1">
+                            {q.mcqOptions.map((opt) => {
+                              const isSelected = q.subQuestions.some((sq) => sq.studentAnswer === opt.key);
+                              return (
+                                <div key={opt.key} className={`flex items-center gap-2 rounded px-2 py-1 text-sm ${isSelected ? 'bg-blue-50 font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' : 'text-gray-600 dark:text-gray-400'}`}>
+                                  <span className="font-mono font-semibold">{opt.key}.</span>
+                                  <span>{opt.text}</span>
+                                  {isSelected && <Badge color="info" className="ml-auto" size="xs">Selected</Badge>}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {q.questionType !== 'MCQ' && q.subQuestions.some((sq) => sq.studentAnswer) && (
+                        <div>
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Student Answers:</p>
+                          {q.subQuestions.map((sq) => sq.studentAnswer ? (
+                            <div key={sq.id} className="mb-1 text-sm">
+                              <span className="text-gray-500 dark:text-gray-400">{sq.label}:</span>{' '}
+                              <span className="text-gray-700 dark:text-gray-300">{sq.studentAnswer}</span>
+                            </div>
+                          ) : null)}
+                        </div>
+                      )}
+
+                      <div>
+                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Scores by Topic:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {q.subQuestions.map((sq) => (
+                            <Badge key={sq.id} color={sq.score >= sq.maxScore * 0.7 ? 'success' : sq.score >= sq.maxScore * 0.4 ? 'warning' : 'failure'}>
+                              {sq.topicName}: {sq.score}/{sq.maxScore}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  ))}
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}

@@ -810,3 +810,31 @@ All plan checkboxes marked complete. aidlc-state.md updated.
 **Context**: Code Generation (Unit 1) complete. Moving to Functional Design (Unit 2).
 
 ---
+
+## Sprint 2 - Functional Design (Unit 2: OCR Test Upload) - Stage Started
+**Timestamp**: 2026-03-15T01:15:00Z
+**User Input**: "move on to sprint 2, unit 2/feature 2" / "let's continue now"
+**AI Response**: Unit 1 (Progress Report Content) code generation complete. Starting Functional Design for Unit 2 (OCR Test Upload). Creating functional design plan with questions.
+**Context**: CONSTRUCTION PHASE — Functional Design (Unit 2) — Part 1 (Planning)
+
+---
+
+## Sprint 2 - Functional Design (Unit 2) - Clarification Decisions Confirmed
+**Timestamp**: 2026-03-15T01:30:00Z
+**User Input**: "results concatenated as in they all feed into the same test. but they are different questions and subqns obviously."
+**AI Response**: Confirmed understanding — multiple files are pages of the same exam paper, each page has different questions/sub-questions. OCR processes each page independently, parsed questions are aggregated (not text-concatenated) into a single set for the test score.
+**Context**: Functional Design (Unit 2) — Final clarification on C4 semantics before artifact generation
+
+---
+
+## Sprint 2 - Functional Design (Unit 2) - Artifacts Generated
+**Timestamp**: 2026-03-15T01:35:00Z
+**AI Response**: Generated all 4 functional design artifacts for Unit 2 (OCR Test Upload):
+- `domain-entities.md` — TestPaperUpload + TestPaperPage entities (2-table design), UploadStatus/PageStatus enums, ParsedQuestion/ParsedSubQuestion/ParsedResult value objects, FileStorageService/OcrService/TestPaperParser interfaces, DB schema with indexes
+- `business-logic-model.md` — 6 workflows: multi-file upload, async OCR extraction, structured parsing (hybrid), auto-population into TestScoreForm, status polling, presigned URL generation. Student self-upload creates draft TestScore.
+- `business-rules.md` — 9 rule categories: file validation (type/size/content), access control (teacher/student/admin), status transitions, OCR/parsing confidence thresholds, test score linking, file storage/retention, stub/local dev behavior, error handling, TestScore isDraft field
+- `api-contracts.md` — 4 endpoints (POST upload, POST extract, GET status, GET local file), 2 modified endpoints (create/update test score with uploadIds and isDraft), full DTO specifications
+Key design decisions: 2-table model (upload + pages), TestPaperParser interface as LLM abstraction point, isDraft boolean on TestScore for student self-upload drafts, @Async extraction with frontend polling.
+**Context**: Functional Design (Unit 2) — Steps 3-6 complete, presenting completion message
+
+---

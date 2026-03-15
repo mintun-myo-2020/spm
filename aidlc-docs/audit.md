@@ -861,3 +861,25 @@ Key design decisions: 2-table model (upload + pages), TestPaperParser interface 
 **Context**: Code Generation (Unit 2) — Part 2 (Generation) — resuming from Step 8
 
 ---
+
+## Sprint 2 - Code Generation (Unit 2) - Steps 7-12 Completed
+**Timestamp**: 2026-03-15T02:15:00Z
+**AI Response**: Completed backend Steps 7-12:
+- Step 7: S3FileStorageService + TextractOcrService already existed from previous session — marked complete
+- Step 8: Fixed TestPaperUploadDTO (cleaned AggregatedQuestion, removed sourceQuestions reference, added flat sub-records). Modified CreateTestScoreRequestDTO with uploadIds + isDraft fields.
+- Step 9: Created TestPaperService with uploadFiles(), triggerExtraction(), processExtractionAsync(), getUpload(), linkToTestScore(), toDTO(), aggregateQuestions(). Updated UploadStatus (PARTIALLY_FAILED), PageStatus (EXTRACTING, PARSING).
+- Step 10: Created TestPaperController with 4 endpoints (upload multipart, extract 202, get status, serve local files). LocalFileStorageService injected optionally for dev file serving.
+- Step 11: Modified TestScoreService — added testPaperService dependency, isDraft handling in createTestScore(), upload linking. Updated TestScoreRepository queries to filter is_draft=false.
+- Step 12: Added @EnableAsync to SpmApplication, added uploads/ to .gitignore.
+Also started Step 13 (frontend types in domain.ts) before user paused.
+**Context**: Code Generation (Unit 2) — Part 2 (Generation) — Steps 7-12 complete, paused for backend testing
+
+---
+
+## Sprint 2 - Code Generation (Unit 2) - User Pause Request
+**Timestamp**: 2026-03-15T02:20:00Z
+**User Input**: "pause here and add progress update first. i want to test the endpoint and how the backend is working"
+**AI Response**: Updated plan checkboxes (Steps 7-12 marked complete), aidlc-state.md (status updated to paused for testing), audit.md updated.
+**Context**: Code Generation (Unit 2) — Paused at Step 12 for user backend testing
+
+---

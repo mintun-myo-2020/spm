@@ -64,42 +64,42 @@
 - [x] Add tesseract-ocr service to `docker-compose.yml` with shared uploads volume
 
 ### Step 7: Backend — AWS Implementations (Production)
-- [ ] Create `S3FileStorageService` in `testpaper/storage/` — uses AWS S3 SDK, `@ConditionalOnProperty`
-- [ ] Create `TextractOcrService` in `testpaper/ocr/` — uses AWS Textract SDK, `@ConditionalOnProperty`
-- [ ] Add Textract dependency to `build.gradle.kts`
+- [x] Create `S3FileStorageService` in `testpaper/storage/` — uses AWS S3 SDK, `@ConditionalOnProperty`
+- [x] Create `TextractOcrService` in `testpaper/ocr/` — uses AWS Textract SDK, `@ConditionalOnProperty`
+- [x] Add Textract dependency to `build.gradle.kts`
 
 ### Step 8: Backend — DTOs
-- [ ] Create `TestPaperUploadDTO` response record in `testpaper/dto/`
-- [ ] Create `TestPaperPageDTO` response record in `testpaper/dto/`
-- [ ] Create `ParsedResultDTO` response record in `testpaper/dto/`
-- [ ] Create `ParsedQuestionDTO` response record in `testpaper/dto/`
-- [ ] Modify `CreateTestScoreRequestDTO` — add optional `uploadIds` (List of UUID) and `isDraft` (Boolean)
+- [x] Create `TestPaperUploadDTO` response record in `testpaper/dto/` (cleaned up AggregatedQuestion — removed sourceQuestions, added flat sub-records)
+- [x] Create `TestPaperPageDTO` response record in `testpaper/dto/`
+- [ ] ~~Create `ParsedResultDTO` response record in `testpaper/dto/`~~ (reusing parser records directly in PageDTO)
+- [ ] ~~Create `ParsedQuestionDTO` response record in `testpaper/dto/`~~ (reusing parser records directly in PageDTO)
+- [x] Modify `CreateTestScoreRequestDTO` — add optional `uploadIds` (List of UUID) and `isDraft` (Boolean)
 
 ### Step 9: Backend — TestPaperService (Core Business Logic)
-- [ ] Create `TestPaperService` in `testpaper/service/`:
+- [x] Create `TestPaperService` in `testpaper/service/`:
   - `uploadFiles()` — validate files, store via FileStorageService, create Upload + Pages
   - `triggerExtraction()` — async OCR + parsing for all pages, update statuses
   - `getUpload()` — return upload with pages, presigned URLs, parsed results
   - `linkToTestScore()` — set testScoreId on upload(s)
-  - `createDraftTestScore()` — create draft TestScore from parsed results (student self-upload)
-- [ ] Use `@Async` for extraction processing
+  - ~~`createDraftTestScore()`~~ — deferred to Step 18 (student self-upload frontend)
+- [x] Use `@Async` for extraction processing
 
 ### Step 10: Backend — TestPaperController
-- [ ] Create `TestPaperController` in `testpaper/controller/`:
+- [x] Create `TestPaperController` in `testpaper/controller/`:
   - `POST /api/v1/test-papers/upload` — multipart upload
   - `POST /api/v1/test-papers/{uploadId}/extract` — trigger extraction (returns 202)
   - `GET /api/v1/test-papers/{uploadId}` — get status + results
   - `GET /api/v1/test-papers/files` — serve local files (dev only, conditional)
-- [ ] Access control: teacher (own classes), student (self), admin (view only)
+- [x] Access control: teacher (own classes), student (self), admin (view only)
 
 ### Step 11: Backend — Modify TestScoreService for isDraft + uploadIds
-- [ ] Update `createTestScore()` — accept uploadIds, link uploads, handle isDraft
-- [ ] Update `updateTestScore()` — handle isDraft transition (false→true triggers full validation)
-- [ ] Update progress/report queries to filter `WHERE is_draft = false`
+- [x] Update `createTestScore()` — accept uploadIds, link uploads, handle isDraft
+- [ ] Update `updateTestScore()` — handle isDraft transition (deferred — not blocking for testing)
+- [x] Update progress/report queries to filter `WHERE is_draft = false`
 
 ### Step 12: Backend — Enable @Async
-- [ ] Add `@EnableAsync` to `SpmApplication.java` (or create AsyncConfig)
-- [ ] Add `uploads/` to `.gitignore`
+- [x] Add `@EnableAsync` to `SpmApplication.java`
+- [x] Add `uploads/` to `.gitignore`
 
 ### Step 13: Frontend — TypeScript Types
 - [ ] Add OCR-related types to `types/domain.ts`: TestPaperUploadDTO, TestPaperPageDTO, ParsedResultDTO, ParsedQuestionDTO, ParsedSubQuestionDTO

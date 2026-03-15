@@ -92,7 +92,7 @@ export interface UpdateNotificationPreferencesForm {
 
 export interface GenerateReportForm {
   reportType: string;
-  startDate?: string;
-  endDate?: string;
-  selectedTestIds?: string[];
+  classId: string;
+  startDate: string;
+  endDate: string;
 }

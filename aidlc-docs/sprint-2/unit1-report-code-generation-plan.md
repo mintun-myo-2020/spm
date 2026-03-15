@@ -43,7 +43,7 @@ ReportService
 ## Steps
 
 ### Step 1: Create ReportData record and ReportContentGenerator interface
-- [ ] Create `ReportData.java` in `report/service/` — record containing:
+- [x] Create `ReportData.java` in `report/service/` — record containing:
   - Student info (name, id)
   - Class info (name, subject name, teacher name)
   - Date range (startDate, endDate)
@@ -51,7 +51,7 @@ ReportService
   - List of topic summaries (topic name, average %, trend, question count)
   - List of feedback entries (date, strengths, areas for improvement, recommendations)
   - Question-level detail per test (question text, sub-questions with topic, score, maxScore) — included now so AI can use it later
-- [ ] Create `ReportContentGenerator.java` interface in `report/service/`:
+- [x] Create `ReportContentGenerator.java` interface in `report/service/`:
   ```java
   public interface ReportContentGenerator {
       String generate(ReportData data);
@@ -59,44 +59,44 @@ ReportService
   ```
 
 ### Step 2: Create ReportDataAssembler
-- [ ] Create `ReportDataAssembler.java` in `report/service/`
-- [ ] Inject TestScoreService, FeedbackRepository, ClassService (or ClassRepository)
-- [ ] Method: `assemble(Student student, UUID classId, LocalDate startDate, LocalDate endDate)` returns `ReportData`
-- [ ] Fetch test scores for student in class within date range
-- [ ] Compute topic summaries from sub-question data
-- [ ] Fetch most recent 5 feedback entries from the class teacher within date range
-- [ ] Include question-level detail (question text, sub-questions, topics, scores)
-- [ ] Return fully populated ReportData
+- [x] Create `ReportDataAssembler.java` in `report/service/`
+- [x] Inject TestScoreService, FeedbackRepository, ClassService (or ClassRepository)
+- [x] Method: `assemble(Student student, UUID classId, LocalDate startDate, LocalDate endDate)` returns `ReportData`
+- [x] Fetch test scores for student in class within date range
+- [x] Compute topic summaries from sub-question data
+- [x] Fetch most recent 5 feedback entries from the class teacher within date range
+- [x] Include question-level detail (question text, sub-questions, topics, scores)
+- [x] Return fully populated ReportData
 
 ### Step 3: Create TemplateReportContentGenerator
-- [ ] Create `TemplateReportContentGenerator.java` in `report/service/`
-- [ ] Annotated with `@Service` and `@Primary` (so it's the default, future AI impl can override)
-- [ ] Implements `ReportContentGenerator`
-- [ ] Produces self-contained HTML with inline CSS
-- [ ] Sections: header, overall summary, score trend table, topic performance, feedback summary
-- [ ] Clean, readable HTML suitable for browser viewing
+- [x] Create `TemplateReportContentGenerator.java` in `report/service/`
+- [x] Annotated with `@Service` and `@Primary` (so it's the default, future AI impl can override)
+- [x] Implements `ReportContentGenerator`
+- [x] Produces self-contained HTML with inline CSS
+- [x] Sections: header, overall summary, score trend table, topic performance, feedback summary
+- [x] Clean, readable HTML suitable for browser viewing
 
 ### Step 4: Update FeedbackRepository
-- [ ] Add query method to find recent feedback by student + teacher + date range
-- [ ] `List<Feedback> findTop5ByStudentIdAndTeacherIdAndCreatedAtBetweenOrderByCreatedAtDesc(UUID studentId, UUID teacherId, Instant from, Instant to)`
-- [ ] Or use `@Query` with `LIMIT 5` if method name is too long
+- [x] Add query method to find recent feedback by student + teacher + date range
+- [x] `List<Feedback> findTop5ByStudentIdAndTeacherIdAndCreatedAtBetweenOrderByCreatedAtDesc(UUID studentId, UUID teacherId, Instant from, Instant to)`
+- [x] Or use `@Query` with `LIMIT 5` if method name is too long
 
 ### Step 5: Update GenerateReportRequestDTO
-- [ ] Add `@NotNull UUID classId`
-- [ ] Add `@NotNull` to `startDate` and `endDate`
+- [x] Add `@NotNull UUID classId`
+- [x] Add `@NotNull` to `startDate` and `endDate`
 
 ### Step 6: Update ReportService.generateReport()
-- [ ] Inject `ReportDataAssembler` and `ReportContentGenerator`
-- [ ] Replace stub HTML with:
+- [x] Inject `ReportDataAssembler` and `ReportContentGenerator`
+- [x] Replace stub HTML with:
   1. Look up class to get teacher context
   2. Call `assembler.assemble(student, classId, startDate, endDate)`
   3. Call `generator.generate(reportData)`
   4. Upload generated HTML to storage
-- [ ] Keep existing S3 upload, entity creation, and DTO mapping logic
+- [x] Keep existing S3 upload, entity creation, and DTO mapping logic
 
 ### Step 7: Update Frontend — GenerateReportForm and ReportList
-- [ ] Update `GenerateReportForm` in `forms.ts`: add `classId: string`, make `startDate`/`endDate` required
-- [ ] Update `ReportList.tsx` generate modal:
+- [x] Update `GenerateReportForm` in `forms.ts`: add `classId: string`, make `startDate`/`endDate` required
+- [x] Update `ReportList.tsx` generate modal:
   - Add start date and end date inputs
   - Add class selector dropdown (only shown when `canGenerate` is true)
   - Fetch classes for the current teacher/admin via classService
@@ -104,8 +104,8 @@ ReportService
   - Validate dates before submission
 
 ### Step 8: Documentation
-- [ ] Create `aidlc-docs/sprint-2/unit1-report-content/code-summary.md`
-- [ ] Document the abstraction strategy and how to add AI implementation later
+- [x] Create `aidlc-docs/sprint-2/unit1-report-content/code-summary.md`
+- [x] Document the abstraction strategy and how to add AI implementation later
 
 ---
 

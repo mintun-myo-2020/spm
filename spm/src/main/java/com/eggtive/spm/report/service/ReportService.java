@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
@@ -28,12 +29,17 @@ public class ReportService {
     private final ProgressReportRepository reportRepository;
     private final UserService userService;
     private final ReportStorage reportStorage;
+    private final ReportDataAssembler reportDataAssembler;
+    private final ReportContentGenerator reportContentGenerator;
 
     public ReportService(ProgressReportRepository reportRepo, UserService userService,
-                         ReportStorage reportStorage) {
+                         ReportStorage reportStorage, ReportDataAssembler reportDataAssembler,
+                         ReportContentGenerator reportContentGenerator) {
         this.reportRepository = reportRepo;
         this.userService = userService;
         this.reportStorage = reportStorage;
+        this.reportDataAssembler = reportDataAssembler;
+        this.reportContentGenerator = reportContentGenerator;
     }
 
     public ProgressReportDTO generateReport(UUID studentId, GenerateReportRequestDTO req, User currentUser) {
@@ -42,8 +48,10 @@ public class ReportService {
         String s3Key = "reports/" + studentId + "/" + UUID.randomUUID() + ".html";
         String s3Bucket = "spm-reports";
 
-        // Stub: in production, generate actual HTML report content here
-        byte[] content = "<html><body>Progress Report</body></html>".getBytes();
+        // Assemble data and generate HTML content
+        ReportData reportData = reportDataAssembler.assemble(student, req.classId(), req.startDate(), req.endDate());
+        String html = reportContentGenerator.generate(reportData);
+        byte[] content = html.getBytes(StandardCharsets.UTF_8);
         reportStorage.upload(s3Key, content, "text/html");
 
         ProgressReport report = new ProgressReport();

@@ -770,3 +770,43 @@ This file contains a complete audit trail of all user interactions and AI respon
 **Context**: Code Generation (Unit 1) — Part 1 (Planning) — awaiting user approval of 8-step plan
 
 ---
+
+## Sprint 2 - Code Generation (Unit 1) - Plan Approved
+**Timestamp**: 2026-03-15T00:22:00Z
+**User Input**: "ok continue"
+**AI Response**: Plan approved. Starting Part 2 (Generation) — executing 8-step plan for Unit 1 (Progress Report Content).
+**Context**: Code Generation (Unit 1) — Part 2 (Generation) — beginning Step 1
+
+---
+
+## Sprint 2 - Code Generation (Unit 1) - Steps 1-8 Completed
+**Timestamp**: 2026-03-15T01:00:00Z
+**AI Response**: Completed all 8 steps of Unit 1 (Progress Report Content) code generation:
+- Step 1: Created `ReportData.java` (rich record with nested records) and `ReportContentGenerator.java` (interface)
+- Step 2: Created `ReportDataAssembler.java` (gathers data from TestScoreService, FeedbackRepository, ClassService)
+- Step 3: Created `TemplateReportContentGenerator.java` (@Service @Primary, self-contained HTML with inline CSS, 5 sections)
+- Step 4: Updated `FeedbackRepository.java` — added `findRecentByStudentAndTeacher()` @Query with LIMIT 5
+- Step 5: Updated `GenerateReportRequestDTO.java` — added `@NotNull UUID classId`, made startDate/endDate `@NotNull`
+- Step 6: Updated `ReportService.java` — injected ReportDataAssembler + ReportContentGenerator, replaced stub HTML
+- Step 7: Updated frontend — `forms.ts` (classId required, dates required), `ReportList.tsx` (class selector, date range inputs, validation)
+- Step 8: Created `aidlc-docs/sprint-2/unit1-report-content/code-summary.md`
+All plan checkboxes marked complete. aidlc-state.md updated.
+**Context**: Code Generation (Unit 1) — Part 2 (Generation) — all steps complete
+
+---
+
+## Sprint 2 - Code Generation (Unit 1) - TemplateReportContentGenerator Fix
+**Timestamp**: 2026-03-15T01:05:00Z
+**User Input**: "CHECK THIS FIRST TemplateReportContentGenerator.JAVA"
+**AI Response**: Found missing closing brace `}` for the class. Appended closing brace to fix the file. Diagnostics clean.
+**Context**: Code Generation (Unit 1) — bug fix for incomplete file
+
+---
+
+## Sprint 2 - Code Generation (Unit 1) - User Approval
+**Timestamp**: 2026-03-15T01:10:00Z
+**User Input**: "ok carry on after updating audit or whatever aidlc progress status we need to update"
+**AI Response**: Updating audit.md with Unit 1 completion entries. Proceeding to Unit 2 (OCR Test Upload) — Functional Design stage.
+**Context**: Code Generation (Unit 1) complete. Moving to Functional Design (Unit 2).
+
+---

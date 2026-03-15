@@ -838,3 +838,18 @@ Key design decisions: 2-table model (upload + pages), TestPaperParser interface 
 **Context**: Functional Design (Unit 2) — Steps 3-6 complete, presenting completion message
 
 ---
+
+## Sprint 2 - Functional Design (Unit 2) - User Approval
+**Timestamp**: 2026-03-15T01:40:00Z
+**User Input**: "Continue to Next Stage"
+**AI Response**: Functional design approved. Updated aidlc-state.md — marked Functional Design (Unit 2) as COMPLETED, moved to Code Generation (Unit 2). Proceeding to Code Generation Part 1 (Planning).
+**Context**: Functional Design (Unit 2) complete. Moving to Code Generation (Unit 2).
+
+---
+
+## Sprint 2 - Code Generation (Unit 2) - Plan Created
+**Timestamp**: 2026-03-15T01:45:00Z
+**AI Response**: Created unit2-ocr-code-generation-plan.md with 19 steps covering: Flyway migration (V5), enums + value objects, entities (TestPaperUpload, TestPaperPage, TestScore isDraft), repositories, interfaces (FileStorageService, OcrService, TestPaperParser), local dev stubs, AWS implementations, DTOs, TestPaperService, TestPaperController, TestScoreService modifications, @Async config, frontend types, testPaperService, TestPaperUpload component, OcrResultPanel component, TestScoreForm integration, student upload entry point, code summary. ~24 new backend files, ~6 modified backend files, ~3 new frontend files, ~3 modified frontend files.
+**Context**: Code Generation (Unit 2) — Part 1 (Planning) — presenting plan for user approval
+
+---

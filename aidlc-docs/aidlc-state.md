@@ -49,11 +49,11 @@ All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Fro
 - [x] Code Generation - COMPLETED
 
 ### CONSTRUCTION PHASE — Unit 2: OCR Test Upload
-- [ ] Functional Design - IN PROGRESS
+- [x] Functional Design - COMPLETED
 - [ ] NFR Requirements - SKIP
 - [ ] NFR Design - SKIP
 - [ ] Infrastructure Design - SKIP
-- [ ] Code Generation - EXECUTE
+- [ ] Code Generation - IN PROGRESS
 
 ### CONSTRUCTION PHASE — Unit 3: Class Scheduling & Attendance
 - [ ] Functional Design - EXECUTE
@@ -67,6 +67,6 @@ All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Fro
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: Functional Design (Unit 2 - OCR Test Upload)
-- **Next Stage**: Code Generation (Unit 2 - OCR Test Upload)
-- **Status**: Functional Design in progress
+- **Current Stage**: Code Generation (Unit 2 - OCR Test Upload) - Part 1 (Planning)
+- **Next Stage**: Code Generation (Unit 2 - OCR Test Upload) - Part 2 (Generation)
+- **Status**: Creating code generation plan

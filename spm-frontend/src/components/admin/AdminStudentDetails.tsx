@@ -21,6 +21,7 @@ export function AdminStudentDetails() {
           { label: 'View Reports →', color: 'gray', onClick: () => navigate(`/admin/classes/${classId}/students/${studentId}/reports`), testId: 'view-reports-link' },
         ]}
         onTestClick={(testScoreId) => navigate(`/admin/classes/${classId}/students/${studentId}/scores/${testScoreId}`)}
+        onViewScores={() => navigate(`/admin/classes/${classId}/students/${studentId}/scores`)}
       />
     </div>
   );

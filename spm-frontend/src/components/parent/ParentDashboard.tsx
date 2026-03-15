@@ -52,6 +52,7 @@ export function ParentDashboard() {
             { label: 'View Recent Tests →', color: 'blue', onClick: () => navigate('/parent/scores'), testId: 'view-all-scores' },
           ]}
           onTestClick={(testScoreId) => navigate(`/parent/scores/${testScoreId}`)}
+          onViewScores={() => navigate('/parent/scores')}
         />
       )}
     </div>

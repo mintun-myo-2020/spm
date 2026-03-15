@@ -18,9 +18,10 @@ interface Props {
   studentId: string;
   actions?: ActionButton[];
   onTestClick?: (testScoreId: string) => void;
+  onViewScores?: () => void;
 }
 
-export function StudentProgressView({ studentId, actions, onTestClick }: Props) {
+export function StudentProgressView({ studentId, actions, onTestClick, onViewScores }: Props) {
   const [overall, setOverall] = useState<OverallProgressDTO | null>(null);
   const [topics, setTopics] = useState<TopicProgressSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,19 +67,36 @@ export function StudentProgressView({ studentId, actions, onTestClick }: Props) 
             <p className="text-sm text-gray-500 dark:text-gray-400">Average Score</p>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{overall.averageScore.toFixed(1)}</p>
           </Card>
-          <Card>
+          <Card className="group relative">
             <p className="text-sm text-gray-500 dark:text-gray-400">Improvement</p>
             {overall.improvementVelocity ? (
-              <p className={`text-2xl font-bold ${overall.improvementVelocity.improvement >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {overall.improvementVelocity.improvement >= 0 ? '+' : ''}{overall.improvementVelocity.improvement.toFixed(1)}
-              </p>
+              <>
+                <p className={`text-2xl font-bold ${overall.improvementVelocity.improvement >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {overall.improvementVelocity.improvement >= 0 ? '+' : ''}{overall.improvementVelocity.improvement.toFixed(1)}
+                </p>
+                <div className="pointer-events-none absolute left-1/2 top-full z-10 mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg group-hover:block dark:bg-gray-700">
+                  {overall.trendData.length >= 2 && (
+                    <>
+                      <p>First score: {overall.trendData[0].score} ({overall.trendData[0].testName})</p>
+                      <p>Latest score: {overall.trendData[overall.trendData.length - 1].score} ({overall.trendData[overall.trendData.length - 1].testName})</p>
+                    </>
+                  )}
+                  <p>Change: {overall.improvementVelocity.improvement >= 0 ? '+' : ''}{overall.improvementVelocity.improvement.toFixed(1)}</p>
+                </div>
+              </>
             ) : (
               <p className="text-2xl font-bold text-gray-400">—</p>
             )}
           </Card>
-          <Card>
+          <Card
+            className={onViewScores ? 'cursor-pointer transition-shadow hover:shadow-md' : ''}
+            onClick={onViewScores}
+          >
             <p className="text-sm text-gray-500 dark:text-gray-400">Tests Taken</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{overall.trendData.length}</p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              {overall.trendData.length}
+              {onViewScores && <span className="ml-1 text-sm font-normal text-blue-500">→</span>}
+            </p>
           </Card>
         </div>
       )}

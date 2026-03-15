@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Select } from 'flowbite-react';
 import { useAuth } from '../../hooks/useAuth';
 import { PageHeader } from '../shared/PageHeader';
@@ -6,6 +7,7 @@ import { StudentProgressView } from '../shared/StudentProgressView';
 
 export function ProgressCharts() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const linkedStudents = user?.linkedStudents ?? [];
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
 
@@ -40,7 +42,7 @@ export function ProgressCharts() {
           </Select>
         </div>
       )}
-      {selectedStudentId && <StudentProgressView studentId={selectedStudentId} />}
+      {selectedStudentId && <StudentProgressView studentId={selectedStudentId} onTestClick={(testScoreId) => navigate(`/parent/scores/${testScoreId}`)} />}
     </div>
   );
 }

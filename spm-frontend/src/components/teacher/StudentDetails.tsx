@@ -20,6 +20,7 @@ export function StudentDetails() {
         actions={[
           { label: 'View Recent Tests →', color: 'blue', onClick: () => navigate(`/teacher/classes/${classId}/students/${studentId}/scores`), testId: 'view-scores-link' },
         ]}
+        onTestClick={(testScoreId) => navigate(`/teacher/classes/${classId}/students/${studentId}/scores/${testScoreId}`)}
       />
     </div>
   );

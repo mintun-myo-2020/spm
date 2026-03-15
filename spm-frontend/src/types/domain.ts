@@ -215,6 +215,7 @@ export interface TopicProgressDTO {
 }
 
 export interface TopicTrendDataPoint {
+  testScoreId: string;
   testDate: string;
   testName: string;
   topicScore: number;

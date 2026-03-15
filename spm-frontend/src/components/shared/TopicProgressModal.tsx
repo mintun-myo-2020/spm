@@ -11,9 +11,10 @@ interface Props {
   studentId: string;
   topic: TopicProgressSummaryDTO | null;
   onClose: () => void;
+  onTestClick?: (testScoreId: string) => void;
 }
 
-export function TopicProgressModal({ studentId, topic, onClose }: Props) {
+export function TopicProgressModal({ studentId, topic, onClose, onTestClick }: Props) {
   const [data, setData] = useState<TopicProgressDTO | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +31,7 @@ export function TopicProgressModal({ studentId, topic, onClose }: Props) {
   }, [studentId, topic]);
 
   const chartData = data?.trendData.map((d) => ({
+    testScoreId: d.testScoreId,
     rawDate: d.testDate,
     date: new Date(d.testDate).toLocaleDateString(),
     testName: d.testName,
@@ -93,8 +95,15 @@ export function TopicProgressModal({ studentId, topic, onClose }: Props) {
                 </thead>
                 <tbody>
                   {sortedBreakdown.map((d, i) => (
-                    <tr key={i} className="border-t border-gray-100 dark:border-gray-800">
-                      <td className="py-1.5 text-gray-900 dark:text-white">{d.testName}</td>
+                    <tr
+                      key={i}
+                      className={`border-t border-gray-100 dark:border-gray-800 ${onTestClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700' : ''}`}
+                      onClick={() => onTestClick?.(d.testScoreId)}
+                    >
+                      <td className="py-1.5 text-gray-900 dark:text-white">
+                        {d.testName}
+                        {onTestClick && <span className="ml-1 text-xs text-blue-500">→</span>}
+                      </td>
                       <td className="py-1.5 text-gray-600 dark:text-gray-400">{d.date}</td>
                       <td className="py-1.5 text-right text-gray-700 dark:text-gray-300">{d.score}/{d.maxScore} ({d.percentage}%)</td>
                     </tr>

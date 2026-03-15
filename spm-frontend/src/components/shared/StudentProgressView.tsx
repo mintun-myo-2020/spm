@@ -17,9 +17,10 @@ interface ActionButton {
 interface Props {
   studentId: string;
   actions?: ActionButton[];
+  onTestClick?: (testScoreId: string) => void;
 }
 
-export function StudentProgressView({ studentId, actions }: Props) {
+export function StudentProgressView({ studentId, actions, onTestClick }: Props) {
   const [overall, setOverall] = useState<OverallProgressDTO | null>(null);
   const [topics, setTopics] = useState<TopicProgressSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,7 +104,7 @@ export function StudentProgressView({ studentId, actions }: Props) {
         </>
       )}
 
-      <TopicProgressModal studentId={studentId} topic={selectedTopic} onClose={() => setSelectedTopic(null)} />
+      <TopicProgressModal studentId={studentId} topic={selectedTopic} onClose={() => setSelectedTopic(null)} onTestClick={onTestClick} />
     </>
   );
 }

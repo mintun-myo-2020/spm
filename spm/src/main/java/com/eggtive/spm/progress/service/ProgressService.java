@@ -193,7 +193,7 @@ public class ProgressService {
             if (found && topicMaxScore.compareTo(BigDecimal.ZERO) > 0) {
                 BigDecimal pct = topicScore.multiply(BigDecimal.valueOf(100))
                     .divide(topicMaxScore, 2, RoundingMode.HALF_UP);
-                trendData.add(new TopicTrendDataPointDTO(ts.getTestDate(), ts.getTestName(),
+                trendData.add(new TopicTrendDataPointDTO(ts.getId(), ts.getTestDate(), ts.getTestName(),
                     topicScore, topicMaxScore, pct));
             }
         }

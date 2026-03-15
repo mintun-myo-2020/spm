@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Badge, Card, Select } from 'flowbite-react';
 import { useAuth } from '../../hooks/useAuth';
 import { classService } from '../../services/classService';
@@ -14,6 +14,7 @@ import type { ClassDTO, OverallProgressDTO, TopicProgressSummaryDTO } from '../.
 export function MyProgress() {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [enrolledClasses, setEnrolledClasses] = useState<ClassDTO[]>([]);
   const [selectedClassId, setSelectedClassId] = useState<string>('');
   const [overall, setOverall] = useState<OverallProgressDTO | null>(null);
@@ -124,7 +125,7 @@ export function MyProgress() {
             </div>
           )}
 
-          {studentId && <TopicProgressModal studentId={studentId} topic={selectedTopic} onClose={() => setSelectedTopic(null)} />}
+          {studentId && <TopicProgressModal studentId={studentId} topic={selectedTopic} onClose={() => setSelectedTopic(null)} onTestClick={(testScoreId) => navigate(`/student/scores/${testScoreId}`)} />}
         </>
       )}
     </div>

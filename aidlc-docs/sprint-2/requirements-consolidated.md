@@ -140,14 +140,20 @@ No scheduling exists currently. Classes have students and teachers but no concep
 - Simple weekly recurrence (e.g., every Monday 4pm-6pm) with end date support
 - One-off sessions (e.g., extra class on Saturday)
 - Each session has: class, date, start time, end time, location (optional text field)
+- Admins have full scheduling permissions (create, update, cancel, deactivate) across all classes
 
-**FR-14.2**: The system shall generate session instances from recurring schedules eagerly on creation only. Teachers manually generate more sessions when needed (no background cron job).
+**FR-14.2**: The system shall generate session instances from recurring schedules eagerly on creation only. Teachers/admins manually generate more sessions when needed (no background cron job).
 
 **FR-14.3**: Teachers and admins shall be able to:
 - Cancel a specific session (with optional reason)
 - Reschedule a session (change date/time)
 - Mark attendance for each student (PRESENT, ABSENT, LATE, EXCUSED)
 - Deactivate a schedule by setting an `effective_until` date (preserves history, no hard delete)
+
+**FR-14.8**: When creating a new class (existing Sprint 1 flow), the class creation form shall include an optional initial schedule section:
+- Teacher/admin can optionally specify a recurring weekly schedule (day of week, start time, end time, location) as part of class creation
+- If provided, the schedule and initial sessions are created atomically with the class
+- If omitted, the class is created without a schedule (schedule can be added later via FR-14.1)
 
 **FR-14.4**: Students shall be able to indicate availability for upcoming sessions:
 - ATTENDING (default)
@@ -232,7 +238,8 @@ CREATE TABLE session_attendance (
 - "Generate More Sessions" button for recurring schedules
 - Student: upcoming sessions list with RSVP toggle
 - Parent: child's schedule view (read-only)
-- Admin: all sessions overview
+- Admin: all sessions overview + full scheduling permissions
+- Update existing class creation form (teacher + admin) to include optional initial schedule fields (day of week, start/end time, location)
 
 ---
 
@@ -249,9 +256,9 @@ CREATE TABLE session_attendance (
 - **Frontend**: Upload component on TestScoreForm, extracted text panel
 
 ### Unit 3: Class Scheduling & Attendance
-- **Scope**: Largest — 3 new tables, new scheduling module, multiple role views
-- **Backend**: New scheduling module (entities, repos, services, controllers), session generation logic, attendance batch/individual endpoints
-- **Frontend**: Schedule creation form, session list, attendance marking, student RSVP, parent schedule view, admin overview
+- **Scope**: Largest — 3 new tables, new scheduling module, multiple role views, class creation form update
+- **Backend**: New scheduling module (entities, repos, services, controllers), session generation logic, attendance batch/individual endpoints. Modify class creation endpoint to accept optional initial schedule.
+- **Frontend**: Schedule creation form, session list, attendance marking, student RSVP, parent schedule view, admin overview + admin scheduling. Update existing CreateClassForm to include optional schedule fields.
 
 ---
 

@@ -1,12 +1,13 @@
 # AI-DLC State Tracking
 
 ## Project Information
-- **Project Type**: Greenfield
+- **Project Type**: Brownfield (Sprint 2)
 - **Start Date**: 2026-03-08T00:00:00Z
+- **Sprint 2 Start Date**: 2026-03-15T00:00:00Z
 - **Current Stage**: INCEPTION - Workflow Planning
 
 ## Workspace State
-- **Existing Code**: No
+- **Existing Code**: Yes (Sprint 1 complete)
 - **Reverse Engineering Needed**: No
 - **Workspace Root**: Current directory
 
@@ -15,45 +16,57 @@
 - **Documentation**: aidlc-docs/ only
 - **Structure patterns**: See code-generation.md Critical Rules
 
-## Execution Plan Summary
-- **Total Stages to Execute**: 11 stages
-- **INCEPTION Stages**: Application Design, Units Generation
-- **CONSTRUCTION Stages**: Functional Design, NFR Requirements, NFR Design, Infrastructure Design, Code Generation (per unit), Build and Test
-- **Stages Skipped**: None (all conditional stages will execute)
+## Sprint 2 Execution Plan Summary
+- **Total Stages to Execute**: 7
+- **Unit Structure**: Per-feature (3 units)
+- **INCEPTION Stages**: Workspace Detection ✓, Requirements Analysis ✓, Workflow Planning (in progress)
+- **CONSTRUCTION Stages**: Functional Design (Units 2,3), Code Generation (Units 1,2,3), Build and Test
+- **Stages Skipped**: User Stories, App Design, Units Gen, NFR Req (all), NFR Design (all), Infra Design (all), Functional Design (Unit 1)
 
 ## Extension Configuration
 | Extension | Enabled | Decided At |
 |---|---|---|
-| Security Baseline | No | Requirements Analysis |
+| Security Baseline | No | Requirements Analysis (Sprint 1) |
 
-## Stage Progress
+## Sprint 1 — COMPLETED
+All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Frontend Application).
+
+## Sprint 2 — Stage Progress
 
 ### INCEPTION PHASE
 - [x] Workspace Detection - COMPLETED
 - [x] Requirements Analysis - COMPLETED
-- [x] User Stories - COMPLETED
-- [x] Workflow Planning - COMPLETED
-- [x] Application Design - COMPLETED
-- [x] Units Generation - COMPLETED
+- [x] Workflow Planning - IN PROGRESS
+- [ ] User Stories - SKIP
+- [ ] Application Design - SKIP
+- [ ] Units Generation - SKIP
 
-### CONSTRUCTION PHASE
-- [ ] Functional Design - EXECUTE (per unit)
-- [ ] NFR Requirements - EXECUTE (per unit)
-- [ ] NFR Design - EXECUTE (per unit)
-- [ ] Infrastructure Design - EXECUTE (per unit)
-- [ ] Code Generation - EXECUTE (per unit)
+### CONSTRUCTION PHASE — Unit 1: Progress Report Content
+- [ ] Functional Design - SKIP
+- [ ] NFR Requirements - SKIP
+- [ ] NFR Design - SKIP
+- [ ] Infrastructure Design - SKIP
+- [ ] Code Generation - EXECUTE
+
+### CONSTRUCTION PHASE — Unit 2: OCR Test Upload
+- [ ] Functional Design - EXECUTE
+- [ ] NFR Requirements - SKIP
+- [ ] NFR Design - SKIP
+- [ ] Infrastructure Design - SKIP
+- [ ] Code Generation - EXECUTE
+
+### CONSTRUCTION PHASE — Unit 3: Class Scheduling & Attendance
+- [ ] Functional Design - EXECUTE
+- [ ] NFR Requirements - SKIP
+- [ ] NFR Design - SKIP
+- [ ] Infrastructure Design - SKIP
+- [ ] Code Generation - EXECUTE
+
+### Build and Test
 - [ ] Build and Test - EXECUTE
 
-### OPERATIONS PHASE
-- [ ] Operations - PLACEHOLDER
-
 ## Current Status
-- **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: Code Generation (Unit 2 - Frontend Application) - COMPLETED
-- **Next Stage**: Build and Test
-- **Status**: Frontend complete — All 18 steps done, TypeScript compiles clean, 29 tests pass, production build succeeds
-
-## Unit Progress
-- **Unit 1 (Backend API)**: Functional Design ✓, NFR Requirements ✓, NFR Design ✓, Infrastructure Design (skipped), Code Generation (in progress — separate agent)
-- **Unit 2 (Frontend)**: Functional Design ✓, NFR Requirements ✓, NFR Design ✓, Infrastructure Design (skipped), Code Generation ✓ (all 18 steps complete)
-
+- **Lifecycle Phase**: INCEPTION
+- **Current Stage**: Workflow Planning
+- **Next Stage**: Code Generation (Unit 1 - Progress Report Content)
+- **Status**: Awaiting workflow plan approval

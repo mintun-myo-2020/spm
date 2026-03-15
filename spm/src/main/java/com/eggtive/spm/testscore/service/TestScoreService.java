@@ -36,15 +36,18 @@ public class TestScoreService {
     private final ClassService classService;
     private final SubjectService subjectService;
     private final com.eggtive.spm.feedback.repository.FeedbackRepository feedbackRepository;
+    private final com.eggtive.spm.testpaper.service.TestPaperService testPaperService;
 
     public TestScoreService(TestScoreRepository tsRepo, UserService userService,
                             ClassService classService, SubjectService subjectService,
-                            com.eggtive.spm.feedback.repository.FeedbackRepository feedbackRepository) {
+                            com.eggtive.spm.feedback.repository.FeedbackRepository feedbackRepository,
+                            com.eggtive.spm.testpaper.service.TestPaperService testPaperService) {
         this.testScoreRepository = tsRepo;
         this.userService = userService;
         this.classService = classService;
         this.subjectService = subjectService;
         this.feedbackRepository = feedbackRepository;
+        this.testPaperService = testPaperService;
     }
 
     public TestScoreDTO createTestScore(CreateTestScoreRequestDTO req, User currentUser, Teacher teacher) {
@@ -63,11 +66,18 @@ public class TestScoreService {
         ts.setTestDate(req.testDate());
         ts.setOverallScore(req.overallScore());
         ts.setMaxScore(req.maxScore() != null ? req.maxScore() : new BigDecimal("100.00"));
+        ts.setDraft(req.isDraft() != null && req.isDraft());
         ts.setCreatedBy(currentUser);
         ts.setUpdatedBy(currentUser);
 
         buildQuestions(ts, req);
         ts = testScoreRepository.save(ts);
+
+        // Link uploads if provided
+        if (req.uploadIds() != null && !req.uploadIds().isEmpty()) {
+            testPaperService.linkToTestScore(req.uploadIds(), ts.getId());
+        }
+
         return toDTO(ts);
     }
 
@@ -94,7 +104,7 @@ public class TestScoreService {
     @Transactional(readOnly = true)
     public PagedResponse<TestScoreDTO> getStudentTestScores(UUID studentId, LocalDate startDate,
                                                              LocalDate endDate, UUID classId, Pageable pageable) {
-        Page<TestScore> page = testScoreRepository.findByStudentWithFilters(studentId, startDate, endDate, classId, pageable);
+        Page<TestScore> page = testScoreRepository.findByStudentWithFilters(studentId, startDate, endDate, classId, false, pageable);
         return PagedResponse.from(page, page.getContent().stream().map(this::toDTO).toList());
     }
 

@@ -39,6 +39,9 @@ public class TestScore extends BaseEntity {
     @Column(nullable = false, precision = 5, scale = 2)
     private BigDecimal maxScore = new BigDecimal("100.00");
 
+    @Column(nullable = false)
+    private boolean isDraft = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false, updatable = false)
     private User createdBy;
@@ -64,6 +67,8 @@ public class TestScore extends BaseEntity {
     public void setOverallScore(BigDecimal overallScore) { this.overallScore = overallScore; }
     public BigDecimal getMaxScore() { return maxScore; }
     public void setMaxScore(BigDecimal maxScore) { this.maxScore = maxScore; }
+    public boolean isDraft() { return isDraft; }
+    public void setDraft(boolean draft) { isDraft = draft; }
     public User getCreatedBy() { return createdBy; }
     public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
     public User getUpdatedBy() { return updatedBy; }

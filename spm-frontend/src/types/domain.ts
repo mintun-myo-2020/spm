@@ -280,3 +280,66 @@ export interface TopicStat {
   averagePercentage: number;
   trend: 'IMPROVING' | 'DECLINING' | 'STABLE';
 }
+
+// --- OCR Test Paper Upload Types ---
+
+export interface TestPaperUploadDTO {
+  uploadId: string;
+  testScoreId: string | null;
+  studentId: string;
+  classId: string;
+  status: 'UPLOADED' | 'PROCESSING' | 'COMPLETED' | 'PARTIALLY_FAILED' | 'FAILED';
+  pages: TestPaperPageDTO[];
+  aggregatedQuestions: AggregatedQuestion[];
+  createdAt: string;
+}
+
+export interface TestPaperPageDTO {
+  pageId: string;
+  pageNumber: number;
+  fileName: string;
+  contentType: string;
+  fileSizeBytes: number;
+  status: 'PENDING' | 'EXTRACTING' | 'PARSING' | 'COMPLETED' | 'FAILED';
+  fileUrl: string;
+  extractedText: string | null;
+  ocrConfidence: number | null;
+  parsedResult: ParsedResultDTO | null;
+  createdAt: string;
+}
+
+export interface ParsedResultDTO {
+  questions: ParsedQuestionDTO[];
+  totalDetectedMarks: number | null;
+  parsingNotes: string[];
+}
+
+export interface ParsedQuestionDTO {
+  questionNumber: string;
+  questionText: string;
+  questionType: string;
+  mcqOptions: { key: string; text: string }[];
+  maxScore: number | null;
+  subQuestions: ParsedSubQuestionDTO[];
+  confidence: number;
+  rawTextSpan: string;
+}
+
+export interface ParsedSubQuestionDTO {
+  label: string;
+  questionText: string;
+  maxScore: number | null;
+  studentAnswer: string | null;
+  confidence: number;
+}
+
+export interface AggregatedQuestion {
+  questionNumber: string;
+  questionText: string;
+  questionType: string;
+  maxScore: number | null;
+  subQuestions: { label: string; questionText: string; maxScore: number | null; studentAnswer: string | null; confidence: number }[];
+  mcqOptions: { key: string; text: string }[];
+  confidence: number;
+  sourcePage: number;
+}

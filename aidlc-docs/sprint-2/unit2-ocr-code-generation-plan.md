@@ -24,7 +24,7 @@
 ## Plan Steps
 
 ### Step 1: Flyway Migration — New Tables + TestScore isDraft Column
-- [ ] Create `V5__test_paper_uploads.sql`:
+- [x] Create `V5__test_paper_uploads.sql`:
   - `test_paper_uploads` table (id, test_score_id FK nullable, student_id FK, class_id FK, status, uploaded_by FK, created_at)
   - `test_paper_pages` table (id, upload_id FK cascade, page_number, s3_bucket, s3_key, file_name, content_type, file_size_bytes, extracted_text, parsed_result, ocr_confidence, status, created_at)
   - Add `is_draft` boolean column to `test_scores` table (default false)
@@ -32,34 +32,36 @@
   - Unique constraint on (upload_id, page_number)
 
 ### Step 2: Backend — Enums + Value Objects
-- [ ] Create `UploadStatus` enum in `testpaper/enums/`
-- [ ] Create `PageStatus` enum in `testpaper/enums/`
-- [ ] Create `OcrResult` record in `testpaper/ocr/`
-- [ ] Create `OcrTextBlock` record in `testpaper/ocr/`
-- [ ] Create `ParsedResult` record in `testpaper/parser/`
-- [ ] Create `ParsedQuestion` record in `testpaper/parser/`
-- [ ] Create `ParsedSubQuestion` record in `testpaper/parser/`
-- [ ] Add new error codes to `ErrorCode` enum: INVALID_FILE_TYPE, FILE_TOO_LARGE, INVALID_FILE_CONTENT, STORAGE_ERROR, OCR_ERROR, UPLOAD_ALREADY_PROCESSING, UPLOAD_ALREADY_PROCESSED
+- [x] Create `UploadStatus` enum in `testpaper/enums/`
+- [x] Create `PageStatus` enum in `testpaper/enums/`
+- [x] Create `OcrResult` record in `testpaper/ocr/`
+- [x] Create `OcrTextBlock` record in `testpaper/ocr/`
+- [x] Create `ParsedResult` record in `testpaper/parser/`
+- [x] Create `ParsedQuestion` record in `testpaper/parser/`
+- [x] Create `ParsedSubQuestion` record in `testpaper/parser/`
+- [x] Add new error codes to `ErrorCode` enum: INVALID_FILE_TYPE, FILE_TOO_LARGE, INVALID_FILE_CONTENT, STORAGE_ERROR, OCR_ERROR, UPLOAD_ALREADY_PROCESSING, UPLOAD_ALREADY_PROCESSED
 
 ### Step 3: Backend — Entities
-- [ ] Create `TestPaperUpload` entity in `testpaper/entity/`
-- [ ] Create `TestPaperPage` entity in `testpaper/entity/`
-- [ ] Modify `TestScore` entity — add `isDraft` boolean field (default false)
+- [x] Create `TestPaperUpload` entity in `testpaper/entity/`
+- [x] Create `TestPaperPage` entity in `testpaper/entity/`
+- [x] Modify `TestScore` entity — add `isDraft` boolean field (default false)
 
 ### Step 4: Backend — Repositories
-- [ ] Create `TestPaperUploadRepository` in `testpaper/repository/`
-- [ ] Create `TestPaperPageRepository` in `testpaper/repository/`
+- [x] Create `TestPaperUploadRepository` in `testpaper/repository/`
+- [x] Create `TestPaperPageRepository` in `testpaper/repository/`
 
 ### Step 5: Backend — Interfaces (Abstractions)
-- [ ] Create `FileStorageService` interface in `testpaper/storage/`
-- [ ] Create `OcrService` interface in `testpaper/ocr/`
-- [ ] Create `TestPaperParser` interface in `testpaper/parser/`
+- [x] Create `FileStorageService` interface in `testpaper/storage/`
+- [x] Create `OcrService` interface in `testpaper/ocr/`
+- [x] Create `TestPaperParser` interface in `testpaper/parser/`
 
 ### Step 6: Backend — Local Dev Implementations (Stubs)
-- [ ] Create `LocalFileStorageService` in `testpaper/storage/` — writes to configurable local path, `@ConditionalOnProperty`
-- [ ] Create `StubOcrService` in `testpaper/ocr/` — returns sample text with question patterns, `@ConditionalOnProperty`
-- [ ] Create `BasicTestPaperParser` in `testpaper/parser/` — regex-based question/sub-question/marks detection
-- [ ] Add config properties to `application.yml`: `app.storage.type`, `app.storage.local-path`, `app.ocr.type`
+- [x] Create `LocalFileStorageService` in `testpaper/storage/` — writes to configurable local path, `@ConditionalOnProperty`
+- [x] Create `TesseractOcrService` in `testpaper/ocr/` — calls Tesseract Docker container (jitesoft/tesseract-ocr) via docker exec, `@ConditionalOnProperty(havingValue="tesseract", matchIfMissing=true)`
+- [x] Keep `StubOcrService` as fallback (havingValue="stub", no matchIfMissing)
+- [x] Create `BasicTestPaperParser` in `testpaper/parser/` — regex-based question/sub-question/marks detection
+- [x] Add config properties to `application.yml`: `app.storage.type`, `app.storage.local-path`, `app.ocr.type`, `app.ocr.tesseract.container-name`
+- [x] Add tesseract-ocr service to `docker-compose.yml` with shared uploads volume
 
 ### Step 7: Backend — AWS Implementations (Production)
 - [ ] Create `S3FileStorageService` in `testpaper/storage/` — uses AWS S3 SDK, `@ConditionalOnProperty`

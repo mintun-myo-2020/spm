@@ -47,6 +47,16 @@ app:
     realm: ${KEYCLOAK_REALM:spm}
     admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:spm-backend}
     admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:}
+  storage:
+    type: ${APP_STORAGE_TYPE:local}
+    local-path: ${APP_STORAGE_LOCAL_PATH:./uploads}
+    s3-bucket: ${APP_STORAGE_S3_BUCKET:spm-uploads}
+  ocr:
+    type: ${APP_OCR_TYPE:tesseract}
+    tesseract:
+      container-name: ${APP_OCR_TESSERACT_CONTAINER:spm-tesseract}
+  report-storage:
+    local-path: ${APP_REPORT_STORAGE_LOCAL_PATH:./report-files}
 
 management:
   endpoints:

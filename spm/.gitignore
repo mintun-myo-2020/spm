@@ -43,3 +43,6 @@ out/
 
 ### Local report storage ###
 report-files/
+
+### Local upload storage ###
+uploads/

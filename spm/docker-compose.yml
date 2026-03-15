@@ -68,6 +68,15 @@ services:
       retries: 20
       start_period: 60s
 
+  tesseract:
+    image: jitesoft/tesseract-ocr:latest
+    container_name: spm-tesseract
+    # Keep the container running so we can docker exec into it
+    entrypoint: ["tail", "-f", "/dev/null"]
+    volumes:
+      - ./uploads:/data
+    restart: unless-stopped
+
   app:
     image: spm-app:latest
     container_name: spm-app

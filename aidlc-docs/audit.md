@@ -853,3 +853,11 @@ Key design decisions: 2-table model (upload + pages), TestPaperParser interface 
 **Context**: Code Generation (Unit 2) — Part 1 (Planning) — presenting plan for user approval
 
 ---
+
+## Sprint 2 - Code Generation (Unit 2) - Session Resumed
+**Timestamp**: 2026-03-15T02:00:00Z
+**User Input**: "OK GOOD separation of concerns. carry on with where we were at"
+**AI Response**: Resuming code generation from Step 8 (finish DTOs). Steps 1-7 completed in previous session. Continuing with: Step 8 finish (modify CreateTestScoreRequestDTO), Steps 9-19.
+**Context**: Code Generation (Unit 2) — Part 2 (Generation) — resuming from Step 8
+
+---

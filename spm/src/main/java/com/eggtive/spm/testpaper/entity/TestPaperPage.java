@@ -15,11 +15,11 @@ public class TestPaperPage extends BaseEntity {
     @Column(nullable = false)
     private int pageNumber;
 
-    @Column(nullable = false, length = 255)
-    private String s3Bucket;
+    @Column(name = "storage_location", nullable = false, length = 255)
+    private String storageLocation;
 
-    @Column(nullable = false, length = 500)
-    private String s3Key;
+    @Column(name = "storage_key", nullable = false, length = 500)
+    private String storageKey;
 
     @Column(nullable = false, length = 255)
     private String fileName;
@@ -46,10 +46,10 @@ public class TestPaperPage extends BaseEntity {
     public void setUpload(TestPaperUpload upload) { this.upload = upload; }
     public int getPageNumber() { return pageNumber; }
     public void setPageNumber(int pageNumber) { this.pageNumber = pageNumber; }
-    public String getS3Bucket() { return s3Bucket; }
-    public void setS3Bucket(String s3Bucket) { this.s3Bucket = s3Bucket; }
-    public String getS3Key() { return s3Key; }
-    public void setS3Key(String s3Key) { this.s3Key = s3Key; }
+    public String getStorageLocation() { return storageLocation; }
+    public void setStorageLocation(String storageLocation) { this.storageLocation = storageLocation; }
+    public String getStorageKey() { return storageKey; }
+    public void setStorageKey(String storageKey) { this.storageKey = storageKey; }
     public String getFileName() { return fileName; }
     public void setFileName(String fileName) { this.fileName = fileName; }
     public String getContentType() { return contentType; }

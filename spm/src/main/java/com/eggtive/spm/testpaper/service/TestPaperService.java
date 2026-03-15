@@ -21,7 +21,7 @@ import com.eggtive.spm.testpaper.storage.FileStorageService;
 import com.eggtive.spm.user.entity.Student;
 import com.eggtive.spm.user.entity.User;
 import com.eggtive.spm.user.service.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -47,7 +47,7 @@ public class TestPaperService {
     private final TestPaperParser testPaperParser;
     private final UserService userService;
     private final ClassService classService;
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     public TestPaperService(TestPaperUploadRepository uploadRepository,
                             TestPaperPageRepository pageRepository,
@@ -56,7 +56,7 @@ public class TestPaperService {
                             TestPaperParser testPaperParser,
                             UserService userService,
                             ClassService classService,
-                            ObjectMapper objectMapper) {
+                            JsonMapper jsonMapper) {
         this.uploadRepository = uploadRepository;
         this.pageRepository = pageRepository;
         this.fileStorageService = fileStorageService;
@@ -64,7 +64,7 @@ public class TestPaperService {
         this.testPaperParser = testPaperParser;
         this.userService = userService;
         this.classService = classService;
-        this.objectMapper = objectMapper;
+        this.jsonMapper = jsonMapper;
     }
 
     /**
@@ -73,7 +73,7 @@ public class TestPaperService {
      */
     public TestPaperUploadDTO uploadFiles(List<MultipartFile> files, UUID studentId, UUID classId, User currentUser) {
         if (files == null || files.isEmpty()) {
-            throw new AppException(ErrorCode.VALIDATION_ERROR, "At least one file is required");
+            throw new AppException(ErrorCode.VALIDATION_FAILED, "At least one file is required");
         }
 
         Student student = userService.findStudentOrThrow(studentId);
@@ -88,9 +88,13 @@ public class TestPaperService {
 
         for (int i = 0; i < files.size(); i++) {
             MultipartFile file = files.get(i);
+            log.info("Storing file [{}]: name='{}', contentType='{}', size={}",
+                    i, file.getOriginalFilename(), file.getContentType(), file.getSize());
             validateFile(file);
 
-            String key = "uploads/" + upload.getId() + "/page-" + (i + 1) + "/" + file.getOriginalFilename();
+            // Sanitize filename: strip path components, replace unsafe chars
+            String safeName = sanitizeFilename(file.getOriginalFilename());
+            String key = upload.getId() + "/page-" + (i + 1) + "/" + safeName;
             try {
                 fileStorageService.upload(key, file.getBytes(), file.getContentType());
             } catch (IOException e) {
@@ -100,8 +104,8 @@ public class TestPaperService {
             TestPaperPage page = new TestPaperPage();
             page.setUpload(upload);
             page.setPageNumber(i + 1);
-            page.setS3Bucket("local");
-            page.setS3Key(key);
+            page.setStorageLocation("local");
+            page.setStorageKey(key);
             page.setFileName(file.getOriginalFilename());
             page.setContentType(file.getContentType());
             page.setFileSizeBytes(file.getSize());
@@ -140,7 +144,7 @@ public class TestPaperService {
                     page.setStatus(PageStatus.EXTRACTING);
                     pageRepository.save(page);
 
-                    OcrResult ocrResult = ocrService.extractText(page.getS3Bucket(), page.getS3Key());
+                    OcrResult ocrResult = ocrService.extractText(page.getStorageLocation(), page.getStorageKey());
 
                     if ("FAILED".equals(ocrResult.status())) {
                         page.setStatus(PageStatus.FAILED);
@@ -152,7 +156,7 @@ public class TestPaperService {
                         pageRepository.save(page);
 
                         ParsedResult parsed = testPaperParser.parse(ocrResult.rawText(), ocrResult.confidence());
-                        page.setParsedResult(objectMapper.writeValueAsString(parsed));
+                        page.setParsedResult(jsonMapper.writeValueAsString(parsed));
                         page.setStatus(PageStatus.COMPLETED);
                     }
                 } catch (Exception e) {
@@ -202,7 +206,10 @@ public class TestPaperService {
 
     private void validateFile(MultipartFile file) {
         if (file.isEmpty()) {
-            throw new AppException(ErrorCode.INVALID_FILE_CONTENT, "File is empty");
+            throw new AppException(ErrorCode.INVALID_FILE_CONTENT,
+                "File is empty: name='" + file.getOriginalFilename()
+                + "', contentType='" + file.getContentType()
+                + "', size=" + file.getSize());
         }
         if (!ALLOWED_TYPES.contains(file.getContentType())) {
             throw new AppException(ErrorCode.INVALID_FILE_TYPE,
@@ -212,6 +219,25 @@ public class TestPaperService {
             throw new AppException(ErrorCode.FILE_TOO_LARGE,
                 "File exceeds maximum size of 10MB: " + file.getOriginalFilename());
         }
+    }
+
+    /**
+     * Strip path separators and unsafe characters from the original filename
+     * to prevent path traversal via crafted filenames.
+     */
+    private String sanitizeFilename(String original) {
+        if (original == null || original.isBlank()) {
+            return "unnamed";
+        }
+        // Take only the filename part (after last / or \)
+        String name = original;
+        int lastSlash = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
+        if (lastSlash >= 0) {
+            name = name.substring(lastSlash + 1);
+        }
+        // Replace anything that isn't alphanumeric, dot, hyphen, or underscore
+        name = name.replaceAll("[^a-zA-Z0-9.\\-_]", "_");
+        return name.isBlank() ? "unnamed" : name;
     }
 
     private TestPaperUploadDTO toDTO(TestPaperUpload upload) {
@@ -234,7 +260,7 @@ public class TestPaperService {
     }
 
     private TestPaperPageDTO toPageDTO(TestPaperPage page) {
-        String fileUrl = fileStorageService.generatePresignedUrl(page.getS3Key(), 60);
+        String fileUrl = fileStorageService.generatePresignedUrl(page.getStorageKey(), 60);
         ParsedResult parsed = deserializeParsedResult(page.getParsedResult());
         return new TestPaperPageDTO(
             page.getId(), page.getPageNumber(), page.getFileName(),
@@ -271,7 +297,7 @@ public class TestPaperService {
     private ParsedResult deserializeParsedResult(String json) {
         if (json == null || json.isBlank()) return null;
         try {
-            return objectMapper.readValue(json, ParsedResult.class);
+            return jsonMapper.readValue(json, ParsedResult.class);
         } catch (Exception e) {
             log.warn("Failed to deserialize parsed result", e);
             return null;

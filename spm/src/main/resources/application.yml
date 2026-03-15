@@ -2,6 +2,11 @@ spring:
   application:
     name: spm
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/spm}
     username: ${DB_USERNAME:spm}
@@ -54,7 +59,7 @@ app:
   ocr:
     type: ${APP_OCR_TYPE:tesseract}
     tesseract:
-      container-name: ${APP_OCR_TESSERACT_CONTAINER:spm-tesseract}
+      server-url: ${APP_OCR_TESSERACT_URL:http://spm-tesseract:8080}
   report-storage:
     local-path: ${APP_REPORT_STORAGE_LOCAL_PATH:./report-files}
 

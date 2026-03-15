@@ -35,7 +35,7 @@ public class StubOcrService implements OcrService {
             """;
 
     @Override
-    public OcrResult extractText(String bucket, String key) {
+    public OcrResult extractText(String storageLocation, String storageKey) {
         List<OcrTextBlock> blocks = SAMPLE_TEXT.lines()
                 .filter(line -> !line.isBlank())
                 .map(line -> new OcrTextBlock(line.trim(), 0.95f, "LINE"))

@@ -36,9 +36,10 @@ public class GlobalExceptionHandler {
             case CONFLICT -> HttpStatus.CONFLICT;
             case FORBIDDEN -> HttpStatus.FORBIDDEN;
             case UNAUTHORIZED -> HttpStatus.UNAUTHORIZED;
-            case INVALID_INPUT, INVALID_SCORE, INVALID_DATE, VALIDATION_FAILED -> HttpStatus.BAD_REQUEST;
-            case CLASS_FULL -> HttpStatus.CONFLICT;
-            case INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
+            case INVALID_INPUT, INVALID_SCORE, INVALID_DATE, VALIDATION_FAILED,
+                 INVALID_FILE_TYPE, FILE_TOO_LARGE, INVALID_FILE_CONTENT -> HttpStatus.BAD_REQUEST;
+            case CLASS_FULL, UPLOAD_ALREADY_PROCESSING, UPLOAD_ALREADY_PROCESSED -> HttpStatus.CONFLICT;
+            case STORAGE_ERROR, OCR_ERROR, INTERNAL_ERROR -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
     }
 }

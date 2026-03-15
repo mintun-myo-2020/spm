@@ -45,14 +45,14 @@ public class ReportService {
     public ProgressReportDTO generateReport(UUID studentId, GenerateReportRequestDTO req, User currentUser) {
         Student student = userService.findStudentOrThrow(studentId);
 
-        String s3Key = "reports/" + studentId + "/" + UUID.randomUUID() + ".html";
-        String s3Bucket = "spm-reports";
+        String storageKey = "reports/" + studentId + "/" + UUID.randomUUID() + ".html";
+        String storageLocation = "local";
 
         // Assemble data and generate HTML content
         ReportData reportData = reportDataAssembler.assemble(student, req.classId(), req.startDate(), req.endDate());
         String html = reportContentGenerator.generate(reportData);
         byte[] content = html.getBytes(StandardCharsets.UTF_8);
-        reportStorage.upload(s3Key, content, "text/html");
+        reportStorage.upload(storageKey, content, "text/html");
 
         ProgressReport report = new ProgressReport();
         report.setStudent(student);
@@ -60,8 +60,8 @@ public class ReportService {
         report.setReportType(req.reportType());
         report.setStartDate(req.startDate());
         report.setEndDate(req.endDate());
-        report.setS3Key(s3Key);
-        report.setS3Bucket(s3Bucket);
+        report.setStorageKey(storageKey);
+        report.setStorageLocation(storageLocation);
         report.setGeneratedAt(Instant.now());
         report.setExpiresAt(Instant.now().plus(7, ChronoUnit.DAYS));
         report = reportRepository.save(report);
@@ -83,7 +83,7 @@ public class ReportService {
     }
 
     private ProgressReportDTO toDTO(ProgressReport r) {
-        String url = reportStorage.generateUrl(r.getS3Bucket(), r.getS3Key());
+        String url = reportStorage.generateUrl(r.getStorageLocation(), r.getStorageKey());
         return new ProgressReportDTO(r.getId(), r.getStudent().getId(), r.getReportType(),
             r.getStartDate(), r.getEndDate(), url, r.getGeneratedAt(), r.getExpiresAt());
     }

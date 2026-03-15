@@ -25,11 +25,11 @@ public class ProgressReport extends BaseEntity {
     private LocalDate startDate;
     private LocalDate endDate;
 
-    @Column(nullable = false)
-    private String s3Key;
+    @Column(name = "storage_key", nullable = false)
+    private String storageKey;
 
-    @Column(nullable = false)
-    private String s3Bucket;
+    @Column(name = "storage_location", nullable = false)
+    private String storageLocation;
 
     @Column(nullable = false)
     private Instant generatedAt;
@@ -47,10 +47,10 @@ public class ProgressReport extends BaseEntity {
     public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
     public LocalDate getEndDate() { return endDate; }
     public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
-    public String getS3Key() { return s3Key; }
-    public void setS3Key(String s3Key) { this.s3Key = s3Key; }
-    public String getS3Bucket() { return s3Bucket; }
-    public void setS3Bucket(String s3Bucket) { this.s3Bucket = s3Bucket; }
+    public String getStorageKey() { return storageKey; }
+    public void setStorageKey(String storageKey) { this.storageKey = storageKey; }
+    public String getStorageLocation() { return storageLocation; }
+    public void setStorageLocation(String storageLocation) { this.storageLocation = storageLocation; }
     public Instant getGeneratedAt() { return generatedAt; }
     public void setGeneratedAt(Instant generatedAt) { this.generatedAt = generatedAt; }
     public Instant getExpiresAt() { return expiresAt; }

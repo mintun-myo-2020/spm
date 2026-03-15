@@ -19,19 +19,31 @@ public class LocalFileStorageService implements FileStorageService {
     private final Path basePath;
 
     public LocalFileStorageService(@Value("${app.storage.local-path:./uploads}") String localPath) {
-        this.basePath = Path.of(localPath);
+        Path requested = Path.of(localPath);
+        Path resolved;
         try {
-            Files.createDirectories(basePath);
+            Files.createDirectories(requested);
+            resolved = requested;
         } catch (IOException e) {
-            throw new UncheckedIOException("Failed to create upload directory: " + localPath, e);
+            log.warn("Cannot create upload directory '{}': {}. Falling back to /tmp/uploads", localPath, e.getMessage());
+            resolved = Path.of("/tmp/uploads");
+            try {
+                Files.createDirectories(resolved);
+            } catch (IOException ex) {
+                throw new UncheckedIOException("Failed to create fallback upload directory: /tmp/uploads", ex);
+            }
         }
+        this.basePath = resolved;
         log.info("Local file storage directory: {}", basePath.toAbsolutePath());
     }
 
     @Override
     public String upload(String key, byte[] content, String contentType) {
         try {
-            Path filePath = basePath.resolve(key);
+            Path filePath = basePath.resolve(key).normalize();
+            if (!filePath.startsWith(basePath)) {
+                throw new IllegalArgumentException("Invalid storage key: path traversal detected");
+            }
             Files.createDirectories(filePath.getParent());
             Files.write(filePath, content);
             log.info("File written to {}", filePath);
@@ -49,7 +61,11 @@ public class LocalFileStorageService implements FileStorageService {
     @Override
     public void delete(String key) {
         try {
-            Path filePath = basePath.resolve(key);
+            Path filePath = basePath.resolve(key).normalize();
+            if (!filePath.startsWith(basePath)) {
+                log.warn("Blocked path traversal attempt in delete: {}", key);
+                return;
+            }
             Files.deleteIfExists(filePath);
         } catch (IOException e) {
             log.warn("Failed to delete file: {}", key, e);
@@ -59,7 +75,11 @@ public class LocalFileStorageService implements FileStorageService {
     /** Read file bytes — used by the local file serving endpoint. */
     public byte[] readFile(String key) {
         try {
-            return Files.readAllBytes(basePath.resolve(key));
+            Path filePath = basePath.resolve(key).normalize();
+            if (!filePath.startsWith(basePath)) {
+                throw new IllegalArgumentException("Invalid storage key: path traversal detected");
+            }
+            return Files.readAllBytes(filePath);
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to read file: " + key, e);
         }
@@ -68,7 +88,11 @@ public class LocalFileStorageService implements FileStorageService {
     /** Detect content type from stored file. */
     public String probeContentType(String key) {
         try {
-            String ct = Files.probeContentType(basePath.resolve(key));
+            Path filePath = basePath.resolve(key).normalize();
+            if (!filePath.startsWith(basePath)) {
+                return "application/octet-stream";
+            }
+            String ct = Files.probeContentType(filePath);
             return ct != null ? ct : "application/octet-stream";
         } catch (IOException e) {
             return "application/octet-stream";

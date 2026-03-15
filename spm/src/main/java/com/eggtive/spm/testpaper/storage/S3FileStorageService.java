@@ -56,4 +56,16 @@ public class S3FileStorageService implements FileStorageService {
         s3Client.deleteObject(DeleteObjectRequest.builder().bucket(bucket).key(key).build());
         log.info("Deleted from S3: s3://{}/{}", bucket, key);
     }
+
+    @Override
+    public byte[] readFileBytes(String storageLocation, String storageKey) {
+        String effectiveBucket = (storageLocation != null && !storageLocation.isBlank())
+                ? storageLocation : this.bucket;
+        try (var response = s3Client.getObject(
+                GetObjectRequest.builder().bucket(effectiveBucket).key(storageKey).build())) {
+            return response.readAllBytes();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to read file from S3: s3://" + effectiveBucket + "/" + storageKey, e);
+        }
+    }
 }

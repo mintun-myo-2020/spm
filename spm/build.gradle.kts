@@ -44,6 +44,7 @@ dependencies {
 	implementation("software.amazon.awssdk:sns")
 	implementation("software.amazon.awssdk:s3")
 	implementation("software.amazon.awssdk:textract")
+	implementation("software.amazon.awssdk:bedrockruntime")
 
 	// -------------------------
 	// Testing

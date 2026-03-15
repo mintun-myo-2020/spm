@@ -1,0 +1,216 @@
+package com.eggtive.spm.testpaper.llm;
+
+import com.eggtive.spm.testpaper.parser.*;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Component;
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
+import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
+import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
+
+import java.math.BigDecimal;
+import java.util.*;
+
+/**
+ * Production implementation that sends test paper images to Amazon Bedrock
+ * and receives structured question data back.
+ *
+ * <p>Model-specific request/response formatting is delegated to a
+ * {@link ModelAdapter}, so switching models (Claude → Nova → Titan, etc.)
+ * is a config change: set {@code app.extraction.bedrock.model-id} and
+ * {@code app.extraction.bedrock.model-adapter} accordingly.</p>
+ */
+@Component
+@ConditionalOnProperty(name = "app.extraction.type", havingValue = "bedrock")
+public class BedrockExtractionService implements TestPaperExtractionService {
+
+    private static final Logger log = LoggerFactory.getLogger(BedrockExtractionService.class);
+
+    private final BedrockRuntimeClient bedrockClient;
+    private final ModelAdapter modelAdapter;
+    private final JsonMapper jsonMapper;
+    private final String modelId;
+
+    public BedrockExtractionService(BedrockRuntimeClient bedrockClient,
+                                    ModelAdapter modelAdapter,
+                                    JsonMapper jsonMapper,
+                                    @Value("${app.extraction.bedrock.model-id}") String modelId) {
+        this.bedrockClient = bedrockClient;
+        this.modelAdapter = modelAdapter;
+        this.jsonMapper = jsonMapper;
+        this.modelId = modelId;
+        log.info("Bedrock extraction configured — model: {}, adapter: {}",
+                modelId, modelAdapter.getClass().getSimpleName());
+    }
+
+    @Override
+    public ParsedResult extractQuestions(byte[] imageBytes, String contentType, String fileName) {
+        log.info("Bedrock extraction for '{}' ({}, {} bytes) using model {}",
+                fileName, contentType, imageBytes.length, modelId);
+        try {
+            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+            String mediaType = contentType != null ? contentType : "image/jpeg";
+
+            String requestBody = modelAdapter.buildRequestBody(base64Image, mediaType, EXTRACTION_PROMPT);
+
+            InvokeModelResponse response = bedrockClient.invokeModel(
+                    InvokeModelRequest.builder()
+                            .modelId(modelId)
+                            .contentType("application/json")
+                            .accept("application/json")
+                            .body(SdkBytes.fromUtf8String(requestBody))
+                            .build());
+
+            String responseBody = response.body().asUtf8String();
+            String textContent = modelAdapter.extractResponseText(responseBody);
+
+            return mapToParsedResult(textContent);
+
+        } catch (Exception e) {
+            log.error("Bedrock extraction failed for '{}'", fileName, e);
+            return new ParsedResult(List.of(), null,
+                    List.of("LLM extraction failed: " + e.getMessage()));
+        }
+    }
+
+    // ── Response mapping (model-agnostic — works with any adapter) ──────
+
+    private ParsedResult mapToParsedResult(String textContent) throws Exception {
+        String jsonContent = extractJsonFromText(textContent);
+        JsonNode data = jsonMapper.readTree(jsonContent);
+
+        List<ParsedQuestion> questions = new ArrayList<>();
+        BigDecimal totalMarks = BigDecimal.ZERO;
+        List<String> notes = new ArrayList<>();
+
+        JsonNode questionsNode = data.get("questions");
+        if (questionsNode != null && questionsNode.isArray()) {
+            for (JsonNode qNode : questionsNode) {
+                ParsedQuestion pq = mapQuestion(qNode);
+                questions.add(pq);
+                if (pq.maxScore() != null) {
+                    totalMarks = totalMarks.add(pq.maxScore());
+                }
+            }
+        }
+
+        JsonNode notesNode = data.get("notes");
+        if (notesNode != null && notesNode.isArray()) {
+            for (JsonNode n : notesNode) {
+                notes.add(n.asText());
+            }
+        }
+
+        return new ParsedResult(questions,
+                totalMarks.compareTo(BigDecimal.ZERO) > 0 ? totalMarks : null,
+                notes);
+    }
+
+    private ParsedQuestion mapQuestion(JsonNode node) {
+        String questionNumber = textOrNull(node, "questionNumber");
+        String questionText = textOrNull(node, "questionText");
+        String questionType = textOrNull(node, "questionType");
+        BigDecimal maxScore = decimalOrNull(node, "maxScore");
+        float confidence = node.has("confidence")
+                ? (float) node.get("confidence").asDouble() : 0.85f;
+
+        List<McqOption> mcqOptions = new ArrayList<>();
+        JsonNode optsNode = node.get("mcqOptions");
+        if (optsNode != null && optsNode.isArray()) {
+            for (JsonNode o : optsNode) {
+                mcqOptions.add(new McqOption(textOrNull(o, "key"), textOrNull(o, "text")));
+            }
+        }
+
+        List<ParsedSubQuestion> subQuestions = new ArrayList<>();
+        JsonNode subsNode = node.get("subQuestions");
+        if (subsNode != null && subsNode.isArray()) {
+            for (JsonNode s : subsNode) {
+                subQuestions.add(new ParsedSubQuestion(
+                        textOrNull(s, "label"),
+                        textOrNull(s, "questionText"),
+                        decimalOrNull(s, "maxScore"),
+                        textOrNull(s, "studentAnswer"),
+                        s.has("confidence") ? (float) s.get("confidence").asDouble() : 0.80f
+                ));
+            }
+        }
+
+        return new ParsedQuestion(questionNumber, questionText,
+                questionType != null ? questionType : "OPEN",
+                mcqOptions, maxScore, subQuestions, confidence, null);
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+
+    /** Strip markdown code fences the model may wrap around its JSON. */
+    private String extractJsonFromText(String text) {
+        if (text == null || text.isBlank()) return "{}";
+        String trimmed = text.trim();
+        if (trimmed.startsWith("```")) {
+            int firstNewline = trimmed.indexOf('\n');
+            int lastFence = trimmed.lastIndexOf("```");
+            if (firstNewline > 0 && lastFence > firstNewline) {
+                trimmed = trimmed.substring(firstNewline + 1, lastFence).trim();
+            }
+        }
+        return trimmed;
+    }
+
+    private String textOrNull(JsonNode node, String field) {
+        JsonNode child = node.get(field);
+        return (child != null && !child.isNull()) ? child.asText() : null;
+    }
+
+    private BigDecimal decimalOrNull(JsonNode node, String field) {
+        JsonNode child = node.get(field);
+        return (child != null && !child.isNull() && child.isNumber())
+                ? new BigDecimal(child.asText()) : null;
+    }
+
+    static final String EXTRACTION_PROMPT = """
+            You are analysing a photograph of a student's test paper. Extract ALL questions \
+            visible on this page and return them as structured JSON.
+
+            Return ONLY valid JSON (no markdown, no explanation) with this exact schema:
+            {
+              "questions": [
+                {
+                  "questionNumber": "1",
+                  "questionText": "Full question text as written",
+                  "questionType": "MCQ" or "OPEN",
+                  "mcqOptions": [
+                    { "key": "A", "text": "Option text" }
+                  ],
+                  "maxScore": 10,
+                  "subQuestions": [
+                    {
+                      "label": "a",
+                      "questionText": "Sub-question text",
+                      "maxScore": 5,
+                      "studentAnswer": "What the student wrote (null if blank/illegible)",
+                      "confidence": 0.85
+                    }
+                  ],
+                  "confidence": 0.90
+                }
+              ],
+              "notes": ["Any observations about image quality or illegible sections"]
+            }
+
+            Rules:
+            - questionType is "MCQ" if the question has multiple-choice options, otherwise "OPEN"
+            - For MCQ questions, include all visible options in mcqOptions
+            - For OPEN questions with parts (a, b, c or i, ii, iii), list them as subQuestions
+            - If the student has written an answer, include it in studentAnswer
+            - If handwriting is illegible, set studentAnswer to null and lower the confidence
+            - maxScore is the marks allocated (look for "[X marks]", "(X)", "/X" patterns)
+            - confidence is your certainty about the extraction (0.0 to 1.0)
+            - If you cannot determine a field, set it to null
+            """;
+}

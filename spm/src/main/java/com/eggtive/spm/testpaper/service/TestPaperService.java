@@ -10,11 +10,9 @@ import com.eggtive.spm.testpaper.entity.TestPaperPage;
 import com.eggtive.spm.testpaper.entity.TestPaperUpload;
 import com.eggtive.spm.testpaper.enums.PageStatus;
 import com.eggtive.spm.testpaper.enums.UploadStatus;
-import com.eggtive.spm.testpaper.ocr.OcrResult;
-import com.eggtive.spm.testpaper.ocr.OcrService;
+import com.eggtive.spm.testpaper.llm.TestPaperExtractionService;
 import com.eggtive.spm.testpaper.parser.ParsedQuestion;
 import com.eggtive.spm.testpaper.parser.ParsedResult;
-import com.eggtive.spm.testpaper.parser.TestPaperParser;
 import com.eggtive.spm.testpaper.repository.TestPaperPageRepository;
 import com.eggtive.spm.testpaper.repository.TestPaperUploadRepository;
 import com.eggtive.spm.testpaper.storage.FileStorageService;
@@ -43,8 +41,7 @@ public class TestPaperService {
     private final TestPaperUploadRepository uploadRepository;
     private final TestPaperPageRepository pageRepository;
     private final FileStorageService fileStorageService;
-    private final OcrService ocrService;
-    private final TestPaperParser testPaperParser;
+    private final TestPaperExtractionService extractionService;
     private final UserService userService;
     private final ClassService classService;
     private final JsonMapper jsonMapper;
@@ -52,16 +49,14 @@ public class TestPaperService {
     public TestPaperService(TestPaperUploadRepository uploadRepository,
                             TestPaperPageRepository pageRepository,
                             FileStorageService fileStorageService,
-                            OcrService ocrService,
-                            TestPaperParser testPaperParser,
+                            TestPaperExtractionService extractionService,
                             UserService userService,
                             ClassService classService,
                             JsonMapper jsonMapper) {
         this.uploadRepository = uploadRepository;
         this.pageRepository = pageRepository;
         this.fileStorageService = fileStorageService;
-        this.ocrService = ocrService;
-        this.testPaperParser = testPaperParser;
+        this.extractionService = extractionService;
         this.userService = userService;
         this.classService = classService;
         this.jsonMapper = jsonMapper;
@@ -144,21 +139,15 @@ public class TestPaperService {
                     page.setStatus(PageStatus.EXTRACTING);
                     pageRepository.save(page);
 
-                    OcrResult ocrResult = ocrService.extractText(page.getStorageLocation(), page.getStorageKey());
+                    byte[] imageBytes = fileStorageService.readFileBytes(
+                            page.getStorageLocation(), page.getStorageKey());
 
-                    if ("FAILED".equals(ocrResult.status())) {
-                        page.setStatus(PageStatus.FAILED);
-                        allSuccess = false;
-                    } else {
-                        page.setExtractedText(ocrResult.rawText());
-                        page.setOcrConfidence(ocrResult.confidence());
-                        page.setStatus(PageStatus.PARSING);
-                        pageRepository.save(page);
+                    ParsedResult parsed = extractionService.extractQuestions(
+                            imageBytes, page.getContentType(), page.getFileName());
 
-                        ParsedResult parsed = testPaperParser.parse(ocrResult.rawText(), ocrResult.confidence());
-                        page.setParsedResult(jsonMapper.writeValueAsString(parsed));
-                        page.setStatus(PageStatus.COMPLETED);
-                    }
+                    page.setParsedResult(jsonMapper.writeValueAsString(parsed));
+                    page.setOcrConfidence(averageConfidence(parsed));
+                    page.setStatus(PageStatus.COMPLETED);
                 } catch (Exception e) {
                     log.error("Failed to process page {} of upload {}", page.getPageNumber(), uploadId, e);
                     page.setStatus(PageStatus.FAILED);
@@ -302,5 +291,16 @@ public class TestPaperService {
             log.warn("Failed to deserialize parsed result", e);
             return null;
         }
+    }
+
+    /** Average confidence across all questions returned by the LLM. */
+    private float averageConfidence(ParsedResult parsed) {
+        if (parsed == null || parsed.questions() == null || parsed.questions().isEmpty()) {
+            return 0f;
+        }
+        return (float) parsed.questions().stream()
+                .mapToDouble(ParsedQuestion::confidence)
+                .average()
+                .orElse(0);
     }
 }

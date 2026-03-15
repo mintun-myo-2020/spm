@@ -74,14 +74,19 @@ public class LocalFileStorageService implements FileStorageService {
 
     /** Read file bytes — used by the local file serving endpoint. */
     public byte[] readFile(String key) {
+        return readFileBytes("local", key);
+    }
+
+    @Override
+    public byte[] readFileBytes(String storageLocation, String storageKey) {
         try {
-            Path filePath = basePath.resolve(key).normalize();
+            Path filePath = basePath.resolve(storageKey).normalize();
             if (!filePath.startsWith(basePath)) {
                 throw new IllegalArgumentException("Invalid storage key: path traversal detected");
             }
             return Files.readAllBytes(filePath);
         } catch (IOException e) {
-            throw new UncheckedIOException("Failed to read file: " + key, e);
+            throw new UncheckedIOException("Failed to read file: " + storageKey, e);
         }
     }
 

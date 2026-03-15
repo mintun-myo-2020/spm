@@ -10,6 +10,7 @@ import { EmptyState } from './EmptyState';
 import { useToast } from './Toast';
 import { Modal } from './Modal';
 import { usePagination } from '../../hooks/usePagination';
+import { useAuth } from '../../hooks/useAuth';
 import type { ProgressReportDTO, ClassDTO } from '../../types/domain';
 
 interface Props {
@@ -21,6 +22,8 @@ interface Props {
 
 export function ReportList({ studentId, studentName, canGenerate = false, backTo }: Props) {
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ADMIN';
   const { pagination, setPage, updateFromResponse } = usePagination();
   const [reports, setReports] = useState<ProgressReportDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,11 +47,14 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
 
   useEffect(() => {
     if (canGenerate) {
-      classService.getMyClasses({ page: 0, size: 100 })
+      const fetchClasses = isAdmin
+        ? classService.getAllClasses({ page: 0, size: 100 })
+        : classService.getMyClasses({ page: 0, size: 100 });
+      fetchClasses
         .then((res) => setClasses(res.data.content))
         .catch(() => {});
     }
-  }, [canGenerate]);
+  }, [canGenerate, isAdmin]);
 
   const openGenerateModal = () => {
     setSelectedClassId('');
@@ -98,9 +104,10 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
       )}
       <Modal isOpen={showGenerate} onClose={() => setShowGenerate(false)} title="Generate Report">
         <div className="space-y-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">Generate a progress summary report for {studentName ?? 'this student'}.</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Generate a progress report covering test scores, topic performance, and teacher feedback for the selected class and date range.</p>
           <div>
             <Label htmlFor="report-class" value="Class" />
+            <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">The report will only include scores and feedback from this class.</p>
             <Select id="report-class" value={selectedClassId} onChange={(e) => setSelectedClassId(e.target.value)} required>
               <option value="">Select a class</option>
               {classes.map((c) => (
@@ -108,14 +115,18 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
               ))}
             </Select>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label htmlFor="report-start" value="Start Date" />
-              <TextInput id="report-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
-            </div>
-            <div>
-              <Label htmlFor="report-end" value="End Date" />
-              <TextInput id="report-end" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
+          <div>
+            <Label value="Report Period" />
+            <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">Only test scores and feedback within this date range will be included.</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label htmlFor="report-start" value="From" />
+                <TextInput id="report-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
+              </div>
+              <div>
+                <Label htmlFor="report-end" value="To" />
+                <TextInput id="report-end" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
+              </div>
             </div>
           </div>
           {startDate && endDate && startDate > endDate && (

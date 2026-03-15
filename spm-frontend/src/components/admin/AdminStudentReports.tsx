@@ -4,5 +4,5 @@ import { ReportList } from '../shared/ReportList';
 export function AdminStudentReports() {
   const { classId, studentId } = useParams<{ classId: string; studentId: string }>();
   if (!studentId) return null;
-  return <ReportList studentId={studentId} canGenerate={false} backTo={`/admin/classes/${classId}/students/${studentId}`} />;
+  return <ReportList studentId={studentId} canGenerate backTo={`/admin/classes/${classId}/students/${studentId}`} />;
 }

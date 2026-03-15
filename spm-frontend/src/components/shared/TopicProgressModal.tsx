@@ -74,23 +74,22 @@ export function TopicProgressModal({ studentId, topic, onClose, onTestClick }: P
           )}
 
           <div>
-            <div className="mb-2 flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700">
-              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Test-by-Test Breakdown</h4>
-              <button
-                type="button"
-                className="inline-flex items-center gap-1 rounded-full border border-gray-300 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-blue-400"
-                onClick={() => setSortLatestFirst((v) => !v)}
-              >
-                {sortLatestFirst ? '↓ Latest first' : '↑ Earliest first'}
-              </button>
-            </div>
+            <h4 className="mb-2 border-b border-gray-200 pb-2 text-sm font-medium text-gray-700 dark:border-gray-700 dark:text-gray-300">Test-by-Test Breakdown</h4>
             <div className="max-h-48 overflow-y-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="text-left text-xs text-gray-500 dark:text-gray-400">
                     <th className="pb-1 font-medium">Test</th>
-                    <th className="pb-1 font-medium">Date</th>
-                    <th className="pb-1 text-right font-medium">Score</th>
+                    <th className="pb-1 font-medium">Score</th>
+                    <th className="pb-1 font-medium">
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1 font-medium hover:text-blue-600 dark:hover:text-blue-400"
+                        onClick={() => setSortLatestFirst((v) => !v)}
+                      >
+                        Date {sortLatestFirst ? '↓' : '↑'}
+                      </button>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -104,8 +103,8 @@ export function TopicProgressModal({ studentId, topic, onClose, onTestClick }: P
                         {d.testName}
                         {onTestClick && <span className="ml-1 text-xs text-blue-500">→</span>}
                       </td>
+                      <td className="py-1.5 text-gray-700 dark:text-gray-300">{d.score}/{d.maxScore} ({d.percentage}%)</td>
                       <td className="py-1.5 text-gray-600 dark:text-gray-400">{d.date}</td>
-                      <td className="py-1.5 text-right text-gray-700 dark:text-gray-300">{d.score}/{d.maxScore} ({d.percentage}%)</td>
                     </tr>
                   ))}
                 </tbody>

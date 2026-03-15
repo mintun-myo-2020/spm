@@ -25,8 +25,17 @@ function getScoreBadgeColor(score: number, max: number) {
 }
 
 export function TestScoreDetail({ score }: Props) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const toggle = (id: string) => setExpandedId((prev) => (prev === id ? null : id));
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const toggle = (id: string) => setExpandedIds((prev) => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const allExpanded = score.questions.length > 0 && expandedIds.size === score.questions.length;
+  const toggleAll = () => {
+    if (allExpanded) setExpandedIds(new Set());
+    else setExpandedIds(new Set(score.questions.map((q) => q.id)));
+  };
 
   const topicChartData = useMemo(() => {
     const map = new Map<string, { score: number; maxScore: number }>();
@@ -72,12 +81,17 @@ export function TestScoreDetail({ score }: Props) {
 
       {score.questions.length > 0 && (
         <div>
-          <h4 className="mb-2 font-medium text-gray-900 dark:text-white">Question Breakdown</h4>
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-medium text-gray-900 dark:text-white">Question Breakdown</h4>
+            <button type="button" onClick={toggleAll} className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+              {allExpanded ? 'Collapse All' : 'Expand All'}
+            </button>
+          </div>
           <p className="mb-2 text-xs text-gray-400">Click a question to see details</p>
           <div className="space-y-2">
             {score.questions.map((q) => {
               const qScore = getQuestionScore(q);
-              const isOpen = expandedId === q.id;
+              const isOpen = expandedIds.has(q.id);
               return (
                 <div key={q.id} className="rounded-lg border dark:border-gray-600 overflow-hidden">
                   <button
@@ -122,31 +136,33 @@ export function TestScoreDetail({ score }: Props) {
                               );
                             })}
                           </div>
-                        </div>
-                      )}
-
-                      {q.questionType !== 'MCQ' && q.subQuestions.some((sq) => sq.studentAnswer) && (
-                        <div>
-                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Student Answers:</p>
-                          {q.subQuestions.map((sq) => sq.studentAnswer ? (
-                            <div key={sq.id} className="mb-1 text-sm">
-                              <span className="text-gray-500 dark:text-gray-400">{sq.label}:</span>{' '}
-                              <span className="text-gray-700 dark:text-gray-300">{sq.studentAnswer}</span>
+                          {q.subQuestions.length > 0 && (
+                            <div className="mt-2">
+                              <Badge color={getScoreBadgeColor(q.subQuestions[0].score, q.subQuestions[0].maxScore)} size="sm">
+                                {q.subQuestions[0].topicName}: {q.subQuestions[0].score}/{q.subQuestions[0].maxScore}
+                              </Badge>
                             </div>
-                          ) : null)}
+                          )}
                         </div>
                       )}
 
-                      <div>
-                        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Scores by Topic:</p>
-                        <div className="flex flex-wrap gap-2">
+                      {q.questionType !== 'MCQ' && q.subQuestions.length > 0 && (
+                        <div className="space-y-2">
                           {q.subQuestions.map((sq) => (
-                            <Badge key={sq.id} color={sq.score >= sq.maxScore * 0.7 ? 'success' : sq.score >= sq.maxScore * 0.4 ? 'warning' : 'failure'}>
-                              {sq.topicName}: {sq.score}/{sq.maxScore}
-                            </Badge>
+                            <div key={sq.id} className="flex items-start gap-2 rounded-md bg-white px-3 py-2 dark:bg-gray-800 border dark:border-gray-700">
+                              <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 shrink-0">({sq.label})</span>
+                              <Badge color="indigo" size="xs" className="shrink-0">{sq.topicName}</Badge>
+                              <Badge color={getScoreBadgeColor(sq.score, sq.maxScore)} size="xs" className="shrink-0">{sq.score}/{sq.maxScore}</Badge>
+                              {sq.studentAnswer && (
+                                <>
+                                  <span className="text-gray-300 dark:text-gray-600 shrink-0">—</span>
+                                  <span className="text-sm text-gray-700 dark:text-gray-300 italic">&ldquo;{sq.studentAnswer}&rdquo;</span>
+                                </>
+                              )}
+                            </div>
                           ))}
                         </div>
-                      </div>
+                      )}
                     </div>
                   )}
                 </div>

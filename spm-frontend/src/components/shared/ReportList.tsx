@@ -82,12 +82,23 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
     finally { setGenerating(false); }
   };
 
+  const handleViewReport = async (reportUrl: string) => {
+    try {
+      const res = await reportService.getReportContent(reportUrl);
+      const blob = new Blob([res.data], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch {
+      showToast('Failed to load report', 'error');
+    }
+  };
+
   const columns: Column<ProgressReportDTO>[] = [
     { key: 'reportType', header: 'Type' },
     { key: 'generatedAt', header: 'Generated', render: (r) => new Date(r.generatedAt).toLocaleDateString() },
     { key: 'startDate', header: 'Period', render: (r) => r.startDate && r.endDate ? `${r.startDate} – ${r.endDate}` : '—' },
     { key: 'actions', header: '', render: (r) => r.reportUrl ? (
-      <Button size="xs" color="light" onClick={(e: React.MouseEvent) => { e.stopPropagation(); window.open(r.reportUrl, '_blank'); }} data-testid={`view-report-${r.id}`}>View</Button>
+      <Button size="xs" color="light" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleViewReport(r.reportUrl); }} data-testid={`view-report-${r.id}`}>View</Button>
     ) : null },
   ];
 

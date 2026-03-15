@@ -4,7 +4,7 @@
 - **Project Type**: Brownfield (Sprint 2)
 - **Start Date**: 2026-03-08T00:00:00Z
 - **Sprint 2 Start Date**: 2026-03-15T00:00:00Z
-- **Current Stage**: INCEPTION - Workflow Planning
+- **Current Stage**: CONSTRUCTION - Functional Design (Unit 2: OCR Test Upload)
 
 ## Workspace State
 - **Existing Code**: Yes (Sprint 1 complete)

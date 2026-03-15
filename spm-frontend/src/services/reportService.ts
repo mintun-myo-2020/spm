@@ -15,4 +15,8 @@ export const reportService = {
   listStudentReports(studentId: string, params?: PaginationParams) {
     return apiClient.get<PagedResponse<ProgressReportDTO>>(`/students/${studentId}/reports`, { params });
   },
+
+  getReportContent(reportUrl: string) {
+    return apiClient.get<string>(reportUrl, { responseType: 'text' as never });
+  },
 };

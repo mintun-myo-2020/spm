@@ -7,4 +7,5 @@ package com.eggtive.spm.report.storage;
 public interface ReportStorage {
     String upload(String key, byte[] content, String contentType);
     String generateUrl(String bucket, String key);
+    byte[] readFile(String key);
 }

@@ -7,9 +7,12 @@ import com.eggtive.spm.common.dto.PagedResponse;
 import com.eggtive.spm.report.dto.GenerateReportRequestDTO;
 import com.eggtive.spm.report.dto.ProgressReportDTO;
 import com.eggtive.spm.report.service.ReportService;
+import com.eggtive.spm.report.storage.ReportStorage;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -21,12 +24,14 @@ public class ReportController {
     private final ReportService reportService;
     private final CurrentUserService currentUserService;
     private final StudentAccessService studentAccessService;
+    private final ReportStorage reportStorage;
 
     public ReportController(ReportService reportService, CurrentUserService currentUserService,
-                             StudentAccessService studentAccessService) {
+                             StudentAccessService studentAccessService, ReportStorage reportStorage) {
         this.reportService = reportService;
         this.currentUserService = currentUserService;
         this.studentAccessService = studentAccessService;
+        this.reportStorage = reportStorage;
     }
 
     @PostMapping("/students/{studentId}/reports")
@@ -46,5 +51,13 @@ public class ReportController {
     public PagedResponse<ProgressReportDTO> listReports(@PathVariable UUID studentId, Pageable pageable) {
         studentAccessService.verifyAccess(currentUserService.getCurrentUser(), studentId);
         return reportService.listStudentReports(studentId, pageable);
+    }
+
+    @GetMapping("/reports/content")
+    public ResponseEntity<byte[]> getReportContent(@RequestParam String key) {
+        byte[] content = reportStorage.readFile(key);
+        return ResponseEntity.ok()
+                .contentType(MediaType.TEXT_HTML)
+                .body(content);
     }
 }

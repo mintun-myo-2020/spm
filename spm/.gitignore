@@ -40,3 +40,6 @@ out/
 .env
 .env.local
 .env.*.local
+
+### Local report storage ###
+report-files/

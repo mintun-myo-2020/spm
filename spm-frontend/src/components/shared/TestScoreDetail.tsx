@@ -66,15 +66,56 @@ export function TestScoreDetail({ score }: Props) {
       {score.questions.length > 0 && (
         <div>
           <h4 className="mb-2 font-medium text-gray-900 dark:text-white">Question Breakdown</h4>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {score.questions.map((q) => (
-              <div key={q.id} className="rounded border p-2 dark:border-gray-600">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Q{q.questionNumber} (max: {q.maxScore})</p>
-                <div className="mt-1 flex flex-wrap gap-2">
+              <div key={q.id} className="rounded-lg border p-3 dark:border-gray-600">
+                <div className="flex items-start justify-between">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Q{q.questionNumber} (max: {q.maxScore})
+                    {q.questionType === 'MCQ' && (
+                      <Badge color="purple" className="ml-2 inline">MCQ</Badge>
+                    )}
+                  </p>
+                </div>
+
+                {q.questionText && (
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 italic">{q.questionText}</p>
+                )}
+
+                {q.questionType === 'MCQ' && q.mcqOptions && q.mcqOptions.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {q.mcqOptions.map((opt) => {
+                      const isSelected = q.subQuestions.some((sq) => sq.studentAnswer === opt.key);
+                      return (
+                        <div
+                          key={opt.key}
+                          className={`flex items-center gap-2 rounded px-2 py-1 text-sm ${
+                            isSelected
+                              ? 'bg-blue-50 font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                              : 'text-gray-600 dark:text-gray-400'
+                          }`}
+                        >
+                          <span className="font-mono font-semibold">{opt.key}.</span>
+                          <span>{opt.text}</span>
+                          {isSelected && <Badge color="info" className="ml-auto">Selected</Badge>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <div className="mt-2 flex flex-wrap gap-2">
                   {q.subQuestions.map((sq) => (
-                    <Badge key={sq.id} color={sq.score >= sq.maxScore * 0.7 ? 'success' : sq.score >= sq.maxScore * 0.4 ? 'warning' : 'failure'}>
-                      {sq.topicName}: {sq.score}/{sq.maxScore}
-                    </Badge>
+                    <div key={sq.id} className="space-y-1">
+                      <Badge color={sq.score >= sq.maxScore * 0.7 ? 'success' : sq.score >= sq.maxScore * 0.4 ? 'warning' : 'failure'}>
+                        {sq.topicName}: {sq.score}/{sq.maxScore}
+                      </Badge>
+                      {q.questionType !== 'MCQ' && sq.studentAnswer && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 pl-1">
+                          Answer: <span className="text-gray-700 dark:text-gray-300">{sq.studentAnswer}</span>
+                        </p>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>

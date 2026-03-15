@@ -26,6 +26,9 @@ public class SubQuestion extends BaseEntity {
     @JoinColumn(name = "topic_id", nullable = false)
     private Topic topic;
 
+    @Column(columnDefinition = "TEXT")
+    private String studentAnswer;
+
     public Question getQuestion() { return question; }
     public void setQuestion(Question question) { this.question = question; }
     public String getSubQuestionLabel() { return subQuestionLabel; }
@@ -36,4 +39,6 @@ public class SubQuestion extends BaseEntity {
     public void setMaxScore(BigDecimal maxScore) { this.maxScore = maxScore; }
     public Topic getTopic() { return topic; }
     public void setTopic(Topic topic) { this.topic = topic; }
+    public String getStudentAnswer() { return studentAnswer; }
+    public void setStudentAnswer(String studentAnswer) { this.studentAnswer = studentAnswer; }
 }

@@ -20,6 +20,15 @@ public class Question extends BaseEntity {
     @Column(nullable = false, precision = 5, scale = 2)
     private BigDecimal maxScore;
 
+    @Column(columnDefinition = "TEXT")
+    private String questionText;
+
+    @Column(nullable = false, length = 10)
+    private String questionType = "OPEN";
+
+    @Column(columnDefinition = "TEXT")
+    private String mcqOptions;
+
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubQuestion> subQuestions = new ArrayList<>();
 
@@ -29,5 +38,11 @@ public class Question extends BaseEntity {
     public void setQuestionNumber(String questionNumber) { this.questionNumber = questionNumber; }
     public BigDecimal getMaxScore() { return maxScore; }
     public void setMaxScore(BigDecimal maxScore) { this.maxScore = maxScore; }
+    public String getQuestionText() { return questionText; }
+    public void setQuestionText(String questionText) { this.questionText = questionText; }
+    public String getQuestionType() { return questionType; }
+    public void setQuestionType(String questionType) { this.questionType = questionType; }
+    public String getMcqOptions() { return mcqOptions; }
+    public void setMcqOptions(String mcqOptions) { this.mcqOptions = mcqOptions; }
     public List<SubQuestion> getSubQuestions() { return subQuestions; }
 }

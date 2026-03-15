@@ -122,12 +122,21 @@ export interface SubQuestionDTO {
   maxScore: number;
   topicId: string;
   topicName: string;
+  studentAnswer: string | null;
+}
+
+export interface McqOptionDTO {
+  key: string;
+  text: string;
 }
 
 export interface QuestionDTO {
   id: string;
   questionNumber: string;
   maxScore: number;
+  questionText: string | null;
+  questionType: 'OPEN' | 'MCQ';
+  mcqOptions: McqOptionDTO[];
   subQuestions: SubQuestionDTO[];
 }
 

@@ -150,6 +150,11 @@ public class TestScoreService {
                 q.setTestScore(ts);
                 q.setQuestionNumber(qReq.questionNumber());
                 q.setMaxScore(qReq.maxScore());
+                q.setQuestionText(qReq.questionText());
+                q.setQuestionType(qReq.questionType() != null ? qReq.questionType() : "OPEN");
+                if (qReq.mcqOptions() != null && !qReq.mcqOptions().isEmpty()) {
+                    q.setMcqOptions(serializeMcqOptions(qReq.mcqOptions()));
+                }
                 ts.getQuestions().add(q);
 
                 if (qReq.subQuestions() != null) {
@@ -161,6 +166,7 @@ public class TestScoreService {
                         sq.setScore(sqReq.score());
                         sq.setMaxScore(sqReq.maxScore());
                         sq.setTopic(topic);
+                        sq.setStudentAnswer(sqReq.studentAnswer());
                         q.getSubQuestions().add(sq);
                     }
                 }
@@ -168,13 +174,34 @@ public class TestScoreService {
         }
     }
 
+    private String serializeMcqOptions(List<CreateTestScoreRequestDTO.McqOptionRequest> options) {
+        try {
+            var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            return mapper.writeValueAsString(options);
+        } catch (Exception e) {
+            return "[]";
+        }
+    }
+
+    private List<TestScoreDTO.McqOptionDTO> deserializeMcqOptions(String json) {
+        if (json == null || json.isBlank()) return List.of();
+        try {
+            var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            var type = mapper.getTypeFactory().constructCollectionType(List.class, TestScoreDTO.McqOptionDTO.class);
+            return mapper.readValue(json, type);
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
     private TestScoreDTO toDTO(TestScore ts) {
         var questions = ts.getQuestions().stream().map(q -> {
             var subs = q.getSubQuestions().stream().map(sq ->
                 new TestScoreDTO.SubQuestionDTO(sq.getId(), sq.getSubQuestionLabel(), sq.getScore(),
-                    sq.getMaxScore(), sq.getTopic().getId(), sq.getTopic().getName())
+                    sq.getMaxScore(), sq.getTopic().getId(), sq.getTopic().getName(), sq.getStudentAnswer())
             ).toList();
-            return new TestScoreDTO.QuestionDTO(q.getId(), q.getQuestionNumber(), q.getMaxScore(), subs);
+            return new TestScoreDTO.QuestionDTO(q.getId(), q.getQuestionNumber(), q.getMaxScore(),
+                q.getQuestionText(), q.getQuestionType(), deserializeMcqOptions(q.getMcqOptions()), subs);
         }).toList();
 
         Student s = ts.getStudent();

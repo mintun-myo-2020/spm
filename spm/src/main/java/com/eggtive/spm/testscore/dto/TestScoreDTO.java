@@ -15,13 +15,16 @@ public record TestScoreDTO(
     List<QuestionDTO> questions,
     Instant createdAt, Instant updatedAt
 ) {
+    public record McqOptionDTO(String key, String text) {}
+
     public record QuestionDTO(
         UUID id, String questionNumber, BigDecimal maxScore,
+        String questionText, String questionType, List<McqOptionDTO> mcqOptions,
         List<SubQuestionDTO> subQuestions
     ) {}
 
     public record SubQuestionDTO(
         UUID id, String label, BigDecimal score, BigDecimal maxScore,
-        UUID topicId, String topicName
+        UUID topicId, String topicName, String studentAnswer
     ) {}
 }

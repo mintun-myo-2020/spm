@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { testScoreService } from '../../services/testScoreService';
 import { PageHeader } from '../shared/PageHeader';
 import { TestScoreDetail } from '../shared/TestScoreDetail';
@@ -9,6 +9,7 @@ import type { TestScoreDetailDTO } from '../../types/domain';
 
 export function AdminTestScoreDetail() {
   const { classId, studentId, testScoreId } = useParams<{ classId: string; studentId: string; testScoreId: string }>();
+  const navigate = useNavigate();
   const [score, setScore] = useState<TestScoreDetailDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +31,8 @@ export function AdminTestScoreDetail() {
       <PageHeader
         title={score.testName}
         subtitle={`${score.studentName} · ${score.overallScore}/${score.maxScore} · ${new Date(score.testDate).toLocaleDateString()}`}
-        backTo={`/admin/classes/${classId}/students/${studentId}`}
+        backTo={`/admin/classes/${classId}/students/${studentId}/scores`}
+        action={{ label: 'Edit Score', onClick: () => navigate(`/admin/classes/${classId}/students/${studentId}/scores/${testScoreId}/edit`) }}
       />
       <TestScoreDetail score={score} />
     </div>

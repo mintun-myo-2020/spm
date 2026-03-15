@@ -18,9 +18,14 @@ public record CreateTestScoreRequestDTO(
     BigDecimal maxScore,
     @Valid List<QuestionRequest> questions
 ) {
+    public record McqOptionRequest(String key, String text) {}
+
     public record QuestionRequest(
         @NotBlank String questionNumber,
         @NotNull @Positive BigDecimal maxScore,
+        String questionText,
+        String questionType,
+        List<McqOptionRequest> mcqOptions,
         @Valid List<SubQuestionRequest> subQuestions
     ) {}
 
@@ -28,6 +33,7 @@ public record CreateTestScoreRequestDTO(
         @NotBlank String label,
         @NotNull BigDecimal score,
         @NotNull @Positive BigDecimal maxScore,
-        @NotNull UUID topicId
+        @NotNull UUID topicId,
+        String studentAnswer
     ) {}
 }

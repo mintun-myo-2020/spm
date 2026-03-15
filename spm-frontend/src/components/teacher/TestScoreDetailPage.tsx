@@ -32,19 +32,12 @@ export function TestScoreDetailPage() {
       <PageHeader
         title={score.testName}
         subtitle={`${score.studentName} · ${score.overallScore}/${score.maxScore} · ${new Date(score.testDate).toLocaleDateString()}`}
-        backTo={`/teacher/classes/${classId}/students/${studentId}`}
+        backTo={`/teacher/classes/${classId}/students/${studentId}/scores`}
+        action={{ label: 'Edit Score', onClick: () => navigate(`/teacher/classes/${classId}/students/${studentId}/scores/${testScoreId}/edit`) }}
       />
       <TestScoreDetail score={score} />
-      <div className="mt-6 flex gap-3">
-        <Button
-          color="light"
-          size="sm"
-          onClick={() => navigate(`/teacher/classes/${classId}/students/${studentId}/scores/${testScoreId}/edit`)}
-          data-testid="edit-score-button"
-        >
-          Edit Score
-        </Button>
-        {!score.feedback && (
+      {!score.feedback && (
+        <div className="mt-6">
           <Button
             color="blue"
             size="sm"
@@ -53,8 +46,8 @@ export function TestScoreDetailPage() {
           >
             Add Feedback
           </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

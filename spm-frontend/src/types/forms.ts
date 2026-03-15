@@ -38,11 +38,20 @@ export interface SubQuestionInput {
   score: number;
   maxScore: number;
   topicId: string;
+  studentAnswer?: string;
+}
+
+export interface McqOptionInput {
+  key: string;
+  text: string;
 }
 
 export interface QuestionInput {
   questionNumber: string;
   maxScore: number;
+  questionText?: string;
+  questionType?: 'OPEN' | 'MCQ';
+  mcqOptions?: McqOptionInput[];
   subQuestions: SubQuestionInput[];
 }
 

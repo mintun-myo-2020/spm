@@ -1,7 +1,7 @@
 import { apiClient } from './apiClient';
 import type { ApiResponse, PagedResponse, PaginationParams } from '../types/api';
 import type { TestScoreDTO, TestScoreDetailDTO } from '../types/domain';
-import type { CreateTestScoreForm } from '../types/forms';
+import type { CreateTestScoreForm, CreateTestScoreFormWithUpload } from '../types/forms';
 
 export interface TestScoreFilters extends PaginationParams {
   startDate?: string;
@@ -13,7 +13,7 @@ export interface TestScoreFilters extends PaginationParams {
 }
 
 export const testScoreService = {
-  createTestScore(data: CreateTestScoreForm) {
+  createTestScore(data: CreateTestScoreForm | CreateTestScoreFormWithUpload) {
     return apiClient.post<ApiResponse<TestScoreDTO>>('/test-scores', data);
   },
 

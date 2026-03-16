@@ -1,7 +1,7 @@
 import { Sidebar as FlowbiteSidebar, SidebarItems, SidebarItemGroup, SidebarItem } from 'flowbite-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { HiAcademicCap, HiChartBar, HiClipboardList, HiHome, HiUserGroup, HiBookOpen, HiBell, HiDocumentReport } from 'react-icons/hi';
+import { HiAcademicCap, HiChartBar, HiClipboardList, HiHome, HiUserGroup, HiBookOpen, HiBell, HiDocumentReport, HiUpload } from 'react-icons/hi';
 import type { FC, SVGProps } from 'react';
 
 interface NavItem {
@@ -26,6 +26,7 @@ const navByRole: Record<string, NavItem[]> = {
   STUDENT: [
     { label: 'Dashboard', to: '/student/dashboard', icon: HiHome },
     { label: 'My Scores', to: '/student/scores', icon: HiClipboardList },
+    { label: 'Upload Paper', to: '/student/upload', icon: HiUpload },
     { label: 'My Progress', to: '/student/progress', icon: HiChartBar },
     { label: 'Reports', to: '/student/reports', icon: HiDocumentReport },
   ],

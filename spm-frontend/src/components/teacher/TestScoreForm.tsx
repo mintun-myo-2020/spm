@@ -10,7 +10,10 @@ import { classService } from '../../services/classService';
 import { PageHeader } from '../shared/PageHeader';
 import { useToast } from '../shared/Toast';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
-import type { TopicDTO } from '../../types/domain';
+import { TestPaperUpload } from '../shared/TestPaperUpload';
+import { OcrResultPanel } from '../shared/OcrResultPanel';
+import type { TopicDTO, AggregatedQuestion, TestPaperUploadDTO } from '../../types/domain';
+import { testPaperService } from '../../services/testPaperService';
 
 const mcqOptionSchema = z.object({
   key: z.string().min(1),
@@ -51,6 +54,8 @@ export function TestScoreForm() {
   const [topics, setTopics] = useState<TopicDTO[]>([]);
   const [subjectName, setSubjectName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [uploadId, setUploadId] = useState<string | null>(null);
+  const [uploadDto, setUploadDto] = useState<TestPaperUploadDTO | null>(null);
   const isEdit = !!testScoreId;
 
   const { register, control, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<FormValues>({
@@ -106,6 +111,41 @@ export function TestScoreForm() {
     loadData();
   }, [classId, testScoreId, isEdit, reset, showToast]);
 
+  const handleParsedResults = async (questions: AggregatedQuestion[], ocrUploadId: string) => {
+    setUploadId(ocrUploadId);
+    // Fetch the full upload DTO for the OcrResultPanel
+    try {
+      const res = await testPaperService.getUpload(ocrUploadId);
+      setUploadDto(res.data.data);
+    } catch { /* panel just won't show */ }
+
+    if (questions.length === 0) return;
+
+    // Map aggregated questions to form fields
+    const mapped = questions.map((q) => ({
+      questionNumber: q.questionNumber,
+      maxScore: q.maxScore ?? 0,
+      questionText: q.questionText ?? '',
+      questionType: (q.questionType === 'MCQ' ? 'MCQ' : 'OPEN') as 'OPEN' | 'MCQ',
+      mcqOptions: q.mcqOptions?.map((o) => ({ key: o.key, text: o.text })) ?? [],
+      subQuestions: q.subQuestions.length > 0
+        ? q.subQuestions.map((sq) => ({
+            label: sq.label,
+            score: 0,
+            maxScore: sq.maxScore ?? 0,
+            topicId: '',
+            studentAnswer: sq.studentAnswer ?? '',
+          }))
+        : [{ label: 'a', score: 0, maxScore: q.maxScore ?? 0, topicId: '', studentAnswer: '' }],
+    }));
+
+    reset((prev) => ({
+      ...prev,
+      questions: mapped,
+    }));
+    showToast(`${questions.length} question(s) auto-populated from OCR`, 'success');
+  };
+
   const onSubmit = async (data: FormValues) => {
     if (!studentId || !classId) return;
     // For MCQ questions, ensure the single sub-question carries the MCQ answer
@@ -135,7 +175,10 @@ export function TestScoreForm() {
         await testScoreService.updateTestScore(testScoreId, payload);
         showToast('Test score updated', 'success');
       } else {
-        await testScoreService.createTestScore(payload);
+        await testScoreService.createTestScore({
+          ...payload,
+          ...(uploadId ? { uploadIds: [uploadId] } : {}),
+        });
         showToast('Test score recorded', 'success');
       }
       navigate(-1);
@@ -173,6 +216,19 @@ export function TestScoreForm() {
         </div>
 
         <div className="space-y-4">
+          {/* OCR Upload Section — only for new scores */}
+          {!isEdit && studentId && classId && (
+            <TestPaperUpload
+              studentId={studentId}
+              classId={classId}
+              onParsedResults={handleParsedResults}
+              onError={(msg) => showToast(msg, 'error')}
+            />
+          )}
+
+          {/* OCR Result Panel */}
+          {uploadDto && <OcrResultPanel upload={uploadDto} />}
+
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Questions</h2>

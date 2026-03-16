@@ -108,9 +108,12 @@ export function StudentDashboard() {
         <LoadingSpinner />
       ) : (
         <>
-          <div className="mb-6">
+          <div className="mb-6 flex gap-3">
             <Button color="blue" onClick={() => navigate('/student/scores')} data-testid="view-all-scores">
               View Recent Tests →
+            </Button>
+            <Button color="light" onClick={() => navigate('/student/upload')} data-testid="upload-paper">
+              Upload My Paper
             </Button>
           </div>
 

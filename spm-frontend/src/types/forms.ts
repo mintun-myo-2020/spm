@@ -96,3 +96,9 @@ export interface GenerateReportForm {
   startDate: string;
   endDate: string;
 }
+
+// Extended form for OCR upload integration
+export interface CreateTestScoreFormWithUpload extends CreateTestScoreForm {
+  uploadIds?: string[];
+  isDraft?: boolean;
+}

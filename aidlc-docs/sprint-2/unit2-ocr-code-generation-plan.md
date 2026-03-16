@@ -102,18 +102,18 @@
 - [x] Add `uploads/` to `.gitignore`
 
 ### Step 13: Frontend — TypeScript Types
-- [ ] Add OCR-related types to `types/domain.ts`: TestPaperUploadDTO, TestPaperPageDTO, ParsedResultDTO, ParsedQuestionDTO, ParsedSubQuestionDTO
-- [ ] Update `CreateTestScoreForm` in `types/forms.ts` — add optional `uploadIds` and `isDraft`
+- [x] Add OCR-related types to `types/domain.ts`: TestPaperUploadDTO, TestPaperPageDTO, ParsedResultDTO, ParsedQuestionDTO, ParsedSubQuestionDTO
+- [x] Update `CreateTestScoreForm` in `types/forms.ts` — add optional `uploadIds` and `isDraft`
 
 ### Step 14: Frontend — testPaperService
-- [ ] Create `services/testPaperService.ts`:
+- [x] Create `services/testPaperService.ts`:
   - `uploadFiles(files, studentId, classId)` — multipart POST
   - `triggerExtraction(uploadId)` — POST extract
   - `getUpload(uploadId)` — GET status + results
   - `pollForCompletion(uploadId)` — poll GET until terminal status
 
 ### Step 15: Frontend — TestPaperUpload Component
-- [ ] Create `components/shared/TestPaperUpload.tsx`:
+- [x] Create `components/shared/TestPaperUpload.tsx`:
   - File drop zone / file picker (accept JPEG, PNG, PDF)
   - Multi-file selection
   - Upload progress indicator
@@ -123,30 +123,30 @@
   - On completion: calls `onParsedResults` callback with aggregated questions
 
 ### Step 16: Frontend — OcrResultPanel Component
-- [ ] Create `components/shared/OcrResultPanel.tsx`:
+- [x] Create `components/shared/OcrResultPanel.tsx`:
   - Collapsible side panel showing raw OCR text per page
   - Page tabs/selector for multi-page uploads
   - Confidence indicators per text block
   - File viewer (image/PDF preview via presigned URL)
 
 ### Step 17: Frontend — Integrate into TestScoreForm
-- [ ] Add TestPaperUpload component to TestScoreForm
+- [x] Add TestPaperUpload component to TestScoreForm
   - "Upload Test Paper" button/area above the questions section
   - On parsed results received: auto-populate form fields via `reset()` or `setValue()`
   - Low-confidence fields highlighted (yellow background)
   - OcrResultPanel shown as collapsible side panel
   - Upload is optional — form works without it
-- [ ] Update form submission to include `uploadIds` if upload was done
-- [ ] Handle isDraft flag for student self-upload flow
+- [x] Update form submission to include `uploadIds` if upload was done
+- [x] Handle isDraft flag for student self-upload flow
 
 ### Step 18: Frontend — Student Upload Entry Point
-- [ ] Add upload capability to student's test score view (if student role)
+- [x] Add upload capability to student's test score view (if student role)
   - Student sees "Upload My Paper" on their class/test page
   - Triggers upload → OCR → creates draft test score
   - Student sees confirmation that draft was created for teacher review
 
 ### Step 19: Code Summary Documentation
-- [ ] Create `aidlc-docs/sprint-2/unit2-ocr-content/code-summary.md`
+- [x] Create `aidlc-docs/sprint-2/unit2-ocr-content/code-summary.md`
 
 ---
 

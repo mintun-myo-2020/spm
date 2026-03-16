@@ -38,6 +38,10 @@ dependencies {
 	// Cache
 	implementation("com.github.ben-manes.caffeine:caffeine")
 
+	// Spring AI (2.0.0-M2 — Spring Boot 4 compatible, milestone)
+	implementation(platform("org.springframework.ai:spring-ai-bom:2.0.0-M2"))
+	implementation("org.springframework.ai:spring-ai-starter-model-bedrock")
+
 	// AWS SDK v2
 	implementation(platform("software.amazon.awssdk:bom:2.42.12"))
 	implementation("software.amazon.awssdk:ses")

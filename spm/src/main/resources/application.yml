@@ -63,8 +63,22 @@ app:
   extraction:
     type: ${APP_EXTRACTION_TYPE:stub}
     bedrock:
-      model-id: ${APP_EXTRACTION_BEDROCK_MODEL_ID:anthropic.claude-sonnet-4-20250514-v1:0}
-      model-adapter: ${APP_EXTRACTION_BEDROCK_MODEL_ADAPTER:anthropic}
+      model-id: ${APP_EXTRACTION_BEDROCK_MODEL_ID:amazon.nova-2-lite-v1:0}
+      model-adapter: ${APP_EXTRACTION_BEDROCK_MODEL_ADAPTER:nova}
+      region: ${APP_EXTRACTION_BEDROCK_REGION:ap-southeast-1}
+
+# Spring AI Bedrock Converse (used when app.extraction.type=spring-ai)
+spring.ai:
+  bedrock:
+    aws:
+      region: ${APP_EXTRACTION_BEDROCK_REGION:ap-southeast-1}
+    converse:
+      chat:
+        enabled: ${SPRING_AI_BEDROCK_ENABLED:false}
+        options:
+          model: ${APP_EXTRACTION_BEDROCK_MODEL_ID:amazon.nova-2-lite-v1:0}
+          temperature: 0.1
+          max-tokens: 4096
   report-storage:
     local-path: ${APP_REPORT_STORAGE_LOCAL_PATH:./report-files}
 

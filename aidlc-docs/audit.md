@@ -883,3 +883,40 @@ Also started Step 13 (frontend types in domain.ts) before user paused.
 **Context**: Code Generation (Unit 2) — Paused at Step 12 for user backend testing
 
 ---
+
+## Sprint 2 - Code Generation (Unit 2) - Frontend Steps Resumed
+**Timestamp**: 2026-03-16T00:00:00Z
+**User Input**: "ok we are good to go with the ocr part. let's see what's next on our plan"
+**AI Response**: Reviewed current state — backend Steps 1-12 complete, frontend Steps 13-19 remaining. Presented options: A) Continue frontend, B) Skip to Unit 3, C) Mark complete.
+**Context**: Code Generation (Unit 2) — Session resumed, reviewing plan status
+
+---
+
+## Sprint 2 - Code Generation (Unit 2) - Frontend Steps 13-17 Completed
+**Timestamp**: 2026-03-16T00:05:00Z
+**User Input**: "A. do frontendd"
+**AI Response**: Completed frontend Steps 13-17:
+- Step 13: OCR types already in domain.ts from previous session. Updated forms.ts with CreateTestScoreFormWithUpload.
+- Step 14: Created testPaperService.ts (uploadFiles, triggerExtraction, getUpload, pollForCompletion).
+- Step 15: Created TestPaperUpload.tsx (file picker, upload progress, extraction status polling, parsed results callback).
+- Step 16: Created OcrResultPanel.tsx (collapsible panel, page tabs, confidence indicators, file preview).
+- Step 17: Integrated into TestScoreForm — added TestPaperUpload + OcrResultPanel above questions section, auto-populates form from OCR results, sends uploadIds on submit.
+Initially marked Step 18 as SKIP (student self-upload not in requirements).
+**Context**: Code Generation (Unit 2) — Part 2 (Generation) — Steps 13-17 complete
+
+---
+
+## Sprint 2 - Code Generation (Unit 2) - Step 18 Student Upload
+**Timestamp**: 2026-03-16T00:10:00Z
+**User Input**: "let's do step 18 too"
+**AI Response**: Created student upload entry point:
+- Created UploadTestPaper.tsx — class selector, TestPaperUpload component, creates draft test score (isDraft=true) on completion, success confirmation view.
+- Added /student/upload route to StudentRoutes.tsx.
+- Added "Upload My Paper" button to StudentDashboard.tsx.
+- Added "Upload Paper" nav link to Sidebar.tsx for students.
+- Updated testScoreService.ts to accept CreateTestScoreFormWithUpload type.
+- Step 19: Created code-summary.md.
+All 19 steps complete. Unit 2 Code Generation marked COMPLETED in aidlc-state.md.
+**Context**: Code Generation (Unit 2) — All steps complete
+
+---

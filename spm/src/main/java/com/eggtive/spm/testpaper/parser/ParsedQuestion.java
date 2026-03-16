@@ -10,6 +10,8 @@ public record ParsedQuestion(
     List<McqOption> mcqOptions,
     BigDecimal maxScore,
     List<ParsedSubQuestion> subQuestions,
+    boolean hasDiagramInQuestion,
+    boolean requiresDiagramAnswer,
     float confidence,
     String rawTextSpan
 ) {}

@@ -136,6 +136,8 @@ public class BedrockExtractionService implements TestPaperExtractionService {
                         textOrNull(s, "questionText"),
                         decimalOrNull(s, "maxScore"),
                         textOrNull(s, "studentAnswer"),
+                        textOrNull(s, "studentCorrection"),
+                        textOrNull(s, "teacherRemarks"),
                         s.has("confidence") ? (float) s.get("confidence").asDouble() : 0.80f
                 ));
             }
@@ -143,7 +145,10 @@ public class BedrockExtractionService implements TestPaperExtractionService {
 
         return new ParsedQuestion(questionNumber, questionText,
                 questionType != null ? questionType : "OPEN",
-                mcqOptions, maxScore, subQuestions, confidence, null);
+                mcqOptions, maxScore, subQuestions,
+                node.has("hasDiagramInQuestion") && node.get("hasDiagramInQuestion").asBoolean(),
+                node.has("requiresDiagramAnswer") && node.get("requiresDiagramAnswer").asBoolean(),
+                confidence, null);
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
@@ -188,12 +193,16 @@ public class BedrockExtractionService implements TestPaperExtractionService {
                     { "key": "A", "text": "Option text" }
                   ],
                   "maxScore": 10,
+                  "hasDiagramInQuestion": false,
+                  "requiresDiagramAnswer": false,
                   "subQuestions": [
                     {
                       "label": "a",
                       "questionText": "Sub-question text",
                       "maxScore": 5,
-                      "studentAnswer": "What the student wrote (null if blank/illegible)",
+                      "studentAnswer": "What the student originally wrote (null if blank/illegible)",
+                      "studentCorrection": "Green text showing the correct answer (null if none)",
+                      "teacherRemarks": "Teacher's feedback or comments (null if none)",
                       "confidence": 0.85
                     }
                   ],
@@ -206,9 +215,14 @@ public class BedrockExtractionService implements TestPaperExtractionService {
             Rules:
             - questionType is "MCQ" if the question has multiple-choice options, otherwise "OPEN"
             - For MCQ questions, include all visible options in mcqOptions
+            - For MCQ answers, the student may have written the letter/number OR circled the chosen option — detect either method and record the selected option key in studentAnswer
             - For OPEN questions with parts (a, b, c or i, ii, iii), list them as subQuestions
-            - If the student has written an answer, include it in studentAnswer
-            - If handwriting is illegible, set studentAnswer to null and lower the confidence
+            - studentAnswer should ONLY contain what the student originally wrote (typically blue/black ink)
+            - GREEN TEXT indicates corrections — extract this into studentCorrection, NOT studentAnswer
+            - teacherRemarks is for any other teacher feedback, comments, or annotations (not the correction itself)
+            - hasDiagramInQuestion: true if the question includes a diagram, graph, chart, or image as part of the question itself
+            - requiresDiagramAnswer: true if the student was required to draw a diagram, graph, or chart as part of their answer
+            - If handwriting is illegible, set the field to null and lower the confidence
             - maxScore is the marks allocated (look for "[X marks]", "(X)", "/X" patterns)
             - confidence is your certainty about the extraction (0.0 to 1.0)
             - If you cannot determine a field, set it to null

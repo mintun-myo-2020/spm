@@ -7,5 +7,7 @@ public record ParsedSubQuestion(
     String questionText,
     BigDecimal maxScore,
     String studentAnswer,
+    String studentCorrection,
+    String teacherRemarks,
     float confidence
 ) {}

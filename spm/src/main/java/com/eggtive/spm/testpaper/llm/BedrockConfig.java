@@ -1,5 +1,7 @@
 package com.eggtive.spm.testpaper.llm;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -20,6 +22,8 @@ import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
 @ConditionalOnProperty(name = "app.extraction.type", havingValue = "bedrock")
 public class BedrockConfig {
 
+    private static final Logger log = LoggerFactory.getLogger(BedrockConfig.class);
+
     @Bean
     public BedrockRuntimeClient bedrockRuntimeClient(
             @Value("${app.extraction.bedrock.region:#{null}}") String region) {
@@ -27,6 +31,18 @@ public class BedrockConfig {
         if (region != null && !region.isBlank()) {
             builder.region(Region.of(region));
         }
-        return builder.build();
+        var client = builder.build();
+
+        // Log credential source for debugging
+        try {
+            var creds = software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider.create().resolveCredentials();
+            String accessKeyId = creds.accessKeyId();
+            String secretKey = creds.secretAccessKey();
+            log.info("AWS credentials resolved");
+        } catch (Exception e) {
+            log.warn("AWS credentials NOT available — Bedrock calls will fail: {}", e.getMessage());
+        }
+
+        return client;
     }
 }

@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public record TopicProgressSummaryDTO(
     UUID topicId, String topicName,
-    int testCount, BigDecimal averagePercentage,
+    int testCount, int questionCount,
+    BigDecimal averagePercentage,
     BigDecimal latestPercentage, Trend trend
 ) {}

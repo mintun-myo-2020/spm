@@ -119,7 +119,7 @@ export function MyProgress() {
               {topics.map((t) => (
                 <Card key={t.topicId} className="cursor-pointer transition-shadow hover:shadow-md" onClick={() => setSelectedTopic(t)}>
                   <h3 className="font-medium text-gray-900 dark:text-white">{t.topicName}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Avg: {t.averagePercentage.toFixed(1)}% · {t.testCount} tests</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Avg: {t.averagePercentage.toFixed(1)}% · {t.testCount} {t.testCount === 1 ? 'test' : 'tests'}, {t.questionCount} {t.questionCount === 1 ? 'question' : 'questions'}</p>
                   <TrendBadge trend={t.trend} className="w-fit" />
                 </Card>
               ))}

@@ -95,35 +95,55 @@ public class ProgressService {
             .filter(ts -> ts.getTuitionClass().getId().equals(classId))
             .toList();
 
-        Map<UUID, List<SubQuestionData>> topicData = new LinkedHashMap<>();
+        // Aggregate sub-questions per test per topic
+        Map<UUID, List<BigDecimal>> topicPerTestPercentages = new LinkedHashMap<>();
         Map<UUID, String> topicNames = new HashMap<>();
+        Map<UUID, Integer> topicTestCounts = new HashMap<>();
+        Map<UUID, Integer> topicQuestionCounts = new HashMap<>();
+        Map<UUID, BigDecimal> topicLatestPct = new HashMap<>();
 
         for (TestScore ts : scores) {
+            // Collect sub-questions for this test grouped by topic
+            Map<UUID, BigDecimal> testTopicScore = new LinkedHashMap<>();
+            Map<UUID, BigDecimal> testTopicMaxScore = new LinkedHashMap<>();
+            Map<UUID, Integer> testTopicQCount = new HashMap<>();
+
             for (var q : ts.getQuestions()) {
                 for (SubQuestion sq : q.getSubQuestions()) {
                     UUID topicId = sq.getTopic().getId();
                     topicNames.putIfAbsent(topicId, sq.getTopic().getName());
-                    topicData.computeIfAbsent(topicId, k -> new ArrayList<>())
-                        .add(new SubQuestionData(sq.getScore(), sq.getMaxScore(), ts.getTestDate()));
+                    testTopicScore.merge(topicId, sq.getScore(), BigDecimal::add);
+                    testTopicMaxScore.merge(topicId, sq.getMaxScore(), BigDecimal::add);
+                    testTopicQCount.merge(topicId, 1, Integer::sum);
+                }
+            }
+
+            // Compute per-test percentage for each topic found in this test
+            for (UUID topicId : testTopicScore.keySet()) {
+                BigDecimal maxScore = testTopicMaxScore.get(topicId);
+                if (maxScore.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal pct = testTopicScore.get(topicId)
+                        .multiply(BigDecimal.valueOf(100))
+                        .divide(maxScore, 2, RoundingMode.HALF_UP);
+                    topicPerTestPercentages.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
+                    topicTestCounts.merge(topicId, 1, Integer::sum);
+                    topicQuestionCounts.merge(topicId, testTopicQCount.get(topicId), Integer::sum);
+                    topicLatestPct.put(topicId, pct);
                 }
             }
         }
 
-        return topicData.entrySet().stream().map(entry -> {
+        return topicPerTestPercentages.entrySet().stream().map(entry -> {
             UUID topicId = entry.getKey();
-            List<SubQuestionData> data = entry.getValue();
-
-            List<BigDecimal> percentages = data.stream()
-                .map(d -> d.score.multiply(BigDecimal.valueOf(100))
-                    .divide(d.maxScore, 2, RoundingMode.HALF_UP))
-                .toList();
+            List<BigDecimal> percentages = entry.getValue();
 
             BigDecimal avgPct = calculator.average(percentages);
-            BigDecimal latestPct = percentages.getLast();
+            BigDecimal latestPct = topicLatestPct.get(topicId);
             Trend trend = calculator.determineTrend(percentages);
 
             return new TopicProgressSummaryDTO(topicId, topicNames.get(topicId),
-                data.size(), avgPct, latestPct, trend);
+                topicTestCounts.get(topicId), topicQuestionCounts.get(topicId),
+                avgPct, latestPct, trend);
         }).toList();
     }
 
@@ -135,36 +155,53 @@ public class ProgressService {
 
         List<TestScore> scores = testScoreService.findByStudentOrderByDateAsc(studentId);
 
-        // Collect all sub-question scores grouped by topic
-        Map<UUID, List<SubQuestionData>> topicData = new LinkedHashMap<>();
+        // Aggregate sub-questions per test per topic
+        Map<UUID, List<BigDecimal>> topicPerTestPercentages = new LinkedHashMap<>();
         Map<UUID, String> topicNames = new HashMap<>();
+        Map<UUID, Integer> topicTestCounts = new HashMap<>();
+        Map<UUID, Integer> topicQuestionCounts = new HashMap<>();
+        Map<UUID, BigDecimal> topicLatestPct = new HashMap<>();
 
         for (TestScore ts : scores) {
+            Map<UUID, BigDecimal> testTopicScore = new LinkedHashMap<>();
+            Map<UUID, BigDecimal> testTopicMaxScore = new LinkedHashMap<>();
+            Map<UUID, Integer> testTopicQCount = new HashMap<>();
+
             for (var q : ts.getQuestions()) {
                 for (SubQuestion sq : q.getSubQuestions()) {
                     UUID topicId = sq.getTopic().getId();
                     topicNames.putIfAbsent(topicId, sq.getTopic().getName());
-                    topicData.computeIfAbsent(topicId, k -> new ArrayList<>())
-                        .add(new SubQuestionData(sq.getScore(), sq.getMaxScore(), ts.getTestDate()));
+                    testTopicScore.merge(topicId, sq.getScore(), BigDecimal::add);
+                    testTopicMaxScore.merge(topicId, sq.getMaxScore(), BigDecimal::add);
+                    testTopicQCount.merge(topicId, 1, Integer::sum);
+                }
+            }
+
+            for (UUID topicId : testTopicScore.keySet()) {
+                BigDecimal maxScore = testTopicMaxScore.get(topicId);
+                if (maxScore.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal pct = testTopicScore.get(topicId)
+                        .multiply(BigDecimal.valueOf(100))
+                        .divide(maxScore, 2, RoundingMode.HALF_UP);
+                    topicPerTestPercentages.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
+                    topicTestCounts.merge(topicId, 1, Integer::sum);
+                    topicQuestionCounts.merge(topicId, testTopicQCount.get(topicId), Integer::sum);
+                    topicLatestPct.put(topicId, pct);
                 }
             }
         }
 
-        return topicData.entrySet().stream().map(entry -> {
+        return topicPerTestPercentages.entrySet().stream().map(entry -> {
             UUID topicId = entry.getKey();
-            List<SubQuestionData> data = entry.getValue();
-
-            List<BigDecimal> percentages = data.stream()
-                .map(d -> d.score.multiply(BigDecimal.valueOf(100))
-                    .divide(d.maxScore, 2, RoundingMode.HALF_UP))
-                .toList();
+            List<BigDecimal> percentages = entry.getValue();
 
             BigDecimal avgPct = calculator.average(percentages);
-            BigDecimal latestPct = percentages.getLast();
+            BigDecimal latestPct = topicLatestPct.get(topicId);
             Trend trend = calculator.determineTrend(percentages);
 
             return new TopicProgressSummaryDTO(topicId, topicNames.get(topicId),
-                data.size(), avgPct, latestPct, trend);
+                topicTestCounts.get(topicId), topicQuestionCounts.get(topicId),
+                avgPct, latestPct, trend);
         }).toList();
     }
 
@@ -178,6 +215,7 @@ public class ProgressService {
         for (TestScore ts : scores) {
             BigDecimal topicScore = BigDecimal.ZERO;
             BigDecimal topicMaxScore = BigDecimal.ZERO;
+            int questionCount = 0;
             boolean found = false;
 
             for (var q : ts.getQuestions()) {
@@ -186,6 +224,7 @@ public class ProgressService {
                         topicScore = topicScore.add(sq.getScore());
                         topicMaxScore = topicMaxScore.add(sq.getMaxScore());
                         if (topicName == null) topicName = sq.getTopic().getName();
+                        questionCount++;
                         found = true;
                     }
                 }
@@ -195,7 +234,7 @@ public class ProgressService {
                 BigDecimal pct = topicScore.multiply(BigDecimal.valueOf(100))
                     .divide(topicMaxScore, 2, RoundingMode.HALF_UP);
                 trendData.add(new TopicTrendDataPointDTO(ts.getId(), ts.getTestDate(), ts.getTestName(),
-                    topicScore, topicMaxScore, pct));
+                    topicScore, topicMaxScore, pct, questionCount));
             }
         }
 
@@ -211,7 +250,6 @@ public class ProgressService {
     }
 
 
-    private record SubQuestionData(BigDecimal score, BigDecimal maxScore, java.time.LocalDate testDate) {}
     public ClassSummaryDTO getClassSummary(UUID classId) {
         List<TestScore> scores = testScoreService.findByClassOrderByDateAsc(classId);
 
@@ -241,25 +279,35 @@ public class ProgressService {
             median = sorted.get(size / 2);
         }
 
-        // Topic-level aggregation across all students
-        Map<UUID, List<BigDecimal>> topicPercentages = new LinkedHashMap<>();
+        // Topic-level aggregation across all students — per-test percentages
+        Map<UUID, List<BigDecimal>> topicPerTestPercentages = new LinkedHashMap<>();
         Map<UUID, String> topicNames = new HashMap<>();
 
         for (TestScore ts : scores) {
+            Map<UUID, BigDecimal> testTopicScore = new LinkedHashMap<>();
+            Map<UUID, BigDecimal> testTopicMaxScore = new LinkedHashMap<>();
+
             for (var q : ts.getQuestions()) {
                 for (SubQuestion sq : q.getSubQuestions()) {
                     UUID topicId = sq.getTopic().getId();
                     topicNames.putIfAbsent(topicId, sq.getTopic().getName());
-                    BigDecimal pct = sq.getMaxScore().compareTo(BigDecimal.ZERO) > 0
-                        ? sq.getScore().multiply(BigDecimal.valueOf(100))
-                            .divide(sq.getMaxScore(), 2, RoundingMode.HALF_UP)
-                        : BigDecimal.ZERO;
-                    topicPercentages.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
+                    testTopicScore.merge(topicId, sq.getScore(), BigDecimal::add);
+                    testTopicMaxScore.merge(topicId, sq.getMaxScore(), BigDecimal::add);
+                }
+            }
+
+            for (UUID topicId : testTopicScore.keySet()) {
+                BigDecimal maxScore = testTopicMaxScore.get(topicId);
+                if (maxScore.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal pct = testTopicScore.get(topicId)
+                        .multiply(BigDecimal.valueOf(100))
+                        .divide(maxScore, 2, RoundingMode.HALF_UP);
+                    topicPerTestPercentages.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
                 }
             }
         }
 
-        List<ClassSummaryDTO.TopicStat> topicStats = topicPercentages.entrySet().stream()
+        List<ClassSummaryDTO.TopicStat> topicStats = topicPerTestPercentages.entrySet().stream()
             .map(e -> new ClassSummaryDTO.TopicStat(
                 e.getKey(),
                 topicNames.get(e.getKey()),

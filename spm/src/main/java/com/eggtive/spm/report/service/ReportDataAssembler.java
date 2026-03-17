@@ -100,26 +100,38 @@ public class ReportDataAssembler {
     }
 
     private List<ReportData.TopicSummary> buildTopicSummaries(List<TestScore> scores) {
-        Map<UUID, List<BigDecimal>> topicPercentages = new LinkedHashMap<>();
+        Map<UUID, List<BigDecimal>> topicPerTestPercentages = new LinkedHashMap<>();
         Map<UUID, String> topicNames = new HashMap<>();
         Map<UUID, Integer> topicCounts = new HashMap<>();
 
         for (TestScore ts : scores) {
+            Map<UUID, BigDecimal> testTopicScore = new LinkedHashMap<>();
+            Map<UUID, BigDecimal> testTopicMaxScore = new LinkedHashMap<>();
+            Map<UUID, Integer> testTopicQCount = new HashMap<>();
+
             for (Question q : ts.getQuestions()) {
                 for (SubQuestion sq : q.getSubQuestions()) {
                     UUID topicId = sq.getTopic().getId();
                     topicNames.putIfAbsent(topicId, sq.getTopic().getName());
-                    topicCounts.merge(topicId, 1, Integer::sum);
-                    BigDecimal pct = sq.getMaxScore().compareTo(BigDecimal.ZERO) == 0
-                            ? BigDecimal.ZERO
-                            : sq.getScore().multiply(BigDecimal.valueOf(100))
-                                .divide(sq.getMaxScore(), 2, RoundingMode.HALF_UP);
-                    topicPercentages.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
+                    testTopicScore.merge(topicId, sq.getScore(), BigDecimal::add);
+                    testTopicMaxScore.merge(topicId, sq.getMaxScore(), BigDecimal::add);
+                    testTopicQCount.merge(topicId, 1, Integer::sum);
+                }
+            }
+
+            for (UUID topicId : testTopicScore.keySet()) {
+                BigDecimal maxScore = testTopicMaxScore.get(topicId);
+                if (maxScore.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal pct = testTopicScore.get(topicId)
+                            .multiply(BigDecimal.valueOf(100))
+                            .divide(maxScore, 2, RoundingMode.HALF_UP);
+                    topicPerTestPercentages.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
+                    topicCounts.merge(topicId, testTopicQCount.get(topicId), Integer::sum);
                 }
             }
         }
 
-        return topicPercentages.entrySet().stream().map(entry -> {
+        return topicPerTestPercentages.entrySet().stream().map(entry -> {
             UUID topicId = entry.getKey();
             List<BigDecimal> pcts = entry.getValue();
             BigDecimal avg = calculator.average(pcts);

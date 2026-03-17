@@ -38,6 +38,7 @@ export function TopicProgressModal({ studentId, topic, onClose, onTestClick }: P
     percentage: d.percentage,
     score: d.topicScore,
     maxScore: d.topicMaxScore,
+    questionCount: d.questionCount,
   })) ?? [];
 
   const sortedBreakdown = [...chartData].sort((a, b) =>
@@ -53,7 +54,7 @@ export function TopicProgressModal({ studentId, topic, onClose, onTestClick }: P
       {!loading && !error && topic && data && (
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-3 text-sm">
-            <span className="text-gray-500 dark:text-gray-400">{topic.testCount} tests</span>
+            <span className="text-gray-500 dark:text-gray-400">{topic.testCount} {topic.testCount === 1 ? 'test' : 'tests'}, {topic.questionCount} {topic.questionCount === 1 ? 'question' : 'questions'}</span>
             <span className="text-gray-500 dark:text-gray-400">Avg: {topic.averagePercentage.toFixed(1)}%</span>
             <span className="text-gray-500 dark:text-gray-400">Latest: {topic.latestPercentage.toFixed(1)}%</span>
             <TrendBadge trend={topic.trend} />
@@ -80,6 +81,7 @@ export function TopicProgressModal({ studentId, topic, onClose, onTestClick }: P
                 <thead>
                   <tr className="text-left text-xs text-gray-500 dark:text-gray-400">
                     <th className="pb-1 font-medium">Test</th>
+                    <th className="pb-1 font-medium">Questions</th>
                     <th className="pb-1 font-medium">Score</th>
                     <th className="pb-1 font-medium">
                       <button
@@ -103,6 +105,7 @@ export function TopicProgressModal({ studentId, topic, onClose, onTestClick }: P
                         {d.testName}
                         {onTestClick && <span className="ml-1 text-xs text-blue-500">→</span>}
                       </td>
+                      <td className="py-1.5 text-gray-700 dark:text-gray-300">{d.questionCount}</td>
                       <td className="py-1.5 text-gray-700 dark:text-gray-300">{d.score}/{d.maxScore} ({d.percentage}%)</td>
                       <td className="py-1.5 text-gray-600 dark:text-gray-400">{d.date}</td>
                     </tr>

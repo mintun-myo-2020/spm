@@ -221,6 +221,7 @@ export interface TopicTrendDataPoint {
   topicScore: number;
   topicMaxScore: number;
   percentage: number;
+  questionCount: number;
 }
 
 export type Trend = 'IMPROVING' | 'DECLINING' | 'STABLE' | 'INSUFFICIENT_DATA';
@@ -229,6 +230,7 @@ export interface TopicProgressSummaryDTO {
   topicId: string;
   topicName: string;
   testCount: number;
+  questionCount: number;
   averagePercentage: number;
   latestPercentage: number;
   trend: Trend;

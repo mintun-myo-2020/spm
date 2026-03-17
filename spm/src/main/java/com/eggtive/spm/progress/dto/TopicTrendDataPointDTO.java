@@ -8,5 +8,6 @@ public record TopicTrendDataPointDTO(
     UUID testScoreId,
     LocalDate testDate, String testName,
     BigDecimal topicScore, BigDecimal topicMaxScore,
-    BigDecimal percentage
+    BigDecimal percentage,
+    int questionCount
 ) {}

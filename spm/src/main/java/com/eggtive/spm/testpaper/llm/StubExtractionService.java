@@ -36,6 +36,8 @@ public class StubExtractionService implements TestPaperExtractionService {
                 ),
                 new BigDecimal("2"),
                 List.of(),
+                false,
+                false,
                 0.95f,
                 null
             ),
@@ -47,10 +49,12 @@ public class StubExtractionService implements TestPaperExtractionService {
                 new BigDecimal("10"),
                 List.of(
                     new ParsedSubQuestion("a", "Describe evaporation", new BigDecimal("5"),
-                            "Water heats up and turns into vapor", 0.90f),
+                            "Water heats up and turns into vapor", null, null, 0.90f),
                     new ParsedSubQuestion("b", "Describe condensation", new BigDecimal("5"),
-                            "Vapor cools and forms clouds", 0.88f)
+                            "Vapor cools and forms clouds", null, null, 0.88f)
                 ),
+                false,
+                false,
                 0.92f,
                 null
             ),
@@ -62,10 +66,12 @@ public class StubExtractionService implements TestPaperExtractionService {
                 new BigDecimal("8"),
                 List.of(
                     new ParsedSubQuestion("a", "Show your working", new BigDecimal("5"),
-                            "2x = 10, x = 5", 0.85f),
+                            "2x = 10, x = 5", null, null, 0.85f),
                     new ParsedSubQuestion("b", "Verify your answer", new BigDecimal("3"),
-                            "2(5) + 5 = 15, correct", 0.87f)
+                            "2(5) + 5 = 15, correct", null, null, 0.87f)
                 ),
+                false,
+                false,
                 0.90f,
                 null
             )

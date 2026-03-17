@@ -1,87 +1,56 @@
 package com.eggtive.spm.testpaper.llm;
 
+import com.eggtive.spm.common.llm.LlmResponseUtil;
+import com.eggtive.spm.common.llm.LlmService;
 import com.eggtive.spm.testpaper.parser.*;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
-import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
-import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
-import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
 
 import java.math.BigDecimal;
 import java.util.*;
 
 /**
- * Production implementation that sends test paper images to Amazon Bedrock
- * and receives structured question data back.
+ * Test paper extraction implementation that delegates to the shared {@link LlmService}.
+ * This class owns the test-paper-specific prompt and response mapping.
+ * The actual LLM call is handled by whatever LlmService implementation is active.
  *
- * <p>Model-specific request/response formatting is delegated to a
- * {@link ModelAdapter}, so switching models (Claude → Nova → Titan, etc.)
- * is a config change: set {@code app.extraction.bedrock.model-id} and
- * {@code app.extraction.bedrock.model-adapter} accordingly.</p>
+ * <p>Activated when {@code app.extraction.type=llm} (i.e. use the shared LLM service).</p>
  */
 @Component
-@ConditionalOnProperty(name = "app.extraction.type", havingValue = "bedrock")
-public class BedrockExtractionService implements TestPaperExtractionService {
+@ConditionalOnProperty(name = "app.extraction.type", havingValue = "llm")
+public class LlmExtractionService implements TestPaperExtractionService {
 
-    private static final Logger log = LoggerFactory.getLogger(BedrockExtractionService.class);
+    private static final Logger log = LoggerFactory.getLogger(LlmExtractionService.class);
 
-    private final BedrockRuntimeClient bedrockClient;
-    private final ModelAdapter modelAdapter;
+    private final LlmService llmService;
     private final JsonMapper jsonMapper;
-    private final String modelId;
 
-    public BedrockExtractionService(BedrockRuntimeClient bedrockClient,
-                                    ModelAdapter modelAdapter,
-                                    JsonMapper jsonMapper,
-                                    @Value("${app.extraction.bedrock.model-id}") String modelId) {
-        this.bedrockClient = bedrockClient;
-        this.modelAdapter = modelAdapter;
+    public LlmExtractionService(LlmService llmService, JsonMapper jsonMapper) {
+        this.llmService = llmService;
         this.jsonMapper = jsonMapper;
-        this.modelId = modelId;
-        log.info("Bedrock extraction configured — model: {}, adapter: {}",
-                modelId, modelAdapter.getClass().getSimpleName());
     }
 
     @Override
     public ParsedResult extractQuestions(byte[] imageBytes, String contentType, String fileName) {
-        log.info("Bedrock extraction for '{}' ({}, {} bytes) using model {}",
-                fileName, contentType, imageBytes.length, modelId);
+        log.info("LLM extraction for '{}' ({}, {} bytes)", fileName, contentType, imageBytes.length);
         try {
-            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-            String mediaType = contentType != null ? contentType : "image/jpeg";
-
-            String requestBody = modelAdapter.buildRequestBody(base64Image, mediaType, EXTRACTION_PROMPT);
-
-            InvokeModelResponse response = bedrockClient.invokeModel(
-                    InvokeModelRequest.builder()
-                            .modelId(modelId)
-                            .contentType("application/json")
-                            .accept("application/json")
-                            .body(SdkBytes.fromUtf8String(requestBody))
-                            .build());
-
-            String responseBody = response.body().asUtf8String();
-            String textContent = modelAdapter.extractResponseText(responseBody);
-
-            return mapToParsedResult(textContent);
-
+            String rawResponse = llmService.completeWithImage(imageBytes, contentType, EXTRACTION_PROMPT);
+            return mapToParsedResult(rawResponse);
         } catch (Exception e) {
-            log.error("Bedrock extraction failed for '{}'", fileName, e);
+            log.error("LLM extraction failed for '{}'", fileName, e);
             return new ParsedResult(List.of(), null,
                     List.of("LLM extraction failed: " + e.getMessage()));
         }
     }
 
-    // ── Response mapping (model-agnostic — works with any adapter) ──────
+    // ── Response mapping ────────────────────────────────────────────────
 
     private ParsedResult mapToParsedResult(String textContent) throws Exception {
-        String jsonContent = extractJsonFromText(textContent);
+        String jsonContent = LlmResponseUtil.extractJsonFromText(textContent);
         JsonNode data = jsonMapper.readTree(jsonContent);
 
         List<ParsedQuestion> questions = new ArrayList<>();
@@ -93,22 +62,17 @@ public class BedrockExtractionService implements TestPaperExtractionService {
             for (JsonNode qNode : questionsNode) {
                 ParsedQuestion pq = mapQuestion(qNode);
                 questions.add(pq);
-                if (pq.maxScore() != null) {
-                    totalMarks = totalMarks.add(pq.maxScore());
-                }
+                if (pq.maxScore() != null) totalMarks = totalMarks.add(pq.maxScore());
             }
         }
 
         JsonNode notesNode = data.get("notes");
         if (notesNode != null && notesNode.isArray()) {
-            for (JsonNode n : notesNode) {
-                notes.add(n.asText());
-            }
+            for (JsonNode n : notesNode) notes.add(n.asText());
         }
 
         return new ParsedResult(questions,
-                totalMarks.compareTo(BigDecimal.ZERO) > 0 ? totalMarks : null,
-                notes);
+                totalMarks.compareTo(BigDecimal.ZERO) > 0 ? totalMarks : null, notes);
     }
 
     private ParsedQuestion mapQuestion(JsonNode node) {
@@ -116,15 +80,12 @@ public class BedrockExtractionService implements TestPaperExtractionService {
         String questionText = textOrNull(node, "questionText");
         String questionType = textOrNull(node, "questionType");
         BigDecimal maxScore = decimalOrNull(node, "maxScore");
-        float confidence = node.has("confidence")
-                ? (float) node.get("confidence").asDouble() : 0.85f;
+        float confidence = node.has("confidence") ? (float) node.get("confidence").asDouble() : 0.85f;
 
         List<McqOption> mcqOptions = new ArrayList<>();
         JsonNode optsNode = node.get("mcqOptions");
         if (optsNode != null && optsNode.isArray()) {
-            for (JsonNode o : optsNode) {
-                mcqOptions.add(new McqOption(textOrNull(o, "key"), textOrNull(o, "text")));
-            }
+            for (JsonNode o : optsNode) mcqOptions.add(new McqOption(textOrNull(o, "key"), textOrNull(o, "text")));
         }
 
         List<ParsedSubQuestion> subQuestions = new ArrayList<>();
@@ -156,22 +117,6 @@ public class BedrockExtractionService implements TestPaperExtractionService {
                 .build();
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────
-
-    /** Strip markdown code fences the model may wrap around its JSON. */
-    private String extractJsonFromText(String text) {
-        if (text == null || text.isBlank()) return "{}";
-        String trimmed = text.trim();
-        if (trimmed.startsWith("```")) {
-            int firstNewline = trimmed.indexOf('\n');
-            int lastFence = trimmed.lastIndexOf("```");
-            if (firstNewline > 0 && lastFence > firstNewline) {
-                trimmed = trimmed.substring(firstNewline + 1, lastFence).trim();
-            }
-        }
-        return trimmed;
-    }
-
     private String textOrNull(JsonNode node, String field) {
         JsonNode child = node.get(field);
         return (child != null && !child.isNull()) ? child.asText() : null;
@@ -179,8 +124,7 @@ public class BedrockExtractionService implements TestPaperExtractionService {
 
     private BigDecimal decimalOrNull(JsonNode node, String field) {
         JsonNode child = node.get(field);
-        return (child != null && !child.isNull() && child.isNumber())
-                ? new BigDecimal(child.asText()) : null;
+        return (child != null && !child.isNull() && child.isNumber()) ? new BigDecimal(child.asText()) : null;
     }
 
     static final String EXTRACTION_PROMPT = """
@@ -194,9 +138,7 @@ public class BedrockExtractionService implements TestPaperExtractionService {
                   "questionNumber": "1",
                   "questionText": "Full question text as written",
                   "questionType": "MCQ" or "OPEN",
-                  "mcqOptions": [
-                    { "key": "A", "text": "Option text" }
-                  ],
+                  "mcqOptions": [{ "key": "A", "text": "Option text" }],
                   "maxScore": 10,
                   "hasDiagramInQuestion": false,
                   "requiresDiagramAnswer": false,

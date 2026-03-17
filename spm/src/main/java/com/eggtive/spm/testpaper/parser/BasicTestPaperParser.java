@@ -124,12 +124,16 @@ public class BasicTestPaperParser implements TestPaperParser {
 
         float confidence = calculateConfidence(ocrConfidence, questionText, maxScore, isMcq ? mcqOptions.size() : subQuestions.size());
 
-        return new ParsedQuestion(
-                questionNumber, questionText,
-                isMcq ? "MCQ" : "OPEN",
-                mcqOptions, maxScore, subQuestions,
-                confidence, text
-        );
+        return ParsedQuestion.defaults()
+                .questionNumber(questionNumber)
+                .questionText(questionText)
+                .questionType(isMcq ? "MCQ" : "OPEN")
+                .mcqOptions(mcqOptions)
+                .maxScore(maxScore)
+                .subQuestions(subQuestions)
+                .confidence(confidence)
+                .rawTextSpan(text)
+                .build();
     }
 
     private BigDecimal extractMarks(String text) {
@@ -166,7 +170,10 @@ public class BasicTestPaperParser implements TestPaperParser {
             if (subMatcher.find()) {
                 // Save previous sub-question
                 if (currentLabel != null) {
-                    subs.add(new ParsedSubQuestion(currentLabel, currentText.toString().trim(), currentMarks, currentAnswer, ocrConfidence * 0.85f));
+                    subs.add(ParsedSubQuestion.defaults()
+                            .label(currentLabel).questionText(currentText.toString().trim())
+                            .maxScore(currentMarks).studentAnswer(currentAnswer)
+                            .confidence(ocrConfidence * 0.85f).build());
                 }
                 currentLabel = subMatcher.group(1);
                 currentText = new StringBuilder(line.substring(subMatcher.end()).trim());
@@ -191,7 +198,10 @@ public class BasicTestPaperParser implements TestPaperParser {
         }
         // Save last sub-question
         if (currentLabel != null) {
-            subs.add(new ParsedSubQuestion(currentLabel, currentText.toString().trim(), currentMarks, currentAnswer, ocrConfidence * 0.85f));
+            subs.add(ParsedSubQuestion.defaults()
+                    .label(currentLabel).questionText(currentText.toString().trim())
+                    .maxScore(currentMarks).studentAnswer(currentAnswer)
+                    .confidence(ocrConfidence * 0.85f).build());
         }
         return subs;
     }

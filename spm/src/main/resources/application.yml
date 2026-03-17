@@ -66,6 +66,12 @@ app:
       model-id: ${APP_EXTRACTION_BEDROCK_MODEL_ID:amazon.nova-2-lite-v1:0}
       model-adapter: ${APP_EXTRACTION_BEDROCK_MODEL_ADAPTER:nova}
       region: ${APP_EXTRACTION_BEDROCK_REGION:ap-southeast-1}
+  llm:
+    type: ${APP_LLM_TYPE:stub}
+    bedrock:
+      model-id: ${APP_LLM_BEDROCK_MODEL_ID:amazon.nova-2-lite-v1:0}
+      model-adapter: ${APP_LLM_BEDROCK_MODEL_ADAPTER:nova}
+      region: ${APP_LLM_BEDROCK_REGION:ap-southeast-1}
 
 # Spring AI Bedrock Converse (used when app.extraction.type=spring-ai)
 spring.ai:

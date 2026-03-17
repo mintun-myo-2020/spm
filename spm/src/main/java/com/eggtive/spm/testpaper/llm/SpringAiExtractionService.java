@@ -1,5 +1,6 @@
 package com.eggtive.spm.testpaper.llm;
 
+import com.eggtive.spm.common.llm.LlmResponseUtil;
 import com.eggtive.spm.testpaper.parser.*;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
@@ -87,7 +88,7 @@ public class SpringAiExtractionService implements TestPaperExtractionService {
         JsonNode notesNode = data.get("notes");
         if (notesNode != null && notesNode.isArray()) {
             for (JsonNode n : notesNode) {
-                notes.add(n.asText());
+                notes.add(n.asString());
             }
         }
 
@@ -100,7 +101,7 @@ public class SpringAiExtractionService implements TestPaperExtractionService {
         String questionNumber = textOrNull(node, "questionNumber");
         String questionText = textOrNull(node, "questionText");
         String questionType = textOrNull(node, "questionType");
-        BigDecimal maxScore = decimalOrNull(node, "maxScore");
+        BigDecimal maxScore = decimalOrNull(node);
         float confidence = node.has("confidence")
                 ? (float) node.get("confidence").asDouble() : 0.85f;
 
@@ -116,42 +117,43 @@ public class SpringAiExtractionService implements TestPaperExtractionService {
         JsonNode subsNode = node.get("subQuestions");
         if (subsNode != null && subsNode.isArray()) {
             for (JsonNode s : subsNode) {
-                subQuestions.add(new ParsedSubQuestion(
-                        textOrNull(s, "label"),
-                        textOrNull(s, "questionText"),
-                        decimalOrNull(s, "maxScore"),
-                        textOrNull(s, "studentAnswer"),
-                        s.has("confidence") ? (float) s.get("confidence").asDouble() : 0.80f
-                ));
+                subQuestions.add(ParsedSubQuestion.defaults()
+                        .label(textOrNull(s, "label"))
+                        .questionText(textOrNull(s, "questionText"))
+                        .maxScore(decimalOrNull(s))
+                        .studentAnswer(textOrNull(s, "studentAnswer"))
+                        .studentCorrection(textOrNull(s, "studentCorrection"))
+                        .teacherRemarks(textOrNull(s, "teacherRemarks"))
+                        .confidence(s.has("confidence") ? (float) s.get("confidence").asDouble() : 0.80f)
+                        .build());
             }
         }
 
-        return new ParsedQuestion(questionNumber, questionText,
-                questionType != null ? questionType : "OPEN",
-                mcqOptions, maxScore, subQuestions, confidence, null);
+        return ParsedQuestion.defaults()
+                .questionNumber(questionNumber)
+                .questionText(questionText)
+                .questionType(questionType != null ? questionType : "OPEN")
+                .mcqOptions(mcqOptions)
+                .maxScore(maxScore)
+                .subQuestions(subQuestions)
+                .hasDiagramInQuestion(node.has("hasDiagramInQuestion") && node.get("hasDiagramInQuestion").asBoolean())
+                .requiresDiagramAnswer(node.has("requiresDiagramAnswer") && node.get("requiresDiagramAnswer").asBoolean())
+                .confidence(confidence)
+                .build();
     }
 
     private String extractJsonFromText(String text) {
-        if (text == null || text.isBlank()) return "{}";
-        String trimmed = text.trim();
-        if (trimmed.startsWith("```")) {
-            int firstNewline = trimmed.indexOf('\n');
-            int lastFence = trimmed.lastIndexOf("```");
-            if (firstNewline > 0 && lastFence > firstNewline) {
-                trimmed = trimmed.substring(firstNewline + 1, lastFence).trim();
-            }
-        }
-        return trimmed;
+        return LlmResponseUtil.extractJsonFromText(text);
     }
 
     private String textOrNull(JsonNode node, String field) {
         JsonNode child = node.get(field);
-        return (child != null && !child.isNull()) ? child.asText() : null;
+        return (child != null && !child.isNull()) ? child.asString() : null;
     }
 
-    private BigDecimal decimalOrNull(JsonNode node, String field) {
-        JsonNode child = node.get(field);
+    private BigDecimal decimalOrNull(JsonNode node) {
+        JsonNode child = node.get("maxScore");
         return (child != null && !child.isNull() && child.isNumber())
-                ? new BigDecimal(child.asText()) : null;
+                ? new BigDecimal(child.asString()) : null;
     }
 }

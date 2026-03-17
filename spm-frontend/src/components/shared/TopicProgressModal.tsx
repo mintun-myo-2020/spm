@@ -14,6 +14,9 @@ interface Props {
   onTestClick?: (testScoreId: string) => void;
 }
 
+const scoreColor = (pct: number) =>
+  pct >= 70 ? 'text-green-600' : pct < 60 ? 'text-[#8B2500]' : 'text-gray-500 dark:text-gray-400';
+
 export function TopicProgressModal({ studentId, topic, onClose, onTestClick }: Props) {
   const [data, setData] = useState<TopicProgressDTO | null>(null);
   const [loading, setLoading] = useState(false);
@@ -55,8 +58,8 @@ export function TopicProgressModal({ studentId, topic, onClose, onTestClick }: P
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-3 text-sm">
             <span className="text-gray-500 dark:text-gray-400">{topic.testCount} {topic.testCount === 1 ? 'test' : 'tests'}, {topic.questionCount} {topic.questionCount === 1 ? 'question' : 'questions'}</span>
-            <span className="text-gray-500 dark:text-gray-400">Avg: {topic.averagePercentage.toFixed(1)}%</span>
-            <span className="text-gray-500 dark:text-gray-400">Latest: {topic.latestPercentage.toFixed(1)}%</span>
+            <span className={scoreColor(topic.averagePercentage)}>Avg: {topic.averagePercentage.toFixed(1)}%</span>
+            <span className={scoreColor(topic.latestPercentage)}>Latest: {topic.latestPercentage.toFixed(1)}%</span>
             <TrendBadge trend={topic.trend} />
           </div>
 
@@ -106,7 +109,7 @@ export function TopicProgressModal({ studentId, topic, onClose, onTestClick }: P
                         {onTestClick && <span className="ml-1 text-xs text-blue-500">→</span>}
                       </td>
                       <td className="py-1.5 text-gray-700 dark:text-gray-300">{d.questionCount}</td>
-                      <td className="py-1.5 text-gray-700 dark:text-gray-300">{d.score}/{d.maxScore} ({d.percentage}%)</td>
+                      <td className={`py-1.5 ${scoreColor(d.percentage)}`}>{d.score}/{d.maxScore} ({d.percentage}%)</td>
                       <td className="py-1.5 text-gray-600 dark:text-gray-400">{d.date}</td>
                     </tr>
                   ))}

@@ -22,6 +22,9 @@ interface Props {
   onViewScores?: () => void;
 }
 
+const scoreColor = (pct: number) =>
+  pct >= 70 ? 'text-green-600' : pct < 60 ? 'text-[#8B2500]' : '';
+
 export function StudentProgressView({ studentId, actions, onTestClick, onViewScores }: Props) {
   const [overall, setOverall] = useState<OverallProgressDTO | null>(null);
   const [topics, setTopics] = useState<TopicProgressSummaryDTO[]>([]);
@@ -66,7 +69,7 @@ export function StudentProgressView({ studentId, actions, onTestClick, onViewSco
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
           <Card>
             <p className="text-sm text-gray-500 dark:text-gray-400">Average Score</p>
-            <p className={`text-2xl font-bold ${overall.averageScore >= 70 ? 'text-green-600' : 'text-gray-900 dark:text-white'}`}>{overall.averageScore.toFixed(1)}</p>
+            <p className={`text-2xl font-bold ${overall.averageScore >= 70 ? 'text-green-600' : overall.averageScore < 60 ? 'text-[#8B2500]' : 'text-gray-900 dark:text-white'}`}>{overall.averageScore.toFixed(1)}</p>
           </Card>
           <Card className="group relative">
             <p className="text-sm text-gray-500 dark:text-gray-400">Improvement</p>
@@ -115,7 +118,7 @@ export function StudentProgressView({ studentId, actions, onTestClick, onViewSco
             {topics.map((t) => (
               <Card key={t.topicId} className="cursor-pointer transition-shadow hover:shadow-md" onClick={() => setSelectedTopic(t)} data-testid={`topic-card-${t.topicId}`}>
                 <h3 className="font-medium text-gray-900 dark:text-white">{t.topicName}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">{t.testCount} {t.testCount === 1 ? 'test' : 'tests'}, {t.questionCount} {t.questionCount === 1 ? 'question' : 'questions'} · Avg: {t.averagePercentage.toFixed(1)}%</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t.testCount} {t.testCount === 1 ? 'test' : 'tests'}, {t.questionCount} {t.questionCount === 1 ? 'question' : 'questions'} · <span className={scoreColor(t.averagePercentage)}>Avg: {t.averagePercentage.toFixed(1)}%</span></p>
                 <TrendBadge trend={t.trend} className="w-fit" />
               </Card>
             ))}

@@ -12,6 +12,9 @@ import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { ErrorMessage } from '../shared/ErrorMessage';
 import type { ClassDTO, OverallProgressDTO, TopicProgressSummaryDTO } from '../../types/domain';
 
+const scoreColor = (pct: number) =>
+  pct >= 70 ? 'text-green-600' : pct < 60 ? 'text-[#8B2500]' : '';
+
 export function MyProgress() {
   const { user } = useAuth();
   const location = useLocation();
@@ -119,7 +122,7 @@ export function MyProgress() {
               {topics.map((t) => (
                 <Card key={t.topicId} className="cursor-pointer transition-shadow hover:shadow-md" onClick={() => setSelectedTopic(t)}>
                   <h3 className="font-medium text-gray-900 dark:text-white">{t.topicName}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Avg: {t.averagePercentage.toFixed(1)}% · {t.testCount} {t.testCount === 1 ? 'test' : 'tests'}, {t.questionCount} {t.questionCount === 1 ? 'question' : 'questions'}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400"><span className={scoreColor(t.averagePercentage)}>Avg: {t.averagePercentage.toFixed(1)}%</span> · {t.testCount} {t.testCount === 1 ? 'test' : 'tests'}, {t.questionCount} {t.questionCount === 1 ? 'question' : 'questions'}</p>
                   <TrendBadge trend={t.trend} className="w-fit" />
                 </Card>
               ))}

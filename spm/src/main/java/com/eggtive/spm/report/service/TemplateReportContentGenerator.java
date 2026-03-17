@@ -74,7 +74,7 @@ public class TemplateReportContentGenerator implements ReportContentGenerator {
         sb.append("<h2>Overall Summary</h2>");
         var s = data.overallSummary();
         sb.append("<div class=\"summary-grid\">");
-        appendSummaryCard(sb, s.averageScore().toPlainString(), "Average Score");
+        appendSummaryCard(sb, s.averagePercentage().toPlainString() + "%", "Average Score");
         appendSummaryCard(sb, String.valueOf(s.testCount()), "Tests Taken");
         appendSummaryCard(sb, s.trend().name(), "Trend");
         sb.append("</div>");

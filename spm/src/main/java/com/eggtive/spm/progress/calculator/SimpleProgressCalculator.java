@@ -12,6 +12,14 @@ import java.util.List;
  * Simple implementation: plain averages, first-half vs second-half comparison.
  * Replace with a stats-library-backed impl for regression, weighted averages, etc.
  */
+/**
+ * Simple implementation: plain averages, first-half vs second-half comparison.
+ * Replace with a stats-library-backed impl for regression, weighted averages, etc.
+ */
+/**
+ * Simple implementation: plain averages, first-half vs second-half comparison.
+ * Replace with a stats-library-backed impl for regression, weighted averages, etc.
+ */
 @Component
 public class SimpleProgressCalculator implements ProgressCalculator {
 
@@ -43,10 +51,10 @@ public class SimpleProgressCalculator implements ProgressCalculator {
     @Override
     public Trend determineTrend(List<BigDecimal> scores) {
         if (scores == null || scores.size() < 2) return Trend.INSUFFICIENT_DATA;
-        int mid = scores.size() / 2;
-        BigDecimal firstAvg = average(scores.subList(0, mid));
-        BigDecimal recentAvg = average(scores.subList(mid, scores.size()));
-        BigDecimal diff = recentAvg.subtract(firstAvg);
+        // Compare latest score against the average of all previous scores
+        BigDecimal previousAvg = average(scores.subList(0, scores.size() - 1));
+        BigDecimal latest = scores.getLast();
+        BigDecimal diff = latest.subtract(previousAvg);
         if (diff.compareTo(THRESHOLD) > 0) return Trend.IMPROVING;
         if (diff.compareTo(THRESHOLD.negate()) < 0) return Trend.DECLINING;
         return Trend.STABLE;

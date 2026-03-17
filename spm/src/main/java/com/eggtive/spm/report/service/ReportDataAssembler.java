@@ -93,14 +93,23 @@ public class ReportDataAssembler {
         if (scores.isEmpty()) {
             return new ReportData.OverallSummary(BigDecimal.ZERO, 0, Trend.INSUFFICIENT_DATA);
         }
-        List<BigDecimal> scoreValues = scores.stream().map(TestScore::getOverallScore).toList();
-        BigDecimal avg = calculator.average(scoreValues);
-        Trend trend = calculator.determineTrend(scoreValues);
+        // Use percentages (not raw scores) so trend is consistent with topic-level trends
+        List<BigDecimal> percentages = scores.stream()
+            .map(ts -> ts.getMaxScore().compareTo(BigDecimal.ZERO) > 0
+                ? ts.getOverallScore().multiply(BigDecimal.valueOf(100))
+                    .divide(ts.getMaxScore(), 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO)
+            .toList();
+        BigDecimal avg = calculator.average(percentages);
+        Trend trend = calculator.determineTrend(percentages);
         return new ReportData.OverallSummary(avg, scores.size(), trend);
     }
 
     private List<ReportData.TopicSummary> buildTopicSummaries(List<TestScore> scores) {
-        Map<UUID, List<BigDecimal>> topicPerTestPercentages = new LinkedHashMap<>();
+        // Sum-based average: totalScore / totalMaxScore * 100 across all questions
+        Map<UUID, BigDecimal> topicTotalScore = new LinkedHashMap<>();
+        Map<UUID, BigDecimal> topicTotalMaxScore = new LinkedHashMap<>();
+        Map<UUID, List<BigDecimal>> topicPerTestPct = new LinkedHashMap<>();
         Map<UUID, String> topicNames = new HashMap<>();
         Map<UUID, Integer> topicCounts = new HashMap<>();
 
@@ -122,20 +131,22 @@ public class ReportDataAssembler {
             for (UUID topicId : testTopicScore.keySet()) {
                 BigDecimal maxScore = testTopicMaxScore.get(topicId);
                 if (maxScore.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal pct = testTopicScore.get(topicId)
-                            .multiply(BigDecimal.valueOf(100))
+                    BigDecimal score = testTopicScore.get(topicId);
+                    BigDecimal pct = score.multiply(BigDecimal.valueOf(100))
                             .divide(maxScore, 2, RoundingMode.HALF_UP);
-                    topicPerTestPercentages.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
+                    topicTotalScore.merge(topicId, score, BigDecimal::add);
+                    topicTotalMaxScore.merge(topicId, maxScore, BigDecimal::add);
+                    topicPerTestPct.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
                     topicCounts.merge(topicId, testTopicQCount.get(topicId), Integer::sum);
                 }
             }
         }
 
-        return topicPerTestPercentages.entrySet().stream().map(entry -> {
+        return topicTotalScore.entrySet().stream().map(entry -> {
             UUID topicId = entry.getKey();
-            List<BigDecimal> pcts = entry.getValue();
-            BigDecimal avg = calculator.average(pcts);
-            Trend trend = calculator.determineTrend(pcts);
+            BigDecimal avg = entry.getValue().multiply(BigDecimal.valueOf(100))
+                    .divide(topicTotalMaxScore.get(topicId), 2, RoundingMode.HALF_UP);
+            Trend trend = calculator.determineTrend(topicPerTestPct.get(topicId));
             return new ReportData.TopicSummary(topicId, topicNames.get(topicId),
                     topicCounts.get(topicId), avg, trend);
         }).toList();

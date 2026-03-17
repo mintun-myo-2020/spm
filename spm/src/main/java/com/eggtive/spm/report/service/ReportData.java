@@ -27,7 +27,7 @@ public record ReportData(
 
     public record ClassInfo(UUID id, String className, String subjectName, String teacherName) {}
 
-    public record OverallSummary(BigDecimal averageScore, int testCount, Trend trend) {}
+    public record OverallSummary(BigDecimal averagePercentage, int testCount, Trend trend) {}
 
     public record ScoreEntry(
         String testName, LocalDate testDate,

@@ -11,6 +11,21 @@ import java.util.List;
  * Swap this implementation to change how averages, velocity, and trends are computed
  * (e.g. weighted averages, linear regression, moving averages).
  */
+/**
+ * Abstraction for progress calculation logic.
+ * Swap this implementation to change how averages, velocity, and trends are computed
+ * (e.g. weighted averages, linear regression, moving averages).
+ */
+/**
+ * Abstraction for progress calculation logic.
+ * Swap this implementation to change how averages, velocity, and trends are computed
+ * (e.g. weighted averages, linear regression, moving averages).
+ */
+/**
+ * Abstraction for progress calculation logic.
+ * Swap this implementation to change how averages, velocity, and trends are computed
+ * (e.g. weighted averages, linear regression, moving averages).
+ */
 public interface ProgressCalculator {
 
     BigDecimal average(List<BigDecimal> values);
@@ -18,7 +33,8 @@ public interface ProgressCalculator {
     ImprovementVelocityDTO calculateVelocity(List<BigDecimal> scoresChronological, long monthsSpan);
 
     /**
-     * Determines the trend by comparing first-half vs second-half averages.
+     * Determines the trend by comparing the latest score against the average of all
+     * previous scores (excluding the latest). Requires at least 2 data points.
      */
     Trend determineTrend(List<BigDecimal> scoresChronological);
 }

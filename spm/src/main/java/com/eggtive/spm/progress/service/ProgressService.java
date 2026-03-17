@@ -15,9 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -89,77 +89,43 @@ public class ProgressService {
         if (!userService.studentExists(studentId)) {
             throw new AppException(ErrorCode.NOT_FOUND, "Student not found");
         }
-
         List<TestScore> allScores = testScoreService.findByStudentOrderByDateAsc(studentId);
         List<TestScore> scores = allScores.stream()
             .filter(ts -> ts.getTuitionClass().getId().equals(classId))
             .toList();
-
-        // Aggregate sub-questions per test per topic
-        Map<UUID, List<BigDecimal>> topicPerTestPercentages = new LinkedHashMap<>();
-        Map<UUID, String> topicNames = new HashMap<>();
-        Map<UUID, Integer> topicTestCounts = new HashMap<>();
-        Map<UUID, Integer> topicQuestionCounts = new HashMap<>();
-        Map<UUID, BigDecimal> topicLatestPct = new HashMap<>();
-
-        for (TestScore ts : scores) {
-            // Collect sub-questions for this test grouped by topic
-            Map<UUID, BigDecimal> testTopicScore = new LinkedHashMap<>();
-            Map<UUID, BigDecimal> testTopicMaxScore = new LinkedHashMap<>();
-            Map<UUID, Integer> testTopicQCount = new HashMap<>();
-
-            for (var q : ts.getQuestions()) {
-                for (SubQuestion sq : q.getSubQuestions()) {
-                    UUID topicId = sq.getTopic().getId();
-                    topicNames.putIfAbsent(topicId, sq.getTopic().getName());
-                    testTopicScore.merge(topicId, sq.getScore(), BigDecimal::add);
-                    testTopicMaxScore.merge(topicId, sq.getMaxScore(), BigDecimal::add);
-                    testTopicQCount.merge(topicId, 1, Integer::sum);
-                }
-            }
-
-            // Compute per-test percentage for each topic found in this test
-            for (UUID topicId : testTopicScore.keySet()) {
-                BigDecimal maxScore = testTopicMaxScore.get(topicId);
-                if (maxScore.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal pct = testTopicScore.get(topicId)
-                        .multiply(BigDecimal.valueOf(100))
-                        .divide(maxScore, 2, RoundingMode.HALF_UP);
-                    topicPerTestPercentages.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
-                    topicTestCounts.merge(topicId, 1, Integer::sum);
-                    topicQuestionCounts.merge(topicId, testTopicQCount.get(topicId), Integer::sum);
-                    topicLatestPct.put(topicId, pct);
-                }
-            }
-        }
-
-        return topicPerTestPercentages.entrySet().stream().map(entry -> {
-            UUID topicId = entry.getKey();
-            List<BigDecimal> percentages = entry.getValue();
-
-            BigDecimal avgPct = calculator.average(percentages);
-            BigDecimal latestPct = topicLatestPct.get(topicId);
-            Trend trend = calculator.determineTrend(percentages);
-
-            return new TopicProgressSummaryDTO(topicId, topicNames.get(topicId),
-                topicTestCounts.get(topicId), topicQuestionCounts.get(topicId),
-                avgPct, latestPct, trend);
-        }).toList();
+        return aggregateTopicProgress(scores);
     }
-
 
     public List<TopicProgressSummaryDTO> getAllTopicsProgress(UUID studentId) {
         if (!userService.studentExists(studentId)) {
             throw new AppException(ErrorCode.NOT_FOUND, "Student not found");
         }
-
         List<TestScore> scores = testScoreService.findByStudentOrderByDateAsc(studentId);
+        return aggregateTopicProgress(scores);
+    }
 
-        // Aggregate sub-questions per test per topic
-        Map<UUID, List<BigDecimal>> topicPerTestPercentages = new LinkedHashMap<>();
+    /**
+     * Shared topic aggregation logic.
+     *
+     * Average percentage = totalScore / totalMaxScore * 100 across ALL questions for a topic
+     * (i.e. every question counts equally regardless of which test it came from).
+     *
+     * Trend is still computed from per-test percentages (chronological) so we can detect
+     * improvement/decline over time.
+     *
+     * Latest percentage is selected by test date, not by insertion order.
+     */
+    private List<TopicProgressSummaryDTO> aggregateTopicProgress(List<TestScore> scores) {
+        // Running totals for the sum-based average
+        Map<UUID, BigDecimal> topicTotalScore = new LinkedHashMap<>();
+        Map<UUID, BigDecimal> topicTotalMaxScore = new LinkedHashMap<>();
+        // Per-test percentages for trend calculation
+        Map<UUID, List<BigDecimal>> topicPerTestPct = new LinkedHashMap<>();
         Map<UUID, String> topicNames = new HashMap<>();
         Map<UUID, Integer> topicTestCounts = new HashMap<>();
         Map<UUID, Integer> topicQuestionCounts = new HashMap<>();
+        // Latest percentage by date (not insertion order)
+        Map<UUID, LocalDate> topicLatestDate = new HashMap<>();
         Map<UUID, BigDecimal> topicLatestPct = new HashMap<>();
 
         for (TestScore ts : scores) {
@@ -180,24 +146,36 @@ public class ProgressService {
             for (UUID topicId : testTopicScore.keySet()) {
                 BigDecimal maxScore = testTopicMaxScore.get(topicId);
                 if (maxScore.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal pct = testTopicScore.get(topicId)
-                        .multiply(BigDecimal.valueOf(100))
+                    BigDecimal score = testTopicScore.get(topicId);
+                    BigDecimal pct = score.multiply(BigDecimal.valueOf(100))
                         .divide(maxScore, 2, RoundingMode.HALF_UP);
-                    topicPerTestPercentages.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
+                    int qCount = testTopicQCount.get(topicId);
+
+                    // Accumulate raw totals for sum-based average
+                    topicTotalScore.merge(topicId, score, BigDecimal::add);
+                    topicTotalMaxScore.merge(topicId, maxScore, BigDecimal::add);
+                    // Per-test percentage for trend
+                    topicPerTestPct.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
                     topicTestCounts.merge(topicId, 1, Integer::sum);
-                    topicQuestionCounts.merge(topicId, testTopicQCount.get(topicId), Integer::sum);
-                    topicLatestPct.put(topicId, pct);
+                    topicQuestionCounts.merge(topicId, qCount, Integer::sum);
+
+                    // Track latest by date
+                    LocalDate prevDate = topicLatestDate.get(topicId);
+                    if (prevDate == null || ts.getTestDate().isAfter(prevDate)) {
+                        topicLatestDate.put(topicId, ts.getTestDate());
+                        topicLatestPct.put(topicId, pct);
+                    }
                 }
             }
         }
 
-        return topicPerTestPercentages.entrySet().stream().map(entry -> {
+        return topicTotalScore.entrySet().stream().map(entry -> {
             UUID topicId = entry.getKey();
-            List<BigDecimal> percentages = entry.getValue();
-
-            BigDecimal avgPct = calculator.average(percentages);
+            // Average = totalScore / totalMaxScore * 100
+            BigDecimal avgPct = entry.getValue().multiply(BigDecimal.valueOf(100))
+                .divide(topicTotalMaxScore.get(topicId), 2, RoundingMode.HALF_UP);
             BigDecimal latestPct = topicLatestPct.get(topicId);
-            Trend trend = calculator.determineTrend(percentages);
+            Trend trend = calculator.determineTrend(topicPerTestPct.get(topicId));
 
             return new TopicProgressSummaryDTO(topicId, topicNames.get(topicId),
                 topicTestCounts.get(topicId), topicQuestionCounts.get(topicId),
@@ -249,7 +227,6 @@ public class ProgressService {
         return new TopicProgressDTO(studentId, topicId, topicName, trendData, avg);
     }
 
-
     public ClassSummaryDTO getClassSummary(UUID classId) {
         List<TestScore> scores = testScoreService.findByClassOrderByDateAsc(classId);
 
@@ -279,8 +256,10 @@ public class ProgressService {
             median = sorted.get(size / 2);
         }
 
-        // Topic-level aggregation across all students — per-test percentages
-        Map<UUID, List<BigDecimal>> topicPerTestPercentages = new LinkedHashMap<>();
+        // Topic-level: sum-based average, per-test percentages for trend
+        Map<UUID, BigDecimal> topicTotalScore = new LinkedHashMap<>();
+        Map<UUID, BigDecimal> topicTotalMaxScore = new LinkedHashMap<>();
+        Map<UUID, List<BigDecimal>> topicPerTestPct = new LinkedHashMap<>();
         Map<UUID, String> topicNames = new HashMap<>();
 
         for (TestScore ts : scores) {
@@ -299,21 +278,28 @@ public class ProgressService {
             for (UUID topicId : testTopicScore.keySet()) {
                 BigDecimal maxScore = testTopicMaxScore.get(topicId);
                 if (maxScore.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal pct = testTopicScore.get(topicId)
-                        .multiply(BigDecimal.valueOf(100))
+                    BigDecimal score = testTopicScore.get(topicId);
+                    BigDecimal pct = score.multiply(BigDecimal.valueOf(100))
                         .divide(maxScore, 2, RoundingMode.HALF_UP);
-                    topicPerTestPercentages.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
+                    topicTotalScore.merge(topicId, score, BigDecimal::add);
+                    topicTotalMaxScore.merge(topicId, maxScore, BigDecimal::add);
+                    topicPerTestPct.computeIfAbsent(topicId, k -> new ArrayList<>()).add(pct);
                 }
             }
         }
 
-        List<ClassSummaryDTO.TopicStat> topicStats = topicPerTestPercentages.entrySet().stream()
-            .map(e -> new ClassSummaryDTO.TopicStat(
-                e.getKey(),
-                topicNames.get(e.getKey()),
-                calculator.average(e.getValue()),
-                calculator.determineTrend(e.getValue())
-            ))
+        List<ClassSummaryDTO.TopicStat> topicStats = topicTotalScore.entrySet().stream()
+            .map(e -> {
+                UUID topicId = e.getKey();
+                BigDecimal avgPct = e.getValue().multiply(BigDecimal.valueOf(100))
+                    .divide(topicTotalMaxScore.get(topicId), 2, RoundingMode.HALF_UP);
+                return new ClassSummaryDTO.TopicStat(
+                    topicId,
+                    topicNames.get(topicId),
+                    avgPct,
+                    calculator.determineTrend(topicPerTestPct.get(topicId))
+                );
+            })
             .toList();
 
         ClassSummaryDTO.TopicStat strongest = topicStats.stream()
@@ -323,13 +309,9 @@ public class ProgressService {
             .min(Comparator.comparing(ClassSummaryDTO.TopicStat::averagePercentage))
             .orElse(null);
 
-        // Overall trend from all score percentages chronologically
         Trend overallTrend = calculator.determineTrend(new ArrayList<>(allPercentages));
 
         return new ClassSummaryDTO(classId, studentCount, scores.size(), mean, median,
             strongest, weakest, topicStats, overallTrend);
     }
-
-
 }
-

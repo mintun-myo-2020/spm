@@ -4,9 +4,9 @@ import { Badge } from 'flowbite-react';
 import type { Trend } from '../../types/domain';
 
 const trendDescriptions: Record<Trend, string> = {
-  IMPROVING: 'Recent tests average more than 2 percentage points above earlier tests.',
-  DECLINING: 'Recent tests average more than 2 percentage points below earlier tests.',
-  STABLE: 'The difference between recent and earlier test averages is within 2 percentage points.',
+  IMPROVING: 'Latest test is more than 2 percentage points above the previous average.',
+  DECLINING: 'Latest test is more than 2 percentage points below the previous average.',
+  STABLE: 'Latest test is within 2 percentage points of the previous average.',
   INSUFFICIENT_DATA: 'Fewer than 2 tests recorded — not enough data to determine a trend.',
 };
 

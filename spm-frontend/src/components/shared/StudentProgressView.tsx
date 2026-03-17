@@ -66,7 +66,7 @@ export function StudentProgressView({ studentId, actions, onTestClick, onViewSco
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
           <Card>
             <p className="text-sm text-gray-500 dark:text-gray-400">Average Score</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">{overall.averageScore.toFixed(1)}</p>
+            <p className={`text-2xl font-bold ${overall.averageScore >= 70 ? 'text-green-600' : 'text-gray-900 dark:text-white'}`}>{overall.averageScore.toFixed(1)}</p>
           </Card>
           <Card className="group relative">
             <p className="text-sm text-gray-500 dark:text-gray-400">Improvement</p>

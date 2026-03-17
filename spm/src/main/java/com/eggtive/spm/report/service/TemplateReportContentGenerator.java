@@ -1,5 +1,6 @@
 package com.eggtive.spm.report.service;
 
+import com.eggtive.spm.common.enums.Trend;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -75,7 +76,7 @@ public class TemplateReportContentGenerator implements ReportContentGenerator {
         sb.append("<div class=\"summary-grid\">");
         appendSummaryCard(sb, s.averageScore().toPlainString(), "Average Score");
         appendSummaryCard(sb, String.valueOf(s.testCount()), "Tests Taken");
-        appendSummaryCard(sb, s.trend(), "Trend");
+        appendSummaryCard(sb, s.trend().name(), "Trend");
         sb.append("</div>");
     }
 
@@ -108,14 +109,14 @@ public class TemplateReportContentGenerator implements ReportContentGenerator {
         sb.append("</tr></thead><tbody>");
         for (var t : data.topics()) {
             String trendClass = switch (t.trend()) {
-                case "IMPROVING" -> "trend-up";
-                case "DECLINING" -> "trend-down";
+                case IMPROVING -> "trend-up";
+                case DECLINING -> "trend-down";
                 default -> "trend-stable";
             };
             sb.append("<tr><td>").append(esc(t.topicName())).append("</td>");
             sb.append("<td>").append(t.questionCount()).append("</td>");
             sb.append("<td>").append(t.averagePercent().toPlainString()).append("%</td>");
-            sb.append("<td class=\"").append(trendClass).append("\">").append(esc(t.trend())).append("</td></tr>");
+            sb.append("<td class=\"").append(trendClass).append("\">").append(esc(t.trend().name())).append("</td></tr>");
         }
         sb.append("</tbody></table>");
     }

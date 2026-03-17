@@ -1,5 +1,6 @@
 package com.eggtive.spm.progress.calculator;
 
+import com.eggtive.spm.common.enums.Trend;
 import com.eggtive.spm.progress.dto.ImprovementVelocityDTO;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ public interface ProgressCalculator {
     ImprovementVelocityDTO calculateVelocity(List<BigDecimal> scoresChronological, long monthsSpan);
 
     /**
-     * Returns "IMPROVING", "DECLINING", or "STABLE" based on score history.
+     * Determines the trend by comparing first-half vs second-half averages.
      */
-    String determineTrend(List<BigDecimal> scoresChronological);
+    Trend determineTrend(List<BigDecimal> scoresChronological);
 }

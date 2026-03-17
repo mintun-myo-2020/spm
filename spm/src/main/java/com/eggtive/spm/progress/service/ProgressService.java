@@ -1,6 +1,7 @@
 package com.eggtive.spm.progress.service;
 
 import com.eggtive.spm.common.enums.ErrorCode;
+import com.eggtive.spm.common.enums.Trend;
 import com.eggtive.spm.common.exception.AppException;
 import com.eggtive.spm.progress.calculator.ProgressCalculator;
 import com.eggtive.spm.progress.dto.*;
@@ -119,7 +120,7 @@ public class ProgressService {
 
             BigDecimal avgPct = calculator.average(percentages);
             BigDecimal latestPct = percentages.getLast();
-            String trend = calculator.determineTrend(percentages);
+            Trend trend = calculator.determineTrend(percentages);
 
             return new TopicProgressSummaryDTO(topicId, topicNames.get(topicId),
                 data.size(), avgPct, latestPct, trend);
@@ -160,7 +161,7 @@ public class ProgressService {
 
             BigDecimal avgPct = calculator.average(percentages);
             BigDecimal latestPct = percentages.getLast();
-            String trend = calculator.determineTrend(percentages);
+            Trend trend = calculator.determineTrend(percentages);
 
             return new TopicProgressSummaryDTO(topicId, topicNames.get(topicId),
                 data.size(), avgPct, latestPct, trend);
@@ -216,7 +217,7 @@ public class ProgressService {
 
         if (scores.isEmpty()) {
             return new ClassSummaryDTO(classId, 0, 0, BigDecimal.ZERO, BigDecimal.ZERO,
-                null, null, List.of(), "STABLE");
+                null, null, List.of(), Trend.INSUFFICIENT_DATA);
         }
 
         int studentCount = (int) scores.stream()
@@ -275,7 +276,7 @@ public class ProgressService {
             .orElse(null);
 
         // Overall trend from all score percentages chronologically
-        String overallTrend = calculator.determineTrend(new ArrayList<>(allPercentages));
+        Trend overallTrend = calculator.determineTrend(new ArrayList<>(allPercentages));
 
         return new ClassSummaryDTO(classId, studentCount, scores.size(), mean, median,
             strongest, weakest, topicStats, overallTrend);

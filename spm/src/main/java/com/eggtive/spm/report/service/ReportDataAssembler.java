@@ -1,5 +1,6 @@
 package com.eggtive.spm.report.service;
 
+import com.eggtive.spm.common.enums.Trend;
 import com.eggtive.spm.classmanagement.entity.TuitionClass;
 import com.eggtive.spm.classmanagement.service.ClassService;
 import com.eggtive.spm.feedback.entity.Feedback;
@@ -86,20 +87,14 @@ public class ReportDataAssembler {
 
     private ReportData.OverallSummary buildOverallSummary(List<TestScore> scores) {
         if (scores.isEmpty()) {
-            return new ReportData.OverallSummary(BigDecimal.ZERO, 0, "N/A");
+            return new ReportData.OverallSummary(BigDecimal.ZERO, 0, Trend.INSUFFICIENT_DATA);
         }
         BigDecimal sum = scores.stream().map(TestScore::getOverallScore)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal avg = sum.divide(BigDecimal.valueOf(scores.size()), 2, RoundingMode.HALF_UP);
 
-        String trend = "STABLE";
-        if (scores.size() >= 2) {
-            BigDecimal first = scores.getFirst().getOverallScore();
-            BigDecimal last = scores.getLast().getOverallScore();
-            int cmp = last.compareTo(first);
-            if (cmp > 0) trend = "IMPROVING";
-            else if (cmp < 0) trend = "DECLINING";
-        }
+        List<BigDecimal> scoreValues = scores.stream().map(TestScore::getOverallScore).toList();
+        Trend trend = determineTrend(scoreValues);
         return new ReportData.OverallSummary(avg, scores.size(), trend);
     }
 
@@ -128,20 +123,29 @@ public class ReportDataAssembler {
             List<BigDecimal> pcts = entry.getValue();
             BigDecimal avg = pcts.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
                     .divide(BigDecimal.valueOf(pcts.size()), 2, RoundingMode.HALF_UP);
-            String trend = determineTrend(pcts);
+            Trend trend = determineTrend(pcts);
             return new ReportData.TopicSummary(topicId, topicNames.get(topicId),
                     topicCounts.get(topicId), avg, trend);
         }).toList();
     }
 
-    private String determineTrend(List<BigDecimal> values) {
-        if (values.size() < 2) return "N/A";
-        BigDecimal first = values.getFirst();
-        BigDecimal last = values.getLast();
-        int cmp = last.compareTo(first);
-        if (cmp > 0) return "IMPROVING";
-        if (cmp < 0) return "DECLINING";
-        return "STABLE";
+    /** First-half vs second-half average comparison with 2pp threshold. */
+    private Trend determineTrend(List<BigDecimal> values) {
+        if (values.size() < 2) return Trend.INSUFFICIENT_DATA;
+        int mid = values.size() / 2;
+        BigDecimal firstAvg = avgOf(values.subList(0, mid));
+        BigDecimal recentAvg = avgOf(values.subList(mid, values.size()));
+        BigDecimal diff = recentAvg.subtract(firstAvg);
+        BigDecimal threshold = new BigDecimal("2.00");
+        if (diff.compareTo(threshold) > 0) return Trend.IMPROVING;
+        if (diff.compareTo(threshold.negate()) < 0) return Trend.DECLINING;
+        return Trend.STABLE;
+    }
+
+    private BigDecimal avgOf(List<BigDecimal> values) {
+        if (values.isEmpty()) return BigDecimal.ZERO;
+        return values.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
+                .divide(BigDecimal.valueOf(values.size()), 2, RoundingMode.HALF_UP);
     }
 
     private ReportData.TestDetail buildTestDetail(TestScore ts) {

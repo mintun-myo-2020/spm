@@ -1,5 +1,6 @@
 package com.eggtive.spm.progress.calculator;
 
+import com.eggtive.spm.common.enums.Trend;
 import com.eggtive.spm.progress.dto.ImprovementVelocityDTO;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,9 @@ import java.util.List;
  */
 @Component
 public class SimpleProgressCalculator implements ProgressCalculator {
+
+    /** Minimum absolute difference (in percentage points) to count as a real change. */
+    private static final BigDecimal THRESHOLD = new BigDecimal("2.00");
 
     @Override
     public BigDecimal average(List<BigDecimal> values) {
@@ -37,15 +41,14 @@ public class SimpleProgressCalculator implements ProgressCalculator {
     }
 
     @Override
-    public String determineTrend(List<BigDecimal> scores) {
-        if (scores == null || scores.size() < 2) return "STABLE";
+    public Trend determineTrend(List<BigDecimal> scores) {
+        if (scores == null || scores.size() < 2) return Trend.INSUFFICIENT_DATA;
         int mid = scores.size() / 2;
         BigDecimal firstAvg = average(scores.subList(0, mid));
         BigDecimal recentAvg = average(scores.subList(mid, scores.size()));
         BigDecimal diff = recentAvg.subtract(firstAvg);
-        // Threshold: 2% change to count as improving/declining
-        if (diff.compareTo(new BigDecimal("2.00")) > 0) return "IMPROVING";
-        if (diff.compareTo(new BigDecimal("-2.00")) < 0) return "DECLINING";
-        return "STABLE";
+        if (diff.compareTo(THRESHOLD) > 0) return Trend.IMPROVING;
+        if (diff.compareTo(THRESHOLD.negate()) < 0) return Trend.DECLINING;
+        return Trend.STABLE;
     }
 }

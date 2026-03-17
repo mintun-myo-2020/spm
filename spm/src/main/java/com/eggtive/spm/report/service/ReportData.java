@@ -1,5 +1,7 @@
 package com.eggtive.spm.report.service;
 
+import com.eggtive.spm.common.enums.Trend;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -25,7 +27,7 @@ public record ReportData(
 
     public record ClassInfo(UUID id, String className, String subjectName, String teacherName) {}
 
-    public record OverallSummary(BigDecimal averageScore, int testCount, String trend) {}
+    public record OverallSummary(BigDecimal averageScore, int testCount, Trend trend) {}
 
     public record ScoreEntry(
         String testName, LocalDate testDate,
@@ -34,7 +36,7 @@ public record ReportData(
 
     public record TopicSummary(
         UUID topicId, String topicName,
-        int questionCount, BigDecimal averagePercent, String trend
+        int questionCount, BigDecimal averagePercent, Trend trend
     ) {}
 
     public record FeedbackEntry(

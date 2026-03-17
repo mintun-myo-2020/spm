@@ -223,13 +223,15 @@ export interface TopicTrendDataPoint {
   percentage: number;
 }
 
+export type Trend = 'IMPROVING' | 'DECLINING' | 'STABLE' | 'INSUFFICIENT_DATA';
+
 export interface TopicProgressSummaryDTO {
   topicId: string;
   topicName: string;
   testCount: number;
   averagePercentage: number;
   latestPercentage: number;
-  trend: 'IMPROVING' | 'DECLINING' | 'STABLE';
+  trend: Trend;
 }
 
 export interface NotificationDTO {
@@ -271,14 +273,14 @@ export interface ClassSummaryDTO {
   strongestTopic: TopicStat | null;
   weakestTopic: TopicStat | null;
   topicStats: TopicStat[];
-  overallTrend: 'IMPROVING' | 'DECLINING' | 'STABLE';
+  overallTrend: Trend;
 }
 
 export interface TopicStat {
   topicId: string;
   topicName: string;
   averagePercentage: number;
-  trend: 'IMPROVING' | 'DECLINING' | 'STABLE';
+  trend: Trend;
 }
 
 // --- OCR Test Paper Upload Types ---

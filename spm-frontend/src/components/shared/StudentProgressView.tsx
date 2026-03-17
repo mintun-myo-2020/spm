@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Badge, Button, Card } from 'flowbite-react';
+import { Button, Card } from 'flowbite-react';
 import { progressService } from '../../services/progressService';
 import { Chart } from './Chart';
 import { TopicProgressModal } from './TopicProgressModal';
+import { TrendBadge } from './TrendBadge';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
 import type { OverallProgressDTO, TopicProgressSummaryDTO } from '../../types/domain';
@@ -115,7 +116,7 @@ export function StudentProgressView({ studentId, actions, onTestClick, onViewSco
               <Card key={t.topicId} className="cursor-pointer transition-shadow hover:shadow-md" onClick={() => setSelectedTopic(t)} data-testid={`topic-card-${t.topicId}`}>
                 <h3 className="font-medium text-gray-900 dark:text-white">{t.topicName}</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">{t.testCount} tests · Avg: {t.averagePercentage.toFixed(1)}%</p>
-                <Badge color={t.trend === 'IMPROVING' ? 'success' : t.trend === 'DECLINING' ? 'failure' : 'gray'} className="w-fit">{t.trend}</Badge>
+                <TrendBadge trend={t.trend} className="w-fit" />
               </Card>
             ))}
           </div>

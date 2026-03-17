@@ -1,17 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Badge } from 'flowbite-react';
 import { classService } from '../../services/classService';
 import { LoadingSpinner } from './LoadingSpinner';
-import type { ClassSummaryDTO } from '../../types/domain';
+import { TrendBadge } from './TrendBadge';
+import type { ClassSummaryDTO, Trend } from '../../types/domain';
 
 interface Props {
   classId: string;
 }
-
-const trendBadge = (trend: string) => {
-  const color = trend === 'IMPROVING' ? 'success' : trend === 'DECLINING' ? 'failure' : 'gray';
-  return <Badge color={color} size="sm">{trend}</Badge>;
-};
 
 export function ClassSummaryPanel({ classId }: Props) {
   const [summary, setSummary] = useState<ClassSummaryDTO | null>(null);
@@ -40,7 +35,7 @@ export function ClassSummaryPanel({ classId }: Props) {
         <StatCard label="Tests Taken" value={String(summary.testCount)} />
         <div className="rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
           <p className="text-xs text-gray-500 dark:text-gray-400">Overall Trend</p>
-          <div className="mt-1">{trendBadge(summary.overallTrend)}</div>
+          <div className="mt-1"><TrendBadge trend={summary.overallTrend as Trend} /></div>
         </div>
       </div>
 
@@ -90,7 +85,7 @@ export function ClassSummaryPanel({ classId }: Props) {
                     </div>
                   </div>
                   <span className="w-12 text-right text-xs text-gray-700 dark:text-gray-300">{t.averagePercentage.toFixed(0)}%</span>
-                  {trendBadge(t.trend)}
+                  <TrendBadge trend={t.trend as Trend} />
                 </div>
               ))}
           </div>

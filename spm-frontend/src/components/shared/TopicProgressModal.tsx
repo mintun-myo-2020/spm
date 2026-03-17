@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Badge } from 'flowbite-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { progressService } from '../../services/progressService';
 import { Modal } from './Modal';
+import { TrendBadge } from './TrendBadge';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
 import type { TopicProgressDTO, TopicProgressSummaryDTO } from '../../types/domain';
@@ -56,7 +56,7 @@ export function TopicProgressModal({ studentId, topic, onClose, onTestClick }: P
             <span className="text-gray-500 dark:text-gray-400">{topic.testCount} tests</span>
             <span className="text-gray-500 dark:text-gray-400">Avg: {topic.averagePercentage.toFixed(1)}%</span>
             <span className="text-gray-500 dark:text-gray-400">Latest: {topic.latestPercentage.toFixed(1)}%</span>
-            <Badge color={topic.trend === 'IMPROVING' ? 'success' : topic.trend === 'DECLINING' ? 'failure' : 'gray'}>{topic.trend}</Badge>
+            <TrendBadge trend={topic.trend} />
           </div>
 
           {chartData.length > 1 ? (

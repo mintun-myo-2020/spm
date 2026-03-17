@@ -5,6 +5,7 @@ import com.eggtive.spm.classmanagement.entity.TuitionClass;
 import com.eggtive.spm.classmanagement.service.ClassService;
 import com.eggtive.spm.feedback.entity.Feedback;
 import com.eggtive.spm.feedback.repository.FeedbackRepository;
+import com.eggtive.spm.progress.calculator.ProgressCalculator;
 import com.eggtive.spm.testscore.entity.Question;
 import com.eggtive.spm.testscore.entity.SubQuestion;
 import com.eggtive.spm.testscore.entity.TestScore;
@@ -27,13 +28,16 @@ public class ReportDataAssembler {
     private final TestScoreService testScoreService;
     private final FeedbackRepository feedbackRepository;
     private final ClassService classService;
+    private final ProgressCalculator calculator;
 
     public ReportDataAssembler(TestScoreService testScoreService,
                                FeedbackRepository feedbackRepository,
-                               ClassService classService) {
+                               ClassService classService,
+                               ProgressCalculator calculator) {
         this.testScoreService = testScoreService;
         this.feedbackRepository = feedbackRepository;
         this.classService = classService;
+        this.calculator = calculator;
     }
 
     public ReportData assemble(Student student, UUID classId, LocalDate startDate, LocalDate endDate) {
@@ -89,12 +93,9 @@ public class ReportDataAssembler {
         if (scores.isEmpty()) {
             return new ReportData.OverallSummary(BigDecimal.ZERO, 0, Trend.INSUFFICIENT_DATA);
         }
-        BigDecimal sum = scores.stream().map(TestScore::getOverallScore)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal avg = sum.divide(BigDecimal.valueOf(scores.size()), 2, RoundingMode.HALF_UP);
-
         List<BigDecimal> scoreValues = scores.stream().map(TestScore::getOverallScore).toList();
-        Trend trend = determineTrend(scoreValues);
+        BigDecimal avg = calculator.average(scoreValues);
+        Trend trend = calculator.determineTrend(scoreValues);
         return new ReportData.OverallSummary(avg, scores.size(), trend);
     }
 
@@ -121,31 +122,11 @@ public class ReportDataAssembler {
         return topicPercentages.entrySet().stream().map(entry -> {
             UUID topicId = entry.getKey();
             List<BigDecimal> pcts = entry.getValue();
-            BigDecimal avg = pcts.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
-                    .divide(BigDecimal.valueOf(pcts.size()), 2, RoundingMode.HALF_UP);
-            Trend trend = determineTrend(pcts);
+            BigDecimal avg = calculator.average(pcts);
+            Trend trend = calculator.determineTrend(pcts);
             return new ReportData.TopicSummary(topicId, topicNames.get(topicId),
                     topicCounts.get(topicId), avg, trend);
         }).toList();
-    }
-
-    /** First-half vs second-half average comparison with 2pp threshold. */
-    private Trend determineTrend(List<BigDecimal> values) {
-        if (values.size() < 2) return Trend.INSUFFICIENT_DATA;
-        int mid = values.size() / 2;
-        BigDecimal firstAvg = avgOf(values.subList(0, mid));
-        BigDecimal recentAvg = avgOf(values.subList(mid, values.size()));
-        BigDecimal diff = recentAvg.subtract(firstAvg);
-        BigDecimal threshold = new BigDecimal("2.00");
-        if (diff.compareTo(threshold) > 0) return Trend.IMPROVING;
-        if (diff.compareTo(threshold.negate()) < 0) return Trend.DECLINING;
-        return Trend.STABLE;
-    }
-
-    private BigDecimal avgOf(List<BigDecimal> values) {
-        if (values.isEmpty()) return BigDecimal.ZERO;
-        return values.stream().reduce(BigDecimal.ZERO, BigDecimal::add)
-                .divide(BigDecimal.valueOf(values.size()), 2, RoundingMode.HALF_UP);
     }
 
     private ReportData.TestDetail buildTestDetail(TestScore ts) {

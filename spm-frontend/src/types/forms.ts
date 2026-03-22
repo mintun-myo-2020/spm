@@ -39,6 +39,7 @@ export interface SubQuestionInput {
   maxScore: number;
   topicId: string;
   studentAnswer?: string;
+  teacherRemarks?: string;
 }
 
 export interface McqOptionInput {

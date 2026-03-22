@@ -29,6 +29,9 @@ public class SubQuestion extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String studentAnswer;
 
+    @Column(columnDefinition = "TEXT")
+    private String teacherRemarks;
+
     public Question getQuestion() { return question; }
     public void setQuestion(Question question) { this.question = question; }
     public String getSubQuestionLabel() { return subQuestionLabel; }
@@ -41,4 +44,6 @@ public class SubQuestion extends BaseEntity {
     public void setTopic(Topic topic) { this.topic = topic; }
     public String getStudentAnswer() { return studentAnswer; }
     public void setStudentAnswer(String studentAnswer) { this.studentAnswer = studentAnswer; }
+    public String getTeacherRemarks() { return teacherRemarks; }
+    public void setTeacherRemarks(String teacherRemarks) { this.teacherRemarks = teacherRemarks; }
 }

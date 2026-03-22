@@ -180,6 +180,7 @@ public class TestScoreService {
                         sq.setMaxScore(sqReq.maxScore());
                         sq.setTopic(topic);
                         sq.setStudentAnswer(sqReq.studentAnswer());
+                        sq.setTeacherRemarks(sqReq.teacherRemarks());
                         q.getSubQuestions().add(sq);
                     }
                 }
@@ -211,7 +212,7 @@ public class TestScoreService {
         var questions = ts.getQuestions().stream().map(q -> {
             var subs = q.getSubQuestions().stream().map(sq ->
                 new TestScoreDTO.SubQuestionDTO(sq.getId(), sq.getSubQuestionLabel(), sq.getScore(),
-                    sq.getMaxScore(), sq.getTopic().getId(), sq.getTopic().getName(), sq.getStudentAnswer())
+                    sq.getMaxScore(), sq.getTopic().getId(), sq.getTopic().getName(), sq.getStudentAnswer(), sq.getTeacherRemarks())
             ).toList();
             return new TestScoreDTO.QuestionDTO(q.getId(), q.getQuestionNumber(), q.getMaxScore(),
                 q.getQuestionText(), q.getQuestionType(), deserializeMcqOptions(q.getMcqOptions()), subs);

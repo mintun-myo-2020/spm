@@ -123,6 +123,7 @@ export interface SubQuestionDTO {
   topicId: string;
   topicName: string;
   studentAnswer: string | null;
+  teacherRemarks: string | null;
 }
 
 export interface McqOptionDTO {

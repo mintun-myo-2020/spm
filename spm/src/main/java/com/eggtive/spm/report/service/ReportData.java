@@ -58,6 +58,6 @@ public record ReportData(
     public record SubQuestionDetail(
         String label, String topicName,
         BigDecimal score, BigDecimal maxScore,
-        String studentAnswer
+        String studentAnswer, String teacherRemarks
     ) {}
 }

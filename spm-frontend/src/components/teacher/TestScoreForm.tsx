@@ -26,6 +26,7 @@ const subQuestionSchema = z.object({
   maxScore: z.number().min(0.01),
   topicId: z.string().min(1, 'Topic is required'),
   studentAnswer: z.string().optional(),
+  teacherRemarks: z.string().optional(),
 });
 
 const questionSchema = z.object({
@@ -63,7 +64,7 @@ export function TestScoreForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       testName: '', testDate: '', testSource: 'CENTRE' as const, overallScore: 0, maxScore: 100,
-      questions: [{ questionNumber: 'Q1', maxScore: 20, questionText: '', questionType: 'OPEN', mcqOptions: [], subQuestions: [{ label: 'a', score: 0, maxScore: 10, topicId: '', studentAnswer: '' }] }],
+      questions: [{ questionNumber: 'Q1', maxScore: 20, questionText: '', questionType: 'OPEN', mcqOptions: [], subQuestions: [{ label: 'a', score: 0, maxScore: 10, topicId: '', studentAnswer: '', teacherRemarks: '' }] }],
     },
   });
 
@@ -100,6 +101,7 @@ export function TestScoreForm() {
                 maxScore: sq.maxScore,
                 topicId: sq.topicId,
                 studentAnswer: sq.studentAnswer ?? '',
+                teacherRemarks: sq.teacherRemarks ?? '',
               })),
             })),
           });
@@ -137,8 +139,9 @@ export function TestScoreForm() {
             maxScore: sq.maxScore ?? 0,
             topicId: '',
             studentAnswer: sq.studentAnswer ?? '',
+            teacherRemarks: '',
           }))
-        : [{ label: 'a', score: 0, maxScore: q.maxScore ?? 0, topicId: '', studentAnswer: '' }],
+        : [{ label: 'a', score: 0, maxScore: q.maxScore ?? 0, topicId: '', studentAnswer: '', teacherRemarks: '' }],
     }));
 
     reset((prev) => ({
@@ -208,10 +211,10 @@ export function TestScoreForm() {
           </div>
           <div>
             <Label htmlFor="testSource">Source</Label>
-            <Select id="testSource" {...register('testSource')} data-testid="test-source-select">
+            <select id="testSource" {...register('testSource')} data-testid="test-source-select" className="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500">
               <option value="CENTRE">Centre</option>
               <option value="SCHOOL">School</option>
-            </Select>
+            </select>
           </div>
           <div>
             <Label htmlFor="overallScore">Overall Score</Label>
@@ -243,7 +246,7 @@ export function TestScoreForm() {
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Questions</h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">Break down the test into questions and sub-questions. Map each sub-question to a topic for tracking.</p>
             </div>
-            <Button size="sm" color="light" onClick={() => addQuestion({ questionNumber: `Q${questionFields.length + 1}`, maxScore: 20, questionText: '', questionType: 'OPEN', mcqOptions: [], subQuestions: [{ label: 'a', score: 0, maxScore: 10, topicId: '', studentAnswer: '' }] })} data-testid="add-question-button">+ Add Question</Button>
+            <Button size="sm" color="light" onClick={() => addQuestion({ questionNumber: `Q${questionFields.length + 1}`, maxScore: 20, questionText: '', questionType: 'OPEN', mcqOptions: [], subQuestions: [{ label: 'a', score: 0, maxScore: 10, topicId: '', studentAnswer: '', teacherRemarks: '' }] })} data-testid="add-question-button">+ Add Question</Button>
           </div>
           {questionFields.map((qField, qIdx) => (
             <QuestionBlock key={qField.id} qIdx={qIdx} control={control} register={register} setValue={setValue} topics={topics} defaultType={qField.questionType ?? 'OPEN'} onRemove={() => removeQuestion(qIdx)} />
@@ -369,34 +372,37 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
             <span className="w-8" />
           </div>
           {subFields.map((sf, sIdx) => (
-            <div key={sf.id} className="mb-2 flex flex-wrap items-end gap-2" data-testid={`sub-question-${qIdx}-${sIdx}`}>
-              <div className="sm:w-14">
-                <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Label</Label>
-                <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.label`)} placeholder="a" className="w-14" />
+            <div key={sf.id} className="mb-2 space-y-1" data-testid={`sub-question-${qIdx}-${sIdx}`}>
+              <div className="flex flex-wrap items-end gap-2">
+                <div className="sm:w-14">
+                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Label</Label>
+                  <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.label`)} placeholder="a" className="w-14" />
+                </div>
+                <div className="sm:w-20">
+                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Score</Label>
+                  <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.score`, { valueAsNumber: true })} placeholder="0" className="w-20" />
+                </div>
+                <div className="sm:w-20">
+                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Max</Label>
+                  <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.maxScore`, { valueAsNumber: true })} placeholder="10" className="w-20" />
+                </div>
+                <div className="flex-1">
+                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Topic</Label>
+                  <Select sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.topicId`)} className="w-full" data-testid={`topic-select-${qIdx}-${sIdx}`}>
+                    <option value="">Select topic</option>
+                    {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+                  </Select>
+                </div>
+                <div className="sm:w-32">
+                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Answer</Label>
+                  <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.studentAnswer`)} placeholder="Student answer" className="w-32" />
+                </div>
+                <Button size="xs" color="failure" onClick={() => removeSub(sIdx)}>×</Button>
               </div>
-              <div className="sm:w-20">
-                <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Score</Label>
-                <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.score`, { valueAsNumber: true })} placeholder="0" className="w-20" />
-              </div>
-              <div className="sm:w-20">
-                <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Max</Label>
-                <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.maxScore`, { valueAsNumber: true })} placeholder="10" className="w-20" />
-              </div>
-              <div className="flex-1">
-                <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Topic</Label>
-                <Select sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.topicId`)} className="w-full" data-testid={`topic-select-${qIdx}-${sIdx}`}>
-                  <option value="">Select topic</option>
-                  {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-                </Select>
-              </div>
-              <div className="sm:w-32">
-                <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Answer</Label>
-                <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.studentAnswer`)} placeholder="Student answer" className="w-32" />
-              </div>
-              <Button size="xs" color="failure" onClick={() => removeSub(sIdx)}>×</Button>
+              <Textarea {...register(`questions.${qIdx}.subQuestions.${sIdx}.teacherRemarks`)} placeholder="Teacher remarks (optional)" rows={1} className="text-xs" />
             </div>
           ))}
-          <Button size="xs" color="light" onClick={() => addSub({ label: String.fromCharCode(97 + subFields.length), score: 0, maxScore: 10, topicId: '', studentAnswer: '' })} data-testid={`add-sub-question-${qIdx}`}>+ Sub-question</Button>
+          <Button size="xs" color="light" onClick={() => addSub({ label: String.fromCharCode(97 + subFields.length), score: 0, maxScore: 10, topicId: '', studentAnswer: '', teacherRemarks: '' })} data-testid={`add-sub-question-${qIdx}`}>+ Sub-question</Button>
         </>
       )}
     </Card>

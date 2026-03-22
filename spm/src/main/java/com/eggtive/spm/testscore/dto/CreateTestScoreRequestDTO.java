@@ -37,6 +37,7 @@ public record CreateTestScoreRequestDTO(
         @NotNull BigDecimal score,
         @NotNull @Positive BigDecimal maxScore,
         @NotNull UUID topicId,
-        String studentAnswer
+        String studentAnswer,
+        String teacherRemarks
     ) {}
 }

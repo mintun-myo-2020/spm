@@ -158,7 +158,7 @@ public class ReportDataAssembler {
                     List<ReportData.SubQuestionDetail> subs = q.getSubQuestions().stream()
                             .map(sq -> new ReportData.SubQuestionDetail(
                                     sq.getSubQuestionLabel(), sq.getTopic().getName(),
-                                    sq.getScore(), sq.getMaxScore(), sq.getStudentAnswer()))
+                                    sq.getScore(), sq.getMaxScore(), sq.getStudentAnswer(), sq.getTeacherRemarks()))
                             .toList();
                     return new ReportData.QuestionDetail(q.getQuestionNumber(), q.getQuestionText(),
                             q.getQuestionType(), q.getMaxScore(), subs);

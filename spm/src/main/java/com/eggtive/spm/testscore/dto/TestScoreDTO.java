@@ -26,6 +26,6 @@ public record TestScoreDTO(
 
     public record SubQuestionDTO(
         UUID id, String label, BigDecimal score, BigDecimal maxScore,
-        UUID topicId, String topicName, String studentAnswer
+        UUID topicId, String topicName, String studentAnswer, String teacherRemarks
     ) {}
 }

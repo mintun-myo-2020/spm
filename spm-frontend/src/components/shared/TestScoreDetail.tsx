@@ -150,15 +150,20 @@ export function TestScoreDetail({ score }: Props) {
                       {q.questionType !== 'MCQ' && q.subQuestions.length > 0 && (
                         <div className="space-y-2">
                           {q.subQuestions.map((sq) => (
-                            <div key={sq.id} className="flex items-start gap-2 rounded-md bg-white px-3 py-2 dark:bg-gray-800 border dark:border-gray-700">
-                              <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 shrink-0">({sq.label})</span>
-                              <Badge color="indigo" size="xs" className="shrink-0">{sq.topicName}</Badge>
-                              <Badge color={getScoreBadgeColor(sq.score, sq.maxScore)} size="xs" className="shrink-0">{sq.score}/{sq.maxScore}</Badge>
-                              {sq.studentAnswer && (
-                                <>
-                                  <span className="text-gray-300 dark:text-gray-600 shrink-0">—</span>
-                                  <span className="text-sm text-gray-700 dark:text-gray-300 italic">&ldquo;{sq.studentAnswer}&rdquo;</span>
-                                </>
+                            <div key={sq.id} className="rounded-md bg-white px-3 py-2 dark:bg-gray-800 border dark:border-gray-700 space-y-1">
+                              <div className="flex items-start gap-2">
+                                <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 shrink-0">({sq.label})</span>
+                                <Badge color="indigo" size="xs" className="shrink-0">{sq.topicName}</Badge>
+                                <Badge color={getScoreBadgeColor(sq.score, sq.maxScore)} size="xs" className="shrink-0">{sq.score}/{sq.maxScore}</Badge>
+                                {sq.studentAnswer && (
+                                  <>
+                                    <span className="text-gray-300 dark:text-gray-600 shrink-0">—</span>
+                                    <span className="text-sm text-gray-700 dark:text-gray-300 italic">&ldquo;{sq.studentAnswer}&rdquo;</span>
+                                  </>
+                                )}
+                              </div>
+                              {sq.teacherRemarks && (
+                                <p className="ml-6 text-xs text-amber-700 dark:text-amber-400 italic">💬 {sq.teacherRemarks}</p>
                               )}
                             </div>
                           ))}

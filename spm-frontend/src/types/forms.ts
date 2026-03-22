@@ -60,6 +60,7 @@ export interface CreateTestScoreForm {
   classId: string;
   testName: string;
   testDate: string;
+  testSource?: 'SCHOOL' | 'CENTRE';
   overallScore: number;
   maxScore?: number;
   questions: QuestionInput[];

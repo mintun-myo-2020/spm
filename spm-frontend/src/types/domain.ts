@@ -152,6 +152,7 @@ export interface TestScoreDTO {
   testDate: string;
   overallScore: number;
   maxScore: number;
+  testSource: 'SCHOOL' | 'CENTRE';
   questions: QuestionDTO[];
   createdAt: string;
   updatedAt: string;

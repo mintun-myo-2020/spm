@@ -18,7 +18,8 @@ public record CreateTestScoreRequestDTO(
     BigDecimal maxScore,
     @Valid List<QuestionRequest> questions,
     List<UUID> uploadIds,
-    Boolean isDraft
+    Boolean isDraft,
+    String testSource
 ) {
     public record McqOptionRequest(String key, String text) {}
 

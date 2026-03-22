@@ -55,6 +55,7 @@ export function TestScoreDetail({ score }: Props) {
     <div className="space-y-4" data-testid="test-score-detail">
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div><span className="text-gray-500 dark:text-gray-400">Date:</span> {new Date(score.testDate).toLocaleDateString()}</div>
+        <div><span className="text-gray-500 dark:text-gray-400">Source:</span> <Badge color={score.testSource === 'SCHOOL' ? 'purple' : 'blue'} size="xs" className="ml-1 inline">{score.testSource === 'SCHOOL' ? 'School' : 'Centre'}</Badge></div>
         <div><span className="text-gray-500 dark:text-gray-400">Class:</span> {score.className}</div>
         <div><span className="text-gray-500 dark:text-gray-400">Score:</span> {score.overallScore}/{score.maxScore}</div>
         <div><span className="text-gray-500 dark:text-gray-400">Teacher:</span> {score.teacherName}</div>

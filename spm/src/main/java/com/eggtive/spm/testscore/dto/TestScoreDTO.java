@@ -12,6 +12,7 @@ public record TestScoreDTO(
     UUID teacherId, String teacherName,
     String testName, LocalDate testDate,
     BigDecimal overallScore, BigDecimal maxScore,
+    String testSource,
     List<QuestionDTO> questions,
     Instant createdAt, Instant updatedAt
 ) {

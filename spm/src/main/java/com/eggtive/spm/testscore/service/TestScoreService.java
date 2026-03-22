@@ -3,6 +3,7 @@ package com.eggtive.spm.testscore.service;
 import com.eggtive.spm.classmanagement.service.ClassService;
 import com.eggtive.spm.common.dto.PagedResponse;
 import com.eggtive.spm.common.enums.ErrorCode;
+import com.eggtive.spm.common.enums.TestSource;
 import com.eggtive.spm.common.exception.AppException;
 import com.eggtive.spm.subject.entity.Topic;
 import com.eggtive.spm.subject.service.SubjectService;
@@ -67,6 +68,7 @@ public class TestScoreService {
         ts.setOverallScore(req.overallScore());
         ts.setMaxScore(req.maxScore() != null ? req.maxScore() : new BigDecimal("100.00"));
         ts.setDraft(req.isDraft() != null && req.isDraft());
+        ts.setTestSource(req.testSource() != null ? TestSource.valueOf(req.testSource()) : TestSource.CENTRE);
         ts.setCreatedBy(currentUser);
         ts.setUpdatedBy(currentUser);
 
@@ -93,6 +95,7 @@ public class TestScoreService {
         ts.setTestDate(req.testDate());
         ts.setOverallScore(req.overallScore());
         ts.setMaxScore(req.maxScore() != null ? req.maxScore() : new BigDecimal("100.00"));
+        ts.setTestSource(req.testSource() != null ? TestSource.valueOf(req.testSource()) : ts.getTestSource());
         ts.setUpdatedBy(currentUser);
 
         ts.getQuestions().clear();
@@ -222,7 +225,7 @@ public class TestScoreService {
         return new TestScoreDTO(ts.getId(), s.getId(), studentName,
             ts.getTuitionClass().getId(), ts.getTuitionClass().getName(),
             t.getId(), teacherName, ts.getTestName(), ts.getTestDate(),
-            ts.getOverallScore(), ts.getMaxScore(), questions,
+            ts.getOverallScore(), ts.getMaxScore(), ts.getTestSource().name(), questions,
             ts.getCreatedAt(), ts.getUpdatedAt());
     }
 }

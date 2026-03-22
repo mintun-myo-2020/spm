@@ -17,6 +17,7 @@ public record TestScoreDetailDTO(
     UUID teacherId, String teacherName,
     String testName, LocalDate testDate,
     BigDecimal overallScore, BigDecimal maxScore,
+    String testSource,
     List<TestScoreDTO.QuestionDTO> questions,
     Instant createdAt, Instant updatedAt,
     FeedbackDTO feedback
@@ -25,6 +26,6 @@ public record TestScoreDetailDTO(
         return new TestScoreDetailDTO(ts.id(), ts.studentId(), ts.studentName(),
             ts.classId(), ts.className(), ts.teacherId(), ts.teacherName(),
             ts.testName(), ts.testDate(), ts.overallScore(), ts.maxScore(),
-            ts.questions(), ts.createdAt(), ts.updatedAt(), feedback);
+            ts.testSource(), ts.questions(), ts.createdAt(), ts.updatedAt(), feedback);
     }
 }

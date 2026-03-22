@@ -40,6 +40,7 @@ const questionSchema = z.object({
 const formSchema = z.object({
   testName: z.string().min(1, 'Test name is required').max(255),
   testDate: z.string().min(1, 'Test date is required'),
+  testSource: z.enum(['SCHOOL', 'CENTRE']),
   overallScore: z.number().min(0).max(100),
   maxScore: z.number().min(0.01),
   questions: z.array(questionSchema).min(1, 'At least one question'),
@@ -61,7 +62,7 @@ export function TestScoreForm() {
   const { register, control, handleSubmit, reset, setValue, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      testName: '', testDate: '', overallScore: 0, maxScore: 100,
+      testName: '', testDate: '', testSource: 'CENTRE' as const, overallScore: 0, maxScore: 100,
       questions: [{ questionNumber: 'Q1', maxScore: 20, questionText: '', questionType: 'OPEN', mcqOptions: [], subQuestions: [{ label: 'a', score: 0, maxScore: 10, topicId: '', studentAnswer: '' }] }],
     },
   });
@@ -84,6 +85,7 @@ export function TestScoreForm() {
           reset({
             testName: score.testName,
             testDate: score.testDate,
+            testSource: score.testSource ?? 'CENTRE',
             overallScore: score.overallScore,
             maxScore: score.maxScore,
             questions: score.questions.map((q) => ({
@@ -203,6 +205,13 @@ export function TestScoreForm() {
             <Label htmlFor="testDate">Test Date</Label>
             <TextInput id="testDate" type="date" {...register('testDate')} max={new Date().toISOString().split('T')[0]} color={errors.testDate ? 'failure' : undefined} data-testid="test-date-input" />
             {errors.testDate && <p className="mt-1 text-sm text-red-600">{errors.testDate.message}</p>}
+          </div>
+          <div>
+            <Label htmlFor="testSource">Source</Label>
+            <Select id="testSource" {...register('testSource')} data-testid="test-source-select">
+              <option value="CENTRE">Centre</option>
+              <option value="SCHOOL">School</option>
+            </Select>
           </div>
           <div>
             <Label htmlFor="overallScore">Overall Score</Label>

@@ -2,6 +2,7 @@ package com.eggtive.spm.testscore.entity;
 
 import com.eggtive.spm.classmanagement.entity.TuitionClass;
 import com.eggtive.spm.common.entity.BaseEntity;
+import com.eggtive.spm.common.enums.TestSource;
 import com.eggtive.spm.user.entity.Student;
 import com.eggtive.spm.user.entity.Teacher;
 import com.eggtive.spm.user.entity.User;
@@ -42,6 +43,10 @@ public class TestScore extends BaseEntity {
     @Column(nullable = false)
     private boolean isDraft = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "test_source", nullable = false)
+    private TestSource testSource = TestSource.CENTRE;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false, updatable = false)
     private User createdBy;
@@ -69,6 +74,8 @@ public class TestScore extends BaseEntity {
     public void setMaxScore(BigDecimal maxScore) { this.maxScore = maxScore; }
     public boolean isDraft() { return isDraft; }
     public void setDraft(boolean draft) { isDraft = draft; }
+    public TestSource getTestSource() { return testSource; }
+    public void setTestSource(TestSource testSource) { this.testSource = testSource; }
     public User getCreatedBy() { return createdBy; }
     public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
     public User getUpdatedBy() { return updatedBy; }

@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { testScoreService } from '../../services/testScoreService';
 import { PageHeader } from '../shared/PageHeader';
-import { DataTable, type Column } from '../shared/DataTable';
+import { DataTable } from '../shared/DataTable';
+import { testScoreColumnsWithClass } from '../shared/testScoreColumns';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { ErrorMessage } from '../shared/ErrorMessage';
 import { usePagination } from '../../hooks/usePagination';
@@ -29,12 +30,7 @@ export function MyTestScores() {
       .finally(() => setLoading(false));
   }, [studentId, pagination.page, pagination.size, updateFromResponse]);
 
-  const columns: Column<TestScoreDTO>[] = [
-    { key: 'testName', header: 'Test' },
-    { key: 'className', header: 'Class' },
-    { key: 'testDate', header: 'Date', render: (r) => new Date(r.testDate).toLocaleDateString() },
-    { key: 'overallScore', header: 'Score', render: (r) => `${r.overallScore}/${r.maxScore}` },
-  ];
+  const columns = testScoreColumnsWithClass;
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;

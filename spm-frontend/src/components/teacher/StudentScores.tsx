@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { testScoreService } from '../../services/testScoreService';
 import { PageHeader } from '../shared/PageHeader';
-import { DataTable, type Column } from '../shared/DataTable';
+import { DataTable } from '../shared/DataTable';
+import { testScoreColumns } from '../shared/testScoreColumns';
 import { LoadingSpinner } from '../shared/LoadingSpinner';
 import { ErrorMessage } from '../shared/ErrorMessage';
 import { EmptyState } from '../shared/EmptyState';
@@ -34,11 +35,7 @@ export function StudentScores() {
       .finally(() => setLoading(false));
   }, [studentId, classId, pagination.page, pagination.size, updateFromResponse]);
 
-  const columns: Column<TestScoreDTO>[] = [
-    { key: 'testName', header: 'Test' },
-    { key: 'testDate', header: 'Date', render: (row) => new Date(row.testDate).toLocaleDateString() },
-    { key: 'overallScore', header: 'Score', render: (row) => `${row.overallScore}/${row.maxScore}` },
-  ];
+  const columns = testScoreColumns;
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Card, Label, Select, TextInput } from 'flowbite-react';
+import { Button, Checkbox, Label, Select, TextInput } from 'flowbite-react';
 import { reportService } from '../../services/reportService';
 import { classService } from '../../services/classService';
 import { PageHeader } from './PageHeader';
@@ -23,7 +23,7 @@ interface Props {
 export function ReportList({ studentId, studentName, canGenerate = false, backTo }: Props) {
   const { showToast } = useToast();
   const { user } = useAuth();
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = user?.profileType === 'ADMIN';
   const { pagination, setPage, updateFromResponse } = usePagination();
   const [reports, setReports] = useState<ProgressReportDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,6 +34,8 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
   const [selectedClassId, setSelectedClassId] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [includePlan, setIncludePlan] = useState(false);
+  const [compareReportIds, setCompareReportIds] = useState<string[]>([]);
 
   const fetchReports = () => {
     setLoading(true);
@@ -60,10 +62,23 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
     setSelectedClassId('');
     setStartDate('');
     setEndDate('');
+    setIncludePlan(false);
+    setCompareReportIds([]);
     setShowGenerate(true);
   };
 
   const canSubmit = selectedClassId !== '' && startDate !== '' && endDate !== '' && startDate <= endDate;
+
+  // Previous reports available for comparison (only those before the current start date)
+  const availablePreviousReports = reports.filter(
+    (r) => r.endDate && startDate && r.endDate < startDate
+  );
+
+  const toggleCompareReport = (reportId: string) => {
+    setCompareReportIds((prev) =>
+      prev.includes(reportId) ? prev.filter((id) => id !== reportId) : [...prev, reportId]
+    );
+  };
 
   const handleGenerate = async () => {
     if (!canSubmit) return;
@@ -74,6 +89,8 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
         classId: selectedClassId,
         startDate,
         endDate,
+        includePlan: includePlan || undefined,
+        compareReportIds: includePlan && compareReportIds.length > 0 ? compareReportIds : undefined,
       });
       showToast('Report generated', 'success');
       setShowGenerate(false);
@@ -117,7 +134,7 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
         <div className="space-y-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">Generate a progress report covering test scores, topic performance, and teacher feedback for the selected class and date range.</p>
           <div>
-            <Label htmlFor="report-class" value="Class" />
+            <Label htmlFor="report-class">Class</Label>
             <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">The report will only include scores and feedback from this class.</p>
             <Select id="report-class" value={selectedClassId} onChange={(e) => setSelectedClassId(e.target.value)} required>
               <option value="">Select a class</option>
@@ -127,15 +144,15 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
             </Select>
           </div>
           <div>
-            <Label value="Report Period" />
+            <Label>Report Period</Label>
             <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">Only test scores and feedback within this date range will be included.</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="report-start" value="From" />
+                <Label htmlFor="report-start">From</Label>
                 <TextInput id="report-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
               </div>
               <div>
-                <Label htmlFor="report-end" value="To" />
+                <Label htmlFor="report-end">To</Label>
                 <TextInput id="report-end" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
               </div>
             </div>
@@ -143,9 +160,63 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
           {startDate && endDate && startDate > endDate && (
             <p className="text-sm text-red-600">Start date must be before end date.</p>
           )}
+
+          {/* Improvement plan opt-in */}
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+            <div className="flex items-start gap-3">
+              <Checkbox
+                id="include-plan"
+                checked={includePlan}
+                onChange={(e) => {
+                  setIncludePlan(e.target.checked);
+                  if (!e.target.checked) setCompareReportIds([]);
+                }}
+              />
+              <div>
+                <Label htmlFor="include-plan" className="font-medium">
+                  Include strengths &amp; improvement plan
+                </Label>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Uses AI to analyse scores, teacher feedback, and question-level remarks to generate a personalised improvement plan. Takes a few extra seconds.
+                </p>
+              </div>
+            </div>
+
+            {/* Previous report comparison picker */}
+            {includePlan && availablePreviousReports.length > 0 && (
+              <div className="mt-3 ml-7">
+                <Label>Compare with previous reports (optional)</Label>
+                <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">
+                  Select previous reports to show improvement or decline since those periods.
+                </p>
+                <div className="max-h-32 space-y-1 overflow-y-auto">
+                  {availablePreviousReports.map((r) => (
+                    <label key={r.id} className="flex items-center gap-2 text-sm">
+                      <Checkbox
+                        checked={compareReportIds.includes(r.id)}
+                        onChange={() => toggleCompareReport(r.id)}
+                      />
+                      <span>{r.startDate} – {r.endDate}</span>
+                      <span className="text-xs text-gray-400">({r.reportType})</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+            {includePlan && availablePreviousReports.length === 0 && startDate && (
+              <p className="mt-2 ml-7 text-xs text-gray-400">
+                No previous reports found before {startDate} to compare against.
+              </p>
+            )}
+          </div>
+
           <div className="flex justify-end gap-3">
             <Button color="gray" onClick={() => setShowGenerate(false)}>Cancel</Button>
-            <Button onClick={handleGenerate} disabled={generating || !canSubmit} data-testid="confirm-generate">{generating ? 'Generating...' : 'Generate'}</Button>
+            <Button onClick={handleGenerate} disabled={generating || !canSubmit} data-testid="confirm-generate">
+              {generating
+                ? (includePlan ? 'Generating plan...' : 'Generating...')
+                : (includePlan ? 'Generate with Plan' : 'Generate')}
+            </Button>
           </div>
         </div>
       </Modal>

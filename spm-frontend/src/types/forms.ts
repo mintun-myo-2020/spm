@@ -97,6 +97,8 @@ export interface GenerateReportForm {
   classId: string;
   startDate: string;
   endDate: string;
+  includePlan?: boolean;
+  compareReportIds?: string[];
 }
 
 // Extended form for OCR upload integration

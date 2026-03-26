@@ -69,23 +69,23 @@ export function StudentProgressView({ studentId, actions, onTestClick, onViewSco
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
           <Card>
             <p className="text-sm text-gray-500 dark:text-gray-400">Average Score</p>
-            <p className={`text-2xl font-bold ${overall.averageScore >= 70 ? 'text-green-600' : overall.averageScore < 60 ? 'text-[#8B2500]' : 'text-gray-900 dark:text-white'}`}>{overall.averageScore.toFixed(1)}</p>
+            <p className={`text-2xl font-bold ${overall.averageScore >= 70 ? 'text-green-600' : overall.averageScore < 60 ? 'text-[#8B2500]' : 'text-gray-900 dark:text-white'}`}>{overall.averageScore.toFixed(1)}%</p>
           </Card>
           <Card className="group relative">
             <p className="text-sm text-gray-500 dark:text-gray-400">Improvement</p>
             {overall.improvementVelocity ? (
               <>
                 <p className={`text-2xl font-bold ${overall.improvementVelocity.improvement >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {overall.improvementVelocity.improvement >= 0 ? '+' : ''}{overall.improvementVelocity.improvement.toFixed(1)}
+                  {overall.improvementVelocity.improvement >= 0 ? '+' : ''}{overall.improvementVelocity.improvement.toFixed(1)}%
                 </p>
                 <div className="pointer-events-none absolute left-1/2 top-full z-10 mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded-lg bg-gray-900 px-3 py-2 text-xs text-white shadow-lg group-hover:block dark:bg-gray-700">
                   {overall.trendData.length >= 2 && (
                     <>
-                      <p>First score: {overall.trendData[0].score} ({overall.trendData[0].testName})</p>
-                      <p>Latest score: {overall.trendData[overall.trendData.length - 1].score} ({overall.trendData[overall.trendData.length - 1].testName})</p>
+                      <p>First score: {overall.trendData[0].score.toFixed(1)}% ({overall.trendData[0].testName})</p>
+                      <p>Latest score: {overall.trendData[overall.trendData.length - 1].score.toFixed(1)}% ({overall.trendData[overall.trendData.length - 1].testName})</p>
                     </>
                   )}
-                  <p>Change: {overall.improvementVelocity.improvement >= 0 ? '+' : ''}{overall.improvementVelocity.improvement.toFixed(1)}</p>
+                  <p>Change: {overall.improvementVelocity.improvement >= 0 ? '+' : ''}{overall.improvementVelocity.improvement.toFixed(1)}%</p>
                 </div>
               </>
             ) : (
@@ -107,7 +107,7 @@ export function StudentProgressView({ studentId, actions, onTestClick, onViewSco
 
       {chartData.length > 0 && (
         <Card className="mb-6">
-          <Chart data={chartData} xAxisKey="date" lines={[{ dataKey: 'score', name: 'Score', color: '#2563eb' }]} title="Score Trend" />
+          <Chart data={chartData} xAxisKey="date" lines={[{ dataKey: 'score', name: 'Score %', color: '#2563eb' }]} title="Score Trend (%)" />
         </Card>
       )}
 

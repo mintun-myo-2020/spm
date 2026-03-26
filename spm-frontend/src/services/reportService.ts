@@ -5,7 +5,11 @@ import type { GenerateReportForm } from '../types/forms';
 
 export const reportService = {
   generateReport(studentId: string, data: GenerateReportForm) {
-    return apiClient.post<ApiResponse<ProgressReportDTO>>(`/students/${studentId}/reports`, data);
+    // Allow longer timeout when generating with improvement plan (LLM call)
+    const timeout = data.includePlan ? 30000 : 15000;
+    return apiClient.post<ApiResponse<ProgressReportDTO>>(
+      `/students/${studentId}/reports`, data, { timeout }
+    );
   },
 
   getReport(reportId: string) {

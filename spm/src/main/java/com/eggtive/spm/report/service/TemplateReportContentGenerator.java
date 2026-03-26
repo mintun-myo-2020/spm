@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 public class TemplateReportContentGenerator implements ReportContentGenerator {
 
     @Override
-    public String generate(ReportData data) {
+    public String generate(ReportData data, StrengthsImprovementPlan plan) {
         var sb = new StringBuilder();
         sb.append("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\">");
         sb.append("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">");
@@ -28,6 +28,9 @@ public class TemplateReportContentGenerator implements ReportContentGenerator {
         appendScoreTrend(sb, data);
         appendTopicPerformance(sb, data);
         appendFeedbackSummary(sb, data);
+        if (plan != null) {
+            appendImprovementPlan(sb, plan);
+        }
         appendFooter(sb);
 
         sb.append("</div></body></html>");
@@ -56,6 +59,17 @@ public class TemplateReportContentGenerator implements ReportContentGenerator {
         sb.append(".feedback-card dt{font-weight:600;font-size:0.8rem;color:#374151;margin-top:8px}");
         sb.append(".feedback-card dd{font-size:0.875rem;margin-left:0}");
         sb.append(".footer{margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:0.75rem;color:#9ca3af;text-align:center}");
+        // Plan section styles
+        sb.append(".plan-section{margin-top:24px}");
+        sb.append(".plan-card{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin-bottom:12px}");
+        sb.append(".plan-card h3{font-size:0.95rem;margin-bottom:8px;color:#1f2937}");
+        sb.append(".plan-card .evidence{font-size:0.8rem;color:#6b7280;margin-top:4px;font-style:italic}");
+        sb.append(".plan-card .approach{font-size:0.85rem;color:#1d4ed8;margin-top:4px}");
+        sb.append(".action-list{list-style:none;counter-reset:action}");
+        sb.append(".action-list li{counter-increment:action;padding:12px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px}");
+        sb.append(".action-list li::before{content:counter(action);font-weight:700;color:#1d4ed8;margin-right:8px}");
+        sb.append(".action-meta{font-size:0.8rem;color:#6b7280;margin-top:4px}");
+        sb.append(".comparison-positive{color:#059669}.comparison-negative{color:#dc2626}.comparison-neutral{color:#6b7280}");
         sb.append("</style>");
     }
 
@@ -138,6 +152,83 @@ public class TemplateReportContentGenerator implements ReportContentGenerator {
             }
             sb.append("</dl></div>");
         }
+    }
+
+    private void appendImprovementPlan(StringBuilder sb, StrengthsImprovementPlan plan) {
+        sb.append("<div class=\"plan-section\">");
+        sb.append("<h2>Strengths &amp; Improvement Plan</h2>");
+        sb.append("<p style=\"font-size:0.85rem;color:#6b7280;margin-bottom:16px\">")
+          .append(esc(plan.overallSummary())).append("</p>");
+
+        // Strengths
+        if (!plan.strengths().isEmpty()) {
+            sb.append("<h2 style=\"font-size:1rem\">Strengths</h2>");
+            for (var s : plan.strengths()) {
+                sb.append("<div class=\"plan-card\">");
+                sb.append("<h3>").append(esc(s.topic())).append("</h3>");
+                sb.append("<p>").append(esc(s.description())).append("</p>");
+                if (s.evidence() != null) {
+                    sb.append("<p class=\"evidence\">").append(esc(s.evidence())).append("</p>");
+                }
+                sb.append("</div>");
+            }
+        }
+
+        // Improvement areas
+        if (!plan.improvementAreas().isEmpty()) {
+            sb.append("<h2 style=\"font-size:1rem\">Areas for Improvement</h2>");
+            for (var ia : plan.improvementAreas()) {
+                sb.append("<div class=\"plan-card\">");
+                sb.append("<h3>").append(esc(ia.topic())).append("</h3>");
+                sb.append("<p>").append(esc(ia.description())).append("</p>");
+                if (ia.evidence() != null) {
+                    sb.append("<p class=\"evidence\">").append(esc(ia.evidence())).append("</p>");
+                }
+                if (ia.suggestedApproach() != null) {
+                    sb.append("<p class=\"approach\">Suggested: ").append(esc(ia.suggestedApproach())).append("</p>");
+                }
+                sb.append("</div>");
+            }
+        }
+
+        // Period comparisons
+        if (!plan.periodComparisons().isEmpty()) {
+            sb.append("<h2 style=\"font-size:1rem\">Progress Since Previous Report</h2>");
+            sb.append("<table><thead><tr><th>Topic</th><th>Previous</th><th>Current</th><th>Change</th><th>Notes</th></tr></thead><tbody>");
+            for (var c : plan.periodComparisons()) {
+                String changeClass = c.change() == null ? "comparison-neutral"
+                    : c.change().signum() > 0 ? "comparison-positive"
+                    : c.change().signum() < 0 ? "comparison-negative" : "comparison-neutral";
+                String changeStr = c.change() != null
+                    ? (c.change().signum() > 0 ? "+" : "") + c.change().toPlainString() + "%" : "—";
+                sb.append("<tr>");
+                sb.append("<td>").append(esc(c.topic())).append("</td>");
+                sb.append("<td>").append(c.previousAvgPercent() != null ? c.previousAvgPercent().toPlainString() + "%" : "—").append("</td>");
+                sb.append("<td>").append(c.currentAvgPercent() != null ? c.currentAvgPercent().toPlainString() + "%" : "—").append("</td>");
+                sb.append("<td class=\"").append(changeClass).append("\">").append(changeStr).append("</td>");
+                sb.append("<td>").append(esc(c.commentary())).append("</td>");
+                sb.append("</tr>");
+            }
+            sb.append("</tbody></table>");
+        }
+
+        // Action plan
+        if (!plan.actionPlan().isEmpty()) {
+            sb.append("<h2 style=\"font-size:1rem\">Action Plan</h2>");
+            sb.append("<ol class=\"action-list\">");
+            for (var a : plan.actionPlan()) {
+                sb.append("<li>");
+                sb.append("<strong>").append(esc(a.action())).append("</strong>");
+                sb.append("<div class=\"action-meta\">");
+                if (a.targetTopic() != null) sb.append("Topic: ").append(esc(a.targetTopic())).append(" &middot; ");
+                if (a.timeframe() != null) sb.append("Timeframe: ").append(esc(a.timeframe())).append(" &middot; ");
+                if (a.expectedOutcome() != null) sb.append("Expected: ").append(esc(a.expectedOutcome()));
+                sb.append("</div></li>");
+            }
+            sb.append("</ol>");
+        }
+
+        sb.append("</div>");
     }
 
     private void appendFooter(StringBuilder sb) {

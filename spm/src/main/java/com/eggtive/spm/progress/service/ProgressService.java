@@ -45,15 +45,15 @@ public class ProgressService {
         }
 
         List<TrendDataPointDTO> trendData = scores.stream()
-            .map(ts -> new TrendDataPointDTO(ts.getTestDate(), ts.getTestName(), ts.getOverallScore()))
+            .map(ts -> new TrendDataPointDTO(ts.getTestDate(), ts.getTestName(), toPercentage(ts)))
             .toList();
 
-        List<BigDecimal> scoreValues = scores.stream().map(TestScore::getOverallScore).toList();
-        BigDecimal avg = calculator.average(scoreValues);
+        List<BigDecimal> pctValues = scores.stream().map(this::toPercentage).toList();
+        BigDecimal avg = calculator.average(pctValues);
 
         long months = ChronoUnit.MONTHS.between(
             scores.getFirst().getTestDate(), scores.getLast().getTestDate());
-        ImprovementVelocityDTO velocity = calculator.calculateVelocity(scoreValues, Math.max(months, 1));
+        ImprovementVelocityDTO velocity = calculator.calculateVelocity(pctValues, Math.max(months, 1));
 
         return new OverallProgressDTO(studentId, name, trendData, avg, velocity);
     }
@@ -72,15 +72,15 @@ public class ProgressService {
         }
 
         List<TrendDataPointDTO> trendData = scores.stream()
-            .map(ts -> new TrendDataPointDTO(ts.getTestDate(), ts.getTestName(), ts.getOverallScore()))
+            .map(ts -> new TrendDataPointDTO(ts.getTestDate(), ts.getTestName(), toPercentage(ts)))
             .toList();
 
-        List<BigDecimal> scoreValues = scores.stream().map(TestScore::getOverallScore).toList();
-        BigDecimal avg = calculator.average(scoreValues);
+        List<BigDecimal> pctValues = scores.stream().map(this::toPercentage).toList();
+        BigDecimal avg = calculator.average(pctValues);
 
         long months = ChronoUnit.MONTHS.between(
             scores.getFirst().getTestDate(), scores.getLast().getTestDate());
-        ImprovementVelocityDTO velocity = calculator.calculateVelocity(scoreValues, Math.max(months, 1));
+        ImprovementVelocityDTO velocity = calculator.calculateVelocity(pctValues, Math.max(months, 1));
 
         return new OverallProgressDTO(studentId, name, trendData, avg, velocity);
     }
@@ -313,5 +313,12 @@ public class ProgressService {
 
         return new ClassSummaryDTO(classId, studentCount, scores.size(), mean, median,
             strongest, weakest, topicStats, overallTrend);
+    }
+
+    /** Convert a test score to percentage: overallScore / maxScore * 100 */
+    private BigDecimal toPercentage(TestScore ts) {
+        if (ts.getMaxScore().compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
+        return ts.getOverallScore().multiply(BigDecimal.valueOf(100))
+            .divide(ts.getMaxScore(), 2, RoundingMode.HALF_UP);
     }
 }

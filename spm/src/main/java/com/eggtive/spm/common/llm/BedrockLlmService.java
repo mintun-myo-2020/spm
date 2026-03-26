@@ -31,8 +31,6 @@ public class BedrockLlmService implements LlmService {
         this.bedrockClient = bedrockClient;
         this.modelAdapter = modelAdapter;
         this.modelId = modelId;
-        log.info("Bedrock LLM configured — model: {}, adapter: {}",
-                modelId, modelAdapter.getClass().getSimpleName());
     }
 
     @Override

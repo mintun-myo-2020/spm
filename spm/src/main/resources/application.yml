@@ -52,6 +52,8 @@ app:
     realm: ${KEYCLOAK_REALM:spm}
     admin-client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:spm-backend}
     admin-client-secret: ${KEYCLOAK_ADMIN_CLIENT_SECRET:}
+  bedrock:
+    region: ${APP_BEDROCK_REGION:ap-southeast-1}
   storage:
     type: ${APP_STORAGE_TYPE:local}
     local-path: ${APP_STORAGE_LOCAL_PATH:./uploads}

@@ -6,6 +6,7 @@ import { MyProgress } from './MyProgress';
 import { MyReports } from './MyReports';
 import { UploadTestPaper } from './UploadTestPaper';
 import { MySchedule } from './MySchedule';
+import { SettingsPage } from '../shared/SettingsPage';
 
 export default function StudentRoutes() {
   return (
@@ -17,6 +18,7 @@ export default function StudentRoutes() {
       <Route path="reports" element={<MyReports />} />
       <Route path="upload" element={<UploadTestPaper />} />
       <Route path="schedule" element={<MySchedule />} />
+      <Route path="settings" element={<SettingsPage />} />
     </Routes>
   );
 }

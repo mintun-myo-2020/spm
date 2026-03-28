@@ -116,6 +116,14 @@ public class UserService {
         }
     }
 
+    public void resetPassword(UUID userId, String newPassword) {
+        User user = findUserOrThrow(userId);
+        if (user.getKeycloakId() == null || user.getKeycloakId().startsWith("pending-")) {
+            throw new AppException(ErrorCode.INVALID_INPUT, "User has not logged in yet — cannot reset password");
+        }
+        keycloakAdminService.resetPassword(user.getKeycloakId(), newPassword);
+    }
+
     @Transactional(readOnly = true)
     public UserInfoDTO getUserInfo(User user) {
         UUID profileId = null;

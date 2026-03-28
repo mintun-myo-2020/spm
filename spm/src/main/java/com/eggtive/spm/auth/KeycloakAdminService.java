@@ -27,6 +27,7 @@ public class KeycloakAdminService {
     private final String realm;
     private final String clientId;
     private final String clientSecret;
+    private final String publicClientId;
 
     private String cachedToken;
     private long tokenExpiresAt; // epoch millis
@@ -35,11 +36,13 @@ public class KeycloakAdminService {
             @Value("${app.keycloak.server-url}") String serverUrl,
             @Value("${app.keycloak.realm}") String realm,
             @Value("${app.keycloak.admin-client-id}") String clientId,
-            @Value("${app.keycloak.admin-client-secret}") String clientSecret) {
+            @Value("${app.keycloak.admin-client-secret}") String clientSecret,
+            @Value("${app.keycloak.public-client-id:spm-frontend}") String publicClientId) {
         this.serverUrl = serverUrl;
         this.realm = realm;
         this.clientId = clientId;
         this.clientSecret = clientSecret;
+        this.publicClientId = publicClientId;
         this.restClient = RestClient.builder().build();
     }
 
@@ -48,8 +51,12 @@ public class KeycloakAdminService {
      * Returns the Keycloak user ID (sub claim).
      */
     public String createUser(String email, String firstName, String lastName, String password, String roleName) {
+        return createUser(email, firstName, lastName, password, roleName, true);
+    }
+
+    public String createUser(String email, String firstName, String lastName, String password, String roleName, boolean temporaryPassword) {
         String token = getAdminToken();
-        String keycloakId = createKeycloakUser(token, email, firstName, lastName, password);
+        String keycloakId = createKeycloakUser(token, email, firstName, lastName, password, temporaryPassword);
         assignRealmRole(token, keycloakId, roleName);
         return keycloakId;
     }
@@ -67,6 +74,60 @@ public class KeycloakAdminService {
                 .toBodilessEntity();
         } catch (Exception e) {
             log.error("Failed to rollback Keycloak user {}: {}", keycloakId, e.getMessage());
+        }
+    }
+
+    /**
+     * Resets a user's password in Keycloak with a temporary password.
+     */
+    public void resetPassword(String keycloakId, String newPassword) {
+        setPassword(keycloakId, newPassword, true);
+    }
+
+    /**
+     * Sets a user's password in Keycloak as permanent (non-temporary).
+     */
+    public void resetPasswordNonTemporary(String keycloakId, String newPassword) {
+        setPassword(keycloakId, newPassword, false);
+    }
+
+    private void setPassword(String keycloakId, String newPassword, boolean temporary) {
+        try {
+            String token = getAdminToken();
+            restClient.put()
+                .uri(serverUrl + "/admin/realms/{realm}/users/{id}/reset-password", realm, keycloakId)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("type", "password", "value", newPassword, "temporary", temporary))
+                .retrieve()
+                .toBodilessEntity();
+        } catch (Exception e) {
+            log.error("Failed to set password for Keycloak user {}: {}", keycloakId, e.getMessage());
+            throw new AppException(ErrorCode.INTERNAL_ERROR, "Password update failed");
+        }
+    }
+
+    /**
+     * Verifies a user's current password by attempting a direct access grant (password login).
+     * Throws if the password is wrong.
+     */
+    @SuppressWarnings("unchecked")
+    public void verifyPassword(String email, String password) {
+        var form = new LinkedMultiValueMap<String, String>();
+        form.add("grant_type", "password");
+        form.add("client_id", publicClientId);
+        form.add("username", email);
+        form.add("password", password);
+
+        try {
+            restClient.post()
+                .uri(serverUrl + "/realms/{realm}/protocol/openid-connect/token", realm)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(form)
+                .retrieve()
+                .body(Map.class);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.INVALID_INPUT, "Current password is incorrect");
         }
     }
 
@@ -125,7 +186,7 @@ public class KeycloakAdminService {
         }
     }
 
-    private String createKeycloakUser(String token, String email, String firstName, String lastName, String password) {
+    private String createKeycloakUser(String token, String email, String firstName, String lastName, String password, boolean temporary) {
         Map<String, Object> userRep = Map.of(
             "username", email,
             "email", email,
@@ -136,7 +197,7 @@ public class KeycloakAdminService {
             "credentials", List.of(Map.of(
                 "type", "password",
                 "value", password,
-                "temporary", false
+                "temporary", temporary
             ))
         );
 

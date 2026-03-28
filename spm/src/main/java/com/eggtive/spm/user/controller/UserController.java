@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -73,5 +74,17 @@ public class UserController {
     public ApiResponse<Void> reactivate(@PathVariable UUID userId) {
         userService.reactivateUser(userId);
         return ApiResponse.ok(null, "User reactivated");
+    }
+
+    @PutMapping("/{userId}/reset-password")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ApiResponse<Void> resetPassword(@PathVariable UUID userId, @RequestBody Map<String, String> body) {
+        String newPassword = body.get("newPassword");
+        if (newPassword == null || newPassword.length() < 8) {
+            throw new com.eggtive.spm.common.exception.AppException(
+                com.eggtive.spm.common.enums.ErrorCode.INVALID_INPUT, "Password must be at least 8 characters");
+        }
+        userService.resetPassword(userId, newPassword);
+        return ApiResponse.ok(null, "Password reset — user will be asked to change it on next login");
     }
 }

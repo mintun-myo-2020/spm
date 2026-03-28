@@ -1,7 +1,7 @@
 import { Sidebar as FlowbiteSidebar, SidebarItems, SidebarItemGroup, SidebarItem } from 'flowbite-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { HiAcademicCap, HiChartBar, HiClipboardList, HiHome, HiUserGroup, HiBookOpen, HiBell, HiDocumentReport, HiUpload, HiCalendar } from 'react-icons/hi';
+import { HiAcademicCap, HiChartBar, HiClipboardList, HiHome, HiUserGroup, HiBookOpen, HiBell, HiDocumentReport, HiUpload, HiCalendar, HiCog } from 'react-icons/hi';
 import type { FC, SVGProps } from 'react';
 
 interface NavItem {
@@ -47,6 +47,8 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
   const role = user?.profileType ?? '';
   const items = navByRole[role] ?? [];
 
+  const settingsPath = `/${role.toLowerCase()}/settings`;
+
   return (
     <>
       {isOpen && <div className="fixed inset-0 top-16 z-30 bg-black/30 lg:hidden" onClick={onClose} />}
@@ -57,8 +59,8 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
         }`}
         data-testid="sidebar"
       >
-        <FlowbiteSidebar aria-label="Navigation" className="border-none [&>div]:bg-transparent">
-          <SidebarItems>
+        <FlowbiteSidebar aria-label="Navigation" className="flex h-full flex-col border-none [&>div]:bg-transparent [&>div]:flex [&>div]:flex-col [&>div]:h-full">
+          <SidebarItems className="flex flex-1 flex-col">
             <SidebarItemGroup>
               {items.map((item) => {
                 const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
@@ -76,6 +78,21 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                   </SidebarItem>
                 );
               })}
+            </SidebarItemGroup>
+
+            <div className="mt-auto" />
+
+            <SidebarItemGroup>
+              <SidebarItem
+                as={NavLink}
+                to={settingsPath}
+                icon={HiCog}
+                onClick={onClose}
+                active={location.pathname === settingsPath}
+                data-testid="sidebar-link-settings"
+              >
+                Settings
+              </SidebarItem>
             </SidebarItemGroup>
           </SidebarItems>
         </FlowbiteSidebar>

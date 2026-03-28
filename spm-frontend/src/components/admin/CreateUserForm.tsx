@@ -78,9 +78,10 @@ export function CreateUserForm({ onSuccess, onCancel }: { onSuccess: () => void;
         </div>
       </div>
       <div>
-        <Label htmlFor="password">Password</Label>
+        <Label htmlFor="password">Temporary Password</Label>
         <TextInput id="password" type="password" {...register('password')} color={errors.password ? 'failure' : undefined} data-testid="password-input" />
         {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
+        <p className="mt-1 text-xs text-gray-500">User will be asked to change this on first login</p>
       </div>
       {role === 'parent' && (
         <div>

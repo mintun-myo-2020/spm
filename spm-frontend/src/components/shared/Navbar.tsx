@@ -1,4 +1,4 @@
-import { Button, Badge } from 'flowbite-react';
+import { Badge } from 'flowbite-react';
 import { useAuth } from '../../hooks/useAuth';
 import { HiMenuAlt2 } from 'react-icons/hi';
 
@@ -7,7 +7,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ onMenuToggle }: NavbarProps) {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm dark:border-gray-700 dark:bg-gray-800" data-testid="navbar">
@@ -29,9 +29,6 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
           {user?.firstName} {user?.lastName}
         </span>
         <Badge color="info">{user?.profileType}</Badge>
-        <Button size="xs" color="gray" onClick={logout} data-testid="navbar-logout">
-          Logout
-        </Button>
       </div>
     </header>
   );

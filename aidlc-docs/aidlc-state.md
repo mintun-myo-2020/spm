@@ -67,9 +67,9 @@ All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Fro
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: Sprint 4 Code Generation — COMPLETED
-- **Next Stage**: Maintainability & Prod-Readiness (no new features unless customer-driven)
-- **Status**: Sprint 4 complete. Class detail page restructured to nested routes. Session notes feature added. Shifting back to maintainability focus.
+- **Current Stage**: Sprint 5 — User Onboarding & Account Management — IN PROGRESS
+- **Next Stage**: Resolve onboarding blockers (self-service signup, data isolation)
+- **Status**: Sprint 5 in progress. Temporary passwords, change password, settings page, create-and-enroll all done. Blocked on decisions for self-service signup and multi-tenancy.
 
 ## Sprint 4 — Class Page Restructuring & Session Notes
 
@@ -101,6 +101,48 @@ All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Fro
 - [ ] SQS-based ReportJobDispatcher implementation (when needed for prod)
 - [ ] S3-based ReportStorage implementation (when needed for prod)
 
+
+## Sprint 5 — User Onboarding & Account Management
+
+### Status: IN PROGRESS
+
+### Completed
+- [x] Temporary password on user creation (Keycloak `temporary: true`)
+- [x] Password field UX — "Temporary Password" label + helper text on all create forms
+- [x] In-app change password (Settings page with current/new/confirm form)
+- [x] Password verification uses `spm-frontend` public client (directAccessGrantsEnabled: true)
+- [x] Settings page with account info, change password, logout
+- [x] Sidebar "Settings" gear icon at bottom for all roles
+- [x] Logout moved from Navbar to Settings page
+- [x] Admin/teacher reset password API (`PUT /api/v1/users/{userId}/reset-password`)
+- [x] Create-and-enroll student from teacher enroll modal (ClassLayout + AdminClassDetails)
+- [x] Dead code cleanup: deleted orphaned ClassDetails.tsx
+
+### Pending (blocked on requirement decisions)
+- [ ] Self-service signup (how do new teachers register without Keycloak console access?)
+- [ ] Data isolation / multi-tenancy (blocking for multiple customers)
+- [ ] Parent creation from teacher view
+- [ ] Forgot password (Keycloak SMTP config)
+- [ ] Reset password button in frontend user management pages
+
+### Decisions Made (from requirement-verification-questions.md)
+- Q1: Operator creates teacher/admin accounts via admin UI (no self-service signup)
+- Q2: Separate instance per customer (no multi-tenancy code changes needed)
+- Q3: Temporary passwords set by operator/teacher, forced change on first login
+
+### New Issue Identified: Teacher Data Isolation
+- Teachers can see ALL students globally in the enroll dropdown (not just their own)
+- See `sprint-5/teacher-data-isolation-analysis.md` for full analysis
+- Fix: scope `GET /users/students` by `created_by` + class enrollment for TEACHER role
+- Effort: ~1.5 hours
+
+### Remaining Work
+- [ ] Teacher data isolation fix (scope student list to teacher's own students)
+- [ ] Production seed migration (admin-only, no demo data)
+- [ ] Deployment guide for spinning up new customer instances
+- [ ] Parent creation from teacher view
+- [ ] Forgot password (Keycloak SMTP config)
+- [ ] Reset password button in frontend user management pages
 
 ## Next Phase: Maintainability & Prod-Readiness
 

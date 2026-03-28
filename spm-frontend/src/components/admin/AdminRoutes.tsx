@@ -12,6 +12,7 @@ import { SubjectManagement } from './SubjectManagement';
 import { TestScoreForm } from '../teacher/TestScoreForm';
 import { ScheduleOverview } from './ScheduleOverview';
 import { SessionDetail } from '../teacher/SessionDetail';
+import { SettingsPage } from '../shared/SettingsPage';
 
 export default function AdminRoutes() {
   return (
@@ -30,6 +31,7 @@ export default function AdminRoutes() {
       <Route path="subjects" element={<SubjectManagement />} />
       <Route path="schedule" element={<ScheduleOverview />} />
       <Route path="sessions/:sessionId" element={<SessionDetail />} />
+      <Route path="settings" element={<SettingsPage />} />
     </Routes>
   );
 }

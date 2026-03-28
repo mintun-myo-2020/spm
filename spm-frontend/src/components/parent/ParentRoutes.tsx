@@ -6,6 +6,7 @@ import { ProgressCharts } from './ProgressCharts';
 import { NotificationPreferences } from './NotificationPreferences';
 import { ChildReports } from './ChildReports';
 import { ChildSchedule } from './ChildSchedule';
+import { SettingsPage } from '../shared/SettingsPage';
 
 export default function ParentRoutes() {
   return (
@@ -17,6 +18,7 @@ export default function ParentRoutes() {
       <Route path="reports" element={<ChildReports />} />
       <Route path="preferences" element={<NotificationPreferences />} />
       <Route path="schedule" element={<ChildSchedule />} />
+      <Route path="settings" element={<SettingsPage />} />
     </Routes>
   );
 }

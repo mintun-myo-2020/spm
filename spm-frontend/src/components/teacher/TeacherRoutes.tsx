@@ -14,6 +14,7 @@ import { FeedbackForm } from './FeedbackForm';
 import { StudentReports } from './StudentReports';
 import { SubjectManagement } from '../admin/SubjectManagement';
 import { SessionDetail } from './SessionDetail';
+import { SettingsPage } from '../shared/SettingsPage';
 
 export default function TeacherRoutes() {
   return (
@@ -40,6 +41,7 @@ export default function TeacherRoutes() {
         <Route path="notes" element={<SessionNotesTab />} />
       </Route>
       <Route path="subjects" element={<SubjectManagement />} />
+      <Route path="settings" element={<SettingsPage />} />
     </Routes>
   );
 }

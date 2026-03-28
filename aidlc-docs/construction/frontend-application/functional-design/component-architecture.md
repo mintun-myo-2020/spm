@@ -151,17 +151,31 @@ interface ClassListProps {
 
 **Functionality**:
 - Display class information
-- List enrolled students
-- Show student performance summary
+- List enrolled students with status (active/withdrawn)
+- Enroll existing students via dropdown
+- Create new students inline and auto-enroll them
+- Withdraw and re-enroll students
+- Show student performance summary via ClassSummaryPanel
 - Navigate to student details
+- Schedule management via ScheduleTab
 
 **Data Fetched**:
 - GET /api/v1/classes/{classId}
+- GET /api/v1/users/students (for enroll modal)
 
 **State**:
-- `classDetails`: ClassDetail | null
-- `students`: Student[]
+- `classDetail`: ClassDetailDTO | null
+- `students`: StudentDTO[] (available for enrollment)
+- `showEnroll`: boolean
+- `createMode`: boolean (toggle between select-existing and create-new in enroll modal)
+- `newStudent`: { email, firstName, lastName, password, grade }
 - `isLoading`: boolean
+
+**Enroll Modal (dual-mode)**:
+- Default mode: dropdown of existing students not yet enrolled → "Enroll" button
+- Create mode (via "+ Create new student" link): inline form with name, email, password, grade → "Create & Enroll" button
+- Creates student via POST /api/v1/users/students, then enrolls via POST /api/v1/classes/{classId}/students
+- Toggle between modes with links at bottom of modal
 
 ---
 

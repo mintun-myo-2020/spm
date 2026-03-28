@@ -16,6 +16,10 @@ public class Student extends BaseEntity {
     @JoinColumn(name = "parent_id")
     private Parent parent;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
     private LocalDate dateOfBirth;
 
     @Column(nullable = false)
@@ -33,4 +37,6 @@ public class Student extends BaseEntity {
     public void setEnrollmentDate(LocalDate enrollmentDate) { this.enrollmentDate = enrollmentDate; }
     public String getGrade() { return grade; }
     public void setGrade(String grade) { this.grade = grade; }
+    public User getCreatedBy() { return createdBy; }
+    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
 }

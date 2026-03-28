@@ -38,7 +38,9 @@ export function ClassLayout() {
     try {
       const res = await userService.getStudents({ size: 100 });
       const enrolled = new Set(classDetail?.students.map((s) => s.id) ?? []);
-      setStudents(res.data.content.filter((s) => !enrolled.has(s.id) && s.isActive));
+      const available = res.data.content.filter((s) => !enrolled.has(s.id) && s.isActive);
+      setStudents(available);
+      setCreateMode(available.length === 0);
       setShowEnroll(true);
     } catch { showToast('Failed to load students', 'error'); }
   };

@@ -18,9 +18,11 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final com.eggtive.spm.auth.CurrentUserService currentUserService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, com.eggtive.spm.auth.CurrentUserService currentUserService) {
         this.userService = userService;
+        this.currentUserService = currentUserService;
     }
 
     @GetMapping("/teachers")
@@ -32,7 +34,11 @@ public class UserController {
     @GetMapping("/students")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public PagedResponse<StudentDTO> getStudents(Pageable pageable) {
-        return userService.getStudents(pageable);
+        var user = currentUserService.getCurrentUser();
+        if (user.hasRole(com.eggtive.spm.common.enums.Role.ADMIN)) {
+            return userService.getStudents(pageable);
+        }
+        return userService.getStudentsForTeacher(user, pageable);
     }
 
     @GetMapping("/parents")
@@ -52,7 +58,7 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<StudentDTO> createStudent(@Valid @RequestBody CreateStudentRequestDTO req) {
-        return ApiResponse.ok(userService.createStudent(req));
+        return ApiResponse.ok(userService.createStudent(req, currentUserService.getCurrentUser()));
     }
 
     @PostMapping("/parents")

@@ -45,6 +45,27 @@ The `spm-backend` Keycloak client has `directAccessGrantsEnabled: false` (it's a
 - [ ] Add Parent form: name, email, phone, temporary password
 - [ ] Backend: existing `POST /api/v1/users/parents` already works for TEACHER role
 
+## Teacher Data Isolation
+
+- [x] V15 migration: `created_by UUID` column on students table + backfill from class enrollment
+- [x] Student entity: `createdBy` field
+- [x] StudentRepository: `findByCreatorOrTeacher(userId, teacherId)` scoped query
+- [x] UserService: `createStudent()` sets `createdBy` to current user; `getStudentsForTeacher()` uses scoped query
+- [x] UserController: `GET /users/students` uses scoped query for TEACHER role, global for ADMIN
+
+## Production Seed Strategy
+
+- [x] Moved demo seed migrations (V2, V4, V9, V12) from `db/migration/` to `db/seed/`
+- [x] `application.yml` (default/dev): `flyway.locations: classpath:db/migration,classpath:db/seed`
+- [x] `application-prod.yml`: `flyway.locations: classpath:db/migration` (schema + reference data only)
+- [x] Production gets clean DB: schema + V14 syllabus subjects, no demo users/scores
+- [x] Deploy with `SPRING_PROFILES_ACTIVE=prod` to exclude seed data
+- [x] See `deployment/seed-strategy.md` for full details
+
+## Enroll Modal UX
+
+- [x] Auto-skip to create form when no existing students available (ClassLayout + AdminClassDetails)
+
 ## Cleanup
 
 - [x] Deleted dead `ClassDetails.tsx` (orphaned, never routed)

@@ -57,6 +57,10 @@ public class UserService {
     }
 
     public StudentDTO createStudent(CreateStudentRequestDTO req) {
+        return createStudent(req, null);
+    }
+
+    public StudentDTO createStudent(CreateStudentRequestDTO req, User createdBy) {
         assertEmailAvailable(req.email());
         String keycloakId = keycloakAdminService.createUser(
             req.email(), req.firstName(), req.lastName(), req.password(), "STUDENT");
@@ -67,6 +71,7 @@ public class UserService {
             student.setDateOfBirth(req.dateOfBirth());
             student.setGrade(req.grade());
             student.setEnrollmentDate(LocalDate.now());
+            student.setCreatedBy(createdBy);
             return toStudentDTO(studentRepository.save(student));
         } catch (Exception e) {
             keycloakAdminService.deleteUser(keycloakId);
@@ -213,6 +218,15 @@ public class UserService {
     @Transactional(readOnly = true)
     public PagedResponse<StudentDTO> getStudents(Pageable pageable) {
         Page<Student> page = studentRepository.findAll(pageable);
+        List<StudentDTO> content = page.getContent().stream().map(this::toStudentDTO).toList();
+        return PagedResponse.from(page, content);
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<StudentDTO> getStudentsForTeacher(User user, Pageable pageable) {
+        var teacher = teacherRepository.findByUserId(user.getId())
+            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher profile not found"));
+        Page<Student> page = studentRepository.findByCreatorOrTeacher(user.getId(), teacher.getId(), pageable);
         List<StudentDTO> content = page.getContent().stream().map(this::toStudentDTO).toList();
         return PagedResponse.from(page, content);
     }

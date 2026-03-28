@@ -134,11 +134,12 @@ All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Fro
 - Teachers can see ALL students globally in the enroll dropdown (not just their own)
 - See `sprint-5/teacher-data-isolation-analysis.md` for full analysis
 - Fix: scope `GET /users/students` by `created_by` + class enrollment for TEACHER role
-- Effort: ~1.5 hours
+- Status: IMPLEMENTED
 
 ### Remaining Work
-- [ ] Teacher data isolation fix (scope student list to teacher's own students)
-- [ ] Production seed migration (admin-only, no demo data)
+- [x] Teacher data isolation fix (scope student list to teacher's own students)
+- [x] Production seed strategy (Flyway profile-based locations)
+- [x] Auto-skip to create form when no existing students available
 - [ ] Deployment guide for spinning up new customer instances
 - [ ] Parent creation from teacher view
 - [ ] Forgot password (Keycloak SMTP config)

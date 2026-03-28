@@ -128,6 +128,25 @@ Allow admins and teachers to reset a user's password if they're locked out.
 
 ---
 
+## Feature 6: Production Seed Strategy
+
+### FR-5.9: Flyway Profile-Based Migration Locations
+Separate demo seed data from schema migrations so production deployments start clean.
+
+- **FR-5.9.1**: `db/migration/` contains only schema changes and reference data (subjects/topics) — runs in all environments
+- **FR-5.9.2**: `db/seed/` contains demo users, students, classes, test scores — runs in dev only
+- **FR-5.9.3**: Default config (`application.yml`): `flyway.locations: classpath:db/migration,classpath:db/seed`
+- **FR-5.9.4**: Production config (`application-prod.yml`): `flyway.locations: classpath:db/migration`
+- **FR-5.9.5**: Deploy with `SPRING_PROFILES_ACTIVE=prod` to get a clean database
+- **FR-5.9.6**: Production database contains: schema + V14 syllabus subjects/topics, no demo data
+
+### FR-5.10: Enroll Modal Auto-Skip to Create
+- **FR-5.10.1**: When teacher opens enroll modal and no existing students are available, skip directly to the create form
+- **FR-5.10.2**: If existing students are available, show the dropdown with "+ New Student" button as before
+- **FR-5.10.3**: Applies to both teacher (`ClassLayout.tsx`) and admin (`AdminClassDetails.tsx`) enroll modals
+
+---
+
 ## Out of Scope (decided via requirement verification)
 
 - Self-service signup (you create all teacher/admin accounts manually via admin UI)

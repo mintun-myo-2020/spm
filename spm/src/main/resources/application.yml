@@ -89,6 +89,8 @@ spring.ai:
           max-tokens: 4096
   report-storage:
     local-path: ${APP_REPORT_STORAGE_LOCAL_PATH:./report-files}
+  report:
+    dispatcher: ${APP_REPORT_DISPATCHER:local}
 
 management:
   endpoints:

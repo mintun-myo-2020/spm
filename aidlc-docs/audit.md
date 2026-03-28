@@ -992,3 +992,65 @@ All 19 steps complete. Unit 2 Code Generation marked COMPLETED in aidlc-state.md
 **Status**: Requirements logged, implementation pending.
 
 ---
+
+### Implementation — Prompt Fixes (#1)
+**Timestamp**: 2026-03-26T16:15:00Z
+**AI Response**: Updated SYSTEM_INSTRUCTION: added mandatory gender-neutral language rules (they/them, never he/she), prohibited prescriptive subject-specific advice, added guidance to "read the question carefully" instead. Updated both OUTPUT_INSTRUCTION and OUTPUT_INSTRUCTION_WITH_COMPARISON: action items must be "verifiable as done/not done", added gender-neutral and non-prescriptive rules.
+**Context**: Code change — StrengthsImprovementPlanGenerator.java (prompt templates)
+**Status**: COMPLETED
+
+---
+
+### Implementation — Action Plan Checklist + JSON Storage (#2, #3)
+**Timestamp**: 2026-03-26T16:20:00Z
+**AI Response**: 
+- Added `completed` boolean to `StrengthsImprovementPlan.ActionItem` record
+- Created migration V10: added `status` (VARCHAR, default COMPLETED), `plan_json` (TEXT), `error_message` (TEXT) columns to progress_reports; made storage_key/storage_location nullable
+- Created `ReportStatus` enum (IN_PROGRESS, COMPLETED, FAILED)
+- Updated `ProgressReport` entity with new fields + getters/setters
+- Updated `ProgressReportDTO` to include status, planJson, errorMessage
+- Added `toggleActionItem()` method to ReportService — updates a single action item's completed status in the stored plan JSON
+- Added `PATCH /reports/{reportId}/actions/{actionIndex}?completed=true` endpoint to ReportController
+- Updated frontend: domain type, reportService.ts with toggleActionItem method
+**Context**: Code change — multiple backend + frontend files
+**Status**: COMPLETED
+
+---
+
+### Implementation — Async Report Generation (#4)
+**Timestamp**: 2026-03-26T16:30:00Z
+**AI Response**: 
+- Created `ReportAsyncWorker` — separate Spring bean with `@Async` to avoid self-invocation proxy bypass
+- Rewrote `ReportService.generateReport()`: creates IN_PROGRESS record, returns immediately, fires async worker after transaction commit via `TransactionSynchronizationManager.registerSynchronization`
+- Updated `ReportList.tsx`: added status column with pulsing "Generating..." badge, polling every 3s when IN_PROGRESS reports exist, auto-stops when all complete
+**Context**: Architecture change — ReportService.java, ReportAsyncWorker.java, ReportList.tsx
+**Status**: COMPLETED
+
+---
+
+### Bug Fix — Async Stuck in Generating
+**Timestamp**: 2026-03-26T16:45:00Z
+**User Input**: "the async sucks it is stuck in generating forever"
+**AI Response**: Root cause: `@Async` method was called from within the same transaction that created the report row. The async thread started before the transaction committed, so `findById(reportId)` returned null and silently exited. Fix: used `TransactionSynchronizationManager.registerSynchronization(afterCommit)` to ensure the async dispatch only fires after the creating transaction commits.
+**Context**: Bug fix — ReportService.java
+**Status**: COMPLETED
+
+---
+
+### Architecture — Pluggable Job Dispatcher
+**Timestamp**: 2026-03-26T17:00:00Z
+**User Input**: "ok but is it abstracted well tho? can i plop in a queue service like sqs and then it still works? or move the storage to s3 and it works?"
+**AI Response**: Storage was already abstracted (ReportStorage interface). Job dispatch was not. Created `ReportJobDispatcher` interface with `dispatch(reportId, studentId, request)`. Made `ReportAsyncWorker` implement it with `@ConditionalOnProperty(name = "app.report.dispatcher", havingValue = "local", matchIfMissing = true)`. Updated ReportService to depend on the interface. Added `app.report.dispatcher` config to application.yml.
+**Context**: Architecture improvement — ReportJobDispatcher.java, ReportAsyncWorker.java, ReportService.java, application.yml
+
+**Config-driven swap points**:
+| Component | Config | Local | AWS |
+|---|---|---|---|
+| Job dispatch | APP_REPORT_DISPATCHER | local (@Async) | sqs (future) |
+| Report storage | APP_STORAGE_TYPE | local (disk) | s3 (future) |
+| LLM | APP_LLM_TYPE | stub | bedrock |
+| OCR extraction | APP_EXTRACTION_TYPE | stub | bedrock |
+
+**Status**: COMPLETED
+
+---

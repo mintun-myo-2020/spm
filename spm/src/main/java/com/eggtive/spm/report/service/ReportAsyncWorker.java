@@ -11,6 +11,7 @@ import com.eggtive.spm.user.entity.Student;
 import com.eggtive.spm.user.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +23,13 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Separate bean so Spring's @Async proxy works (self-invocation bypasses it).
+ * In-process async dispatcher using Spring @Async.
+ * Active when app.report.dispatcher=local (default).
+ * Swap for an SQS-based implementation by setting app.report.dispatcher=sqs.
  */
 @Component
-public class ReportAsyncWorker {
+@ConditionalOnProperty(name = "app.report.dispatcher", havingValue = "local", matchIfMissing = true)
+public class ReportAsyncWorker implements ReportJobDispatcher {
 
     private static final Logger log = LoggerFactory.getLogger(ReportAsyncWorker.class);
 
@@ -50,9 +54,10 @@ public class ReportAsyncWorker {
         this.jsonMapper = jsonMapper;
     }
 
+    @Override
     @Async
     @Transactional
-    public void buildReport(UUID reportId, UUID studentId, GenerateReportRequestDTO req) {
+    public void dispatch(UUID reportId, UUID studentId, GenerateReportRequestDTO req) {
         log.info("Async report generation started — reportId: {}", reportId);
         ProgressReport report = reportRepository.findById(reportId).orElse(null);
         if (report == null) return;

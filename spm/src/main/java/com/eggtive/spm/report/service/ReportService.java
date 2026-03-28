@@ -40,19 +40,19 @@ public class ReportService {
     private final ReportDataAssembler reportDataAssembler;
     private final StrengthsImprovementPlanGenerator planGenerator;
     private final JsonMapper jsonMapper;
-    private final ReportAsyncWorker asyncWorker;
+    private final ReportJobDispatcher jobDispatcher;
 
     public ReportService(ProgressReportRepository reportRepo, UserService userService,
                          ReportStorage reportStorage, ReportDataAssembler reportDataAssembler,
                          StrengthsImprovementPlanGenerator planGenerator, JsonMapper jsonMapper,
-                         ReportAsyncWorker asyncWorker) {
+                         ReportJobDispatcher jobDispatcher) {
         this.reportRepository = reportRepo;
         this.userService = userService;
         this.reportStorage = reportStorage;
         this.reportDataAssembler = reportDataAssembler;
         this.planGenerator = planGenerator;
         this.jsonMapper = jsonMapper;
-        this.asyncWorker = asyncWorker;
+        this.jobDispatcher = jobDispatcher;
     }
 
     /**
@@ -79,7 +79,7 @@ public class ReportService {
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                asyncWorker.buildReport(reportId, studentId, req);
+                jobDispatcher.dispatch(reportId, studentId, req);
             }
         });
         return toDTO(report);

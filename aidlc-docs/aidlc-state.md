@@ -67,6 +67,26 @@ All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Fro
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: Code Generation (Unit 2 - OCR Test Upload) - COMPLETED
-- **Next Stage**: Functional Design (Unit 3 - Class Scheduling & Attendance)
-- **Status**: Ready to proceed to Unit 3
+- **Current Stage**: Sprint 3 — Report Plan Improvements — COMPLETED
+- **Next Stage**: Functional Design (Unit 3 - Class Scheduling & Attendance) OR frontend report detail view with interactive checklist
+- **Status**: Sprint 3 complete. Remaining work from sprint 3 requirements: frontend report detail view that renders planJson interactively with checkable action items (currently only the static HTML view exists).
+
+## Sprint 3 — Report Plan Improvements
+
+### Completed
+- [x] Fix progress page to use percentages instead of raw scores (ProgressService, StudentProgressView)
+- [x] Fix LLM stub returning empty plan (parseResponse fallback validation)
+- [x] Switch LLM to Bedrock (.env, docker-compose.yml)
+- [x] Consolidate BedrockConfig (single shared BedrockRuntimeClient)
+- [x] LLM prompt fixes: gender-neutral language, no prescriptive advice, checkable action items
+- [x] Action plan checklist: `completed` field on ActionItem, toggle endpoint
+- [x] JSON plan storage: `plan_json` column on progress_reports, serialized on generation
+- [x] Async report generation: fire-and-forget with IN_PROGRESS/COMPLETED/FAILED status
+- [x] Transaction commit ordering fix for async dispatch
+- [x] Pluggable job dispatcher abstraction (ReportJobDispatcher interface)
+- [x] Config-driven environment swaps (dispatcher, storage, LLM, extraction)
+
+### Remaining / Future
+- [ ] Frontend report detail view — render planJson interactively with checkable action items
+- [ ] SQS-based ReportJobDispatcher implementation (when needed for prod)
+- [ ] S3-based ReportStorage implementation (when needed for prod)

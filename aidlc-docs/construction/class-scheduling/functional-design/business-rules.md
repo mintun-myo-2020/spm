@@ -127,6 +127,12 @@
 - Parent must have a valid parent-student link
 - Parent RSVP has the same effect as student RSVP
 
+### BR-RSVP-003a: Teacher/Admin RSVP
+- Teachers can update RSVP on behalf of students in their own classes (e.g., student communicated offline or via text)
+- Admins can update RSVP for any student in any class
+- Teacher/admin must provide `studentId` as query parameter
+- Same validation rules apply (session must be SCHEDULED and in the future)
+
 ### BR-RSVP-004: RSVP Reason
 - When setting RSVP to NOT_ATTENDING, an optional reason can be provided
 - When reverting to ATTENDING, the reason is cleared
@@ -206,5 +212,5 @@
 
 ---
 
-**Document Version**: 1.0
+**Document Version**: 1.1
 **Last Updated**: 2026-03-28

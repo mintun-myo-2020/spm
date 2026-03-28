@@ -151,15 +151,17 @@ Input: sessionId, studentId, status
 
 ## 6. RSVP Workflow
 
-### 6.1 Student/Parent RSVP
+### 6.1 Student/Parent/Teacher/Admin RSVP
 ```
-Input: sessionId, studentId (from auth context or parent's child), rsvpStatus, reason?
+Input: sessionId, studentId (from auth context, parent's child, or teacher/admin param), rsvpStatus, reason?
 ```
 
 1. Load attendance record (session_id + student_id)
 2. Validate authorization:
    - Student: must be the student themselves
    - Parent: must be linked to the student
+   - Teacher: must own the class the session belongs to
+   - Admin: any student in any class
 3. Validate session is SCHEDULED and session_date is in the future
 4. Update student_rsvp:
    - If NOT_ATTENDING: set rsvp_reason
@@ -259,5 +261,5 @@ Input: classId, startDate?, endDate?
 
 ---
 
-**Document Version**: 1.0
+**Document Version**: 1.1
 **Last Updated**: 2026-03-28

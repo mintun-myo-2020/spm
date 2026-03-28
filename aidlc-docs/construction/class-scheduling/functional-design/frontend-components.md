@@ -65,23 +65,32 @@ Props:
 Columns: Date, Day, Time, Class (if showClassName), Location, Status, Enrolled, Marked
 
 ### AttendanceTable
-Table for marking attendance with RSVP indicators.
+Table for marking attendance with RSVP indicators and inline RSVP editing.
 
 Props:
 - `attendance: AttendanceDTO[]`
 - `onMarkAttendance: (entries: AttendanceEntryDTO[]) => void`
 - `readOnly: boolean` — true for student/parent views
 - `loading: boolean`
+- `sessionId?: string` — required for RSVP editing (teacher/admin)
+- `onRsvpUpdated?: () => void` — callback after RSVP is updated
 
 State:
 - `localAttendance: Map<string, string>` — local edits before save
+- `editingRsvp: string | null` — studentId currently being edited
+- `rsvpReason: string` — reason text for RSVP edit
+- `rsvpSaving: boolean` — loading state for RSVP update
 
 Behavior:
 - Sort: NOT_ATTENDING RSVPs at bottom, then alphabetical
-- NOT_ATTENDING students have a badge/indicator
-- Dropdown per student: PRESENT, ABSENT, LATE, EXCUSED
-- "Save All" button for batch submission
-- Read-only mode shows status without dropdowns
+- NOT_ATTENDING students have a red pill badge with reason
+- Dropdown per student: UNMARKED, PRESENT, ABSENT, LATE, EXCUSED
+- "Save Attendance" button sends all changed entries (including reverting to UNMARKED)
+- RSVP editing: pencil icon next to each student's RSVP status (when sessionId provided and not readOnly)
+  - Clicking opens inline form with reason textarea and Not Attending / Attending / Cancel buttons
+  - Teacher/admin can mark student as NOT_ATTENDING with reason, or revert to ATTENDING
+  - Calls PUT /api/v1/sessions/{sessionId}/rsvp?studentId={studentId}
+- Read-only mode shows status without dropdowns or edit controls
 
 ### AttendanceStatsPanel
 Displays attendance statistics.
@@ -180,22 +189,25 @@ New section (accordion, collapsed by default):
 ## Student Components
 
 ### MySchedule
-Upcoming sessions for the student with RSVP toggle.
+Upcoming sessions for the student with opt-out RSVP model.
 
 Route: `/student/schedule`
 
 State:
-- `sessions: SessionDTO[]` — from GET /api/v1/sessions/upcoming
-- `attendanceBySession: Map<string, AttendanceDTO>` — student's own attendance/RSVP
+- `sessions: SessionDTO[]` — from GET /api/v1/sessions/upcoming (includes myRsvp/myRsvpReason per session)
+- `editingRsvp: Record<string, boolean>` — tracks which sessions have the RSVP form open
+- `rsvpReason: Record<string, string>` — reason text per session
 
 Layout:
 1. ScheduleCalendar (read-only, shows enrolled class sessions)
 2. SessionList for selected date or upcoming list
-3. Per session: RSVP toggle (ATTENDING ↔ NOT_ATTENDING)
-   - Default: ATTENDING (no action needed)
-   - Toggle to NOT_ATTENDING: shows optional reason text field
-   - Toggle back to ATTENDING: clears reason
-4. Past sessions: show attendance status (read-only)
+3. Per session card (opt-out model):
+   - Default state (ATTENDING): red "Can't Attend" button
+   - Clicking "Can't Attend" opens inline form with reason textarea + "Confirm Not Attending" / "Cancel" buttons
+   - NOT_ATTENDING state: red "Not Attending" pill badge, reason text (if provided), "Edit" button, green "I Can Attend" button
+   - "Edit" opens the form pre-filled with existing reason
+   - "I Can Attend" reverts RSVP to ATTENDING and clears reason
+4. Uses myRsvp/myRsvpReason fields from SessionDTO (populated by backend for student users)
 
 ---
 
@@ -223,19 +235,23 @@ Layout:
 ## Admin Components
 
 ### ScheduleOverview
-Dedicated page showing all sessions across all classes.
+Dedicated page showing all sessions across all classes with filtering.
 
 Route: `/admin/schedule`
 
 State:
 - `sessions: SessionDTO[]` — from GET /api/v1/sessions/upcoming (admin sees all)
-- `filters: { classId?, status?, startDate?, endDate? }`
+- `classFilter: string` — selected class name filter
+- `dayFilter: string` — selected day of week filter
+- `selectedDate: string | null` — date selected on calendar
 
 Layout:
-1. Filter bar: class dropdown, status dropdown, date range
-2. ScheduleCalendar (all classes, color-coded by class)
-3. SessionList (showClassName=true)
-4. Click session → navigate to admin session detail
+1. PageHeader with title
+2. Grid layout: calendar (left), session list with filters (right)
+3. Filters (right-aligned above session list): class dropdown (populated from loaded sessions), day of week dropdown (Mon-Sun), "Clear" link when any filter active
+4. ScheduleCalendar (all classes)
+5. SessionList (showClassName=true), filtered by class/day/date
+6. Click session → navigate to admin session detail
 
 ### AdminClassDetails (Modified)
 Add "Schedule" tab (reuses ScheduleTab component with admin permissions).
@@ -307,5 +323,5 @@ export interface ClassAttendanceStatsDTO { ... }
 
 ---
 
-**Document Version**: 1.0
+**Document Version**: 1.1
 **Last Updated**: 2026-03-28

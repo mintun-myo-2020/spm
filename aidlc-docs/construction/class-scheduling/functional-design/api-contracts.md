@@ -114,7 +114,9 @@ public record SessionDTO(
     int enrolledCount,         // Total attendance records
     int markedCount,           // Attendance records where status != UNMARKED
     int notAttendingRsvpCount, // Students who RSVP'd NOT_ATTENDING
-    Instant createdAt
+    Instant createdAt,
+    String myRsvp,             // Current user's RSVP status (ATTENDING/NOT_ATTENDING), null for non-student views
+    String myRsvpReason        // Current user's RSVP reason, null if attending or non-student view
 ) {}
 
 public record SessionDetailDTO(
@@ -286,12 +288,13 @@ Update individual student attendance.
 - Response: `ApiResponse<AttendanceDTO>`
 
 #### PUT /api/v1/sessions/{sessionId}/rsvp
-Student/parent RSVP for a session.
+Student/parent/teacher/admin RSVP for a session.
 
-- Auth: STUDENT (own attendance), PARENT (linked child)
+- Auth: STUDENT (own attendance), PARENT (linked child), TEACHER (own class), ADMIN (any class)
 - Request: `RsvpRequestDTO`
 - Response: `ApiResponse<AttendanceDTO>`
-- Note: For parents, include `studentId` as query param
+- Note: For parents/teachers/admins, include `studentId` as query param
+- Teachers can only update RSVP for students in their own classes
 - Errors: 400 (session not SCHEDULED or in past), 403
 
 ---
@@ -325,5 +328,5 @@ Updated to accept optional initial schedule fields.
 
 ---
 
-**Document Version**: 1.0
+**Document Version**: 1.1
 **Last Updated**: 2026-03-28

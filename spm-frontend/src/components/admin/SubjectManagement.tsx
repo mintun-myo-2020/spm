@@ -162,11 +162,13 @@ export function SubjectManagement() {
                   ) : (
                     <Table>
                       <TableHead>
-                        <TableHeadCell>Name</TableHeadCell>
-                        <TableHeadCell>Code</TableHeadCell>
-                        <TableHeadCell>Description</TableHeadCell>
-                        <TableHeadCell>Status</TableHeadCell>
-                        <TableHeadCell>Actions</TableHeadCell>
+                        <TableRow>
+                          <TableHeadCell>Name</TableHeadCell>
+                          <TableHeadCell>Code</TableHeadCell>
+                          <TableHeadCell>Description</TableHeadCell>
+                          <TableHeadCell>Status</TableHeadCell>
+                          <TableHeadCell>Actions</TableHeadCell>
+                        </TableRow>
                       </TableHead>
                       <TableBody className="divide-y">
                         {s.topics.map((t) => (

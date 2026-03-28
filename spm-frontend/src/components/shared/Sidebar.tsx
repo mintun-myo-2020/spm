@@ -1,7 +1,7 @@
 import { Sidebar as FlowbiteSidebar, SidebarItems, SidebarItemGroup, SidebarItem } from 'flowbite-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { HiAcademicCap, HiChartBar, HiClipboardList, HiHome, HiUserGroup, HiBookOpen, HiBell, HiDocumentReport, HiUpload } from 'react-icons/hi';
+import { HiAcademicCap, HiChartBar, HiClipboardList, HiHome, HiUserGroup, HiBookOpen, HiBell, HiDocumentReport, HiUpload, HiCalendar } from 'react-icons/hi';
 import type { FC, SVGProps } from 'react';
 
 interface NavItem {
@@ -20,6 +20,7 @@ const navByRole: Record<string, NavItem[]> = {
     { label: 'Dashboard', to: '/parent/dashboard', icon: HiHome },
     { label: 'Test Scores', to: '/parent/scores', icon: HiClipboardList },
     { label: 'Progress', to: '/parent/progress', icon: HiChartBar },
+    { label: 'Schedule', to: '/parent/schedule', icon: HiCalendar },
     { label: 'Reports', to: '/parent/reports', icon: HiDocumentReport },
     { label: 'Preferences', to: '/parent/preferences', icon: HiBell },
   ],
@@ -28,12 +29,14 @@ const navByRole: Record<string, NavItem[]> = {
     { label: 'My Scores', to: '/student/scores', icon: HiClipboardList },
     { label: 'Upload Paper', to: '/student/upload', icon: HiUpload },
     { label: 'My Progress', to: '/student/progress', icon: HiChartBar },
+    { label: 'Schedule', to: '/student/schedule', icon: HiCalendar },
     { label: 'Reports', to: '/student/reports', icon: HiDocumentReport },
   ],
   ADMIN: [
     { label: 'Dashboard', to: '/admin/dashboard', icon: HiHome },
     { label: 'Users', to: '/admin/users', icon: HiUserGroup },
     { label: 'Classes', to: '/admin/classes', icon: HiAcademicCap },
+    { label: 'Schedule', to: '/admin/schedule', icon: HiCalendar },
     { label: 'Subjects', to: '/admin/subjects', icon: HiBookOpen },
   ],
 };

@@ -81,25 +81,25 @@
   - Modify `ClassService.java` — createClass() to handle optional initial schedule creation
   - Modify `ClassController.java` — inject ScheduleService, pass schedule fields through
 
-- [ ] Step 11: Backend Code Summary
+- [x] Step 11: Backend Code Summary
   - Create `aidlc-docs/construction/class-scheduling/code/code-summary.md`
 
 ### Frontend
 
-- [ ] Step 12: TypeScript Types
+- [x] Step 12: TypeScript Types
   - Modify `spm-frontend/src/types/domain.ts` — add ScheduleDTO, SessionDTO, SessionDetailDTO, AttendanceDTO, SessionUpdateResponseDTO, StudentAttendanceStatsDTO, ClassAttendanceStatsDTO, enums
   - Modify `spm-frontend/src/types/forms.ts` (if exists) or domain.ts — add CreateScheduleForm, CreateOneOffScheduleForm, etc.
 
-- [ ] Step 13: Scheduling Service
+- [x] Step 13: Scheduling Service
   - Create `spm-frontend/src/services/schedulingService.ts` — all schedule, session, attendance, RSVP, stats API calls
 
-- [ ] Step 14: Shared Components
+- [x] Step 14: Shared Components
   - Create `spm-frontend/src/components/shared/ScheduleCalendar.tsx` — monthly calendar with session dots
   - Create `spm-frontend/src/components/shared/SessionList.tsx` — sortable session table
   - Create `spm-frontend/src/components/shared/AttendanceTable.tsx` — attendance marking with RSVP indicators
   - Create `spm-frontend/src/components/shared/AttendanceStatsPanel.tsx` — attendance rate display
 
-- [ ] Step 15: Teacher Components
+- [x] Step 15: Teacher Components
   - Create `spm-frontend/src/components/teacher/ScheduleTab.tsx` — schedule management within ClassDetails
   - Create `spm-frontend/src/components/teacher/CreateScheduleForm.tsx` — recurring/one-off schedule form
   - Create `spm-frontend/src/components/teacher/GenerateSessionsModal.tsx` — target end date modal
@@ -107,25 +107,25 @@
   - Modify `spm-frontend/src/components/teacher/ClassDetails.tsx` — add Schedule tab
   - Modify `spm-frontend/src/components/teacher/CreateClassForm.tsx` — add accordion schedule section
 
-- [ ] Step 16: Student Components
+- [x] Step 16: Student Components
   - Create `spm-frontend/src/components/student/MySchedule.tsx` — upcoming sessions with RSVP toggle
 
-- [ ] Step 17: Parent Components
+- [x] Step 17: Parent Components
   - Create `spm-frontend/src/components/parent/ChildSchedule.tsx` — child's schedule with parent RSVP
 
-- [ ] Step 18: Admin Components
+- [x] Step 18: Admin Components
   - Create `spm-frontend/src/components/admin/ScheduleOverview.tsx` — all sessions across all classes
   - Modify `spm-frontend/src/components/admin/AdminClassDetails.tsx` — add Schedule tab
   - Modify `spm-frontend/src/components/admin/CreateClassForm.tsx` — add accordion schedule section
 
-- [ ] Step 19: Routing & Navigation
+- [x] Step 19: Routing & Navigation
   - Modify `spm-frontend/src/components/teacher/TeacherRoutes.tsx` — add session detail route
   - Modify `spm-frontend/src/components/student/StudentRoutes.tsx` — add schedule route
   - Modify `spm-frontend/src/components/parent/ParentRoutes.tsx` — add child schedule route
   - Modify `spm-frontend/src/components/admin/AdminRoutes.tsx` — add schedule overview + session detail routes
   - Modify `spm-frontend/src/components/shared/Sidebar.tsx` — add Schedule nav items for all roles
 
-- [ ] Step 20: Frontend Code Summary
+- [x] Step 20: Frontend Code Summary
   - Create or update `aidlc-docs/construction/class-scheduling/code/code-summary.md`
 
 ---

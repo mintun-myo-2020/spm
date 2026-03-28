@@ -5,6 +5,7 @@ import { StudentTestScoreDetailPage } from './TestScoreDetailPage';
 import { MyProgress } from './MyProgress';
 import { MyReports } from './MyReports';
 import { UploadTestPaper } from './UploadTestPaper';
+import { MySchedule } from './MySchedule';
 
 export default function StudentRoutes() {
   return (
@@ -15,6 +16,7 @@ export default function StudentRoutes() {
       <Route path="progress" element={<MyProgress />} />
       <Route path="reports" element={<MyReports />} />
       <Route path="upload" element={<UploadTestPaper />} />
+      <Route path="schedule" element={<MySchedule />} />
     </Routes>
   );
 }

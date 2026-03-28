@@ -60,16 +60,16 @@ All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Fro
 - [ ] NFR Requirements - SKIP
 - [ ] NFR Design - SKIP
 - [ ] Infrastructure Design - SKIP
-- [ ] Code Generation - IN PROGRESS
+- [x] Code Generation - COMPLETED
 
 ### Build and Test
 - [ ] Build and Test - EXECUTE
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: CONSTRUCTION - Code Generation (Unit 3: Class Scheduling & Attendance) - IN PROGRESS
+- **Current Stage**: CONSTRUCTION - Code Generation (Unit 3: Class Scheduling & Attendance) - COMPLETED
 - **Next Stage**: Build and Test
-- **Status**: Functional design complete for Unit 3. Starting code generation for scheduling module (backend + frontend).
+- **Status**: All 3 units complete. Backend compiles clean, frontend has zero new TS errors (one pre-existing Sidebar type issue). Ready for Build and Test stage.
 
 ## Sprint 3 — Report Plan Improvements
 

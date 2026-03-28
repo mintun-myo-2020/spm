@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Button, Select } from 'flowbite-react';
+import { Button, Select, Tabs, TabItem } from 'flowbite-react';
 import { classService } from '../../services/classService';
 import { userService } from '../../services/userService';
 import { PageHeader } from '../shared/PageHeader';
@@ -11,6 +11,7 @@ import { EmptyState } from '../shared/EmptyState';
 import { useToast } from '../shared/Toast';
 import { Modal } from '../shared/Modal';
 import { ClassSummaryPanel } from '../shared/ClassSummaryPanel';
+import { ScheduleTab } from '../teacher/ScheduleTab';
 import type { ClassDetailDTO, ClassStudentDTO, StudentDTO } from '../../types/domain';
 
 export function AdminClassDetails() {
@@ -116,13 +117,20 @@ export function AdminClassDetails() {
     <div data-testid="admin-class-details">
       <PageHeader title={classDetail.name} subtitle={`${classDetail.subjectName} · ${classDetail.teacherName} · ${classDetail.currentStudentCount}/${classDetail.maxStudents} students`} backTo="/admin/classes" action={{ label: 'Enroll Student', onClick: openEnrollModal }} />
 
-      <ClassSummaryPanel classId={classId!} />
+      <Tabs aria-label="Class tabs">
+        <TabItem title="Students" active>
+          <ClassSummaryPanel classId={classId!} />
 
-      {classDetail.students.length === 0 ? (
-        <EmptyState title="No students enrolled" description="Click 'Enroll Student' to add students to this class." />
-      ) : (
-        <DataTable data={classDetail.students} columns={columns} keyExtractor={(row) => row.id} onRowClick={(row) => navigate(`/admin/classes/${classId}/students/${row.id}`)} />
-      )}
+          {classDetail.students.length === 0 ? (
+            <EmptyState title="No students enrolled" description="Click 'Enroll Student' to add students to this class." />
+          ) : (
+            <DataTable data={classDetail.students} columns={columns} keyExtractor={(row) => row.id} onRowClick={(row) => navigate(`/admin/classes/${classId}/students/${row.id}`)} />
+          )}
+        </TabItem>
+        <TabItem title="Schedule">
+          <ScheduleTab classId={classId!} basePath="/admin/classes" />
+        </TabItem>
+      </Tabs>
 
       <Modal isOpen={showEnroll} onClose={() => setShowEnroll(false)} title="Enroll Student">
         <div className="space-y-4">

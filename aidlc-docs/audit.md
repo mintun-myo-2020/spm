@@ -1136,3 +1136,16 @@ All 19 steps complete. Unit 2 Code Generation marked COMPLETED in aidlc-state.md
 **Context**: Code Generation stage - backend complete, frontend steps 12-20 remaining.
 
 ---
+
+## Code Generation - All Steps Complete (Unit 3: Class Scheduling & Attendance)
+**Timestamp**: 2026-03-28T11:45:00Z
+**User Input**: "carry on"
+**AI Response**: Completed all 20 steps of the code generation plan. Also refactored ErrorCode enum to carry its own HTTP status (eliminating the switch in GlobalExceptionHandler). Verification results:
+- Backend: `./gradlew compileJava` — BUILD SUCCESSFUL
+- Backend: `./gradlew build -x test` — BUILD SUCCESSFUL
+- Frontend: `npx tsc -b --noEmit` — zero new errors (one pre-existing Sidebar type issue confirmed via git stash test)
+- All plan checkboxes marked [x]
+- aidlc-state.md updated: Unit 3 Code Generation COMPLETED
+**Context**: Code Generation stage complete for Unit 3. Next stage: Build and Test (or user approval first).
+
+---

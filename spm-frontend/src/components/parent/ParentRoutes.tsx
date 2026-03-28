@@ -5,6 +5,7 @@ import { ParentTestScoreDetailPage } from './TestScoreDetailPage';
 import { ProgressCharts } from './ProgressCharts';
 import { NotificationPreferences } from './NotificationPreferences';
 import { ChildReports } from './ChildReports';
+import { ChildSchedule } from './ChildSchedule';
 
 export default function ParentRoutes() {
   return (
@@ -15,6 +16,7 @@ export default function ParentRoutes() {
       <Route path="progress" element={<ProgressCharts />} />
       <Route path="reports" element={<ChildReports />} />
       <Route path="preferences" element={<NotificationPreferences />} />
+      <Route path="schedule" element={<ChildSchedule />} />
     </Routes>
   );
 }

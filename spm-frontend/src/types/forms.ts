@@ -31,6 +31,13 @@ export interface CreateClassForm {
   teacherId: string;
   description?: string;
   maxStudents?: number;
+  // Optional initial schedule (FR-14.8)
+  scheduleDayOfWeek?: number;
+  scheduleStartTime?: string;
+  scheduleEndTime?: string;
+  scheduleLocation?: string;
+  scheduleEffectiveFrom?: string;
+  scheduleEffectiveUntil?: string;
 }
 
 export interface SubQuestionInput {
@@ -105,4 +112,28 @@ export interface GenerateReportForm {
 export interface CreateTestScoreFormWithUpload extends CreateTestScoreForm {
   uploadIds?: string[];
   isDraft?: boolean;
+}
+
+
+// --- Scheduling Forms ---
+
+export interface CreateScheduleForm {
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+  location?: string;
+  effectiveFrom: string;
+  effectiveUntil?: string;
+}
+
+export interface CreateOneOffScheduleForm {
+  sessionDate: string;
+  startTime: string;
+  endTime: string;
+  location?: string;
+}
+
+export interface RsvpForm {
+  rsvpStatus: 'ATTENDING' | 'NOT_ATTENDING';
+  reason?: string;
 }

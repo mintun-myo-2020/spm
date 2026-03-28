@@ -10,6 +10,8 @@ import { AdminStudentProgress } from './AdminStudentProgress';
 import { AdminStudentReports } from './AdminStudentReports';
 import { SubjectManagement } from './SubjectManagement';
 import { TestScoreForm } from '../teacher/TestScoreForm';
+import { ScheduleOverview } from './ScheduleOverview';
+import { SessionDetail } from '../teacher/SessionDetail';
 
 export default function AdminRoutes() {
   return (
@@ -18,6 +20,7 @@ export default function AdminRoutes() {
       <Route path="users" element={<UserManagement />} />
       <Route path="classes" element={<ClassManagement />} />
       <Route path="classes/:classId" element={<AdminClassDetails />} />
+      <Route path="classes/:classId/sessions/:sessionId" element={<SessionDetail />} />
       <Route path="classes/:classId/students/:studentId" element={<AdminStudentDetails />} />
       <Route path="classes/:classId/students/:studentId/scores" element={<AdminStudentScores />} />
       <Route path="classes/:classId/students/:studentId/scores/:testScoreId" element={<AdminTestScoreDetail />} />
@@ -25,6 +28,8 @@ export default function AdminRoutes() {
       <Route path="classes/:classId/students/:studentId/progress" element={<AdminStudentProgress />} />
       <Route path="classes/:classId/students/:studentId/reports" element={<AdminStudentReports />} />
       <Route path="subjects" element={<SubjectManagement />} />
+      <Route path="schedule" element={<ScheduleOverview />} />
+      <Route path="sessions/:sessionId" element={<SessionDetail />} />
     </Routes>
   );
 }

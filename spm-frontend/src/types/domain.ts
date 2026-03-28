@@ -394,3 +394,87 @@ export interface AggregatedQuestion {
   confidence: number;
   sourcePage: number;
 }
+
+
+// --- Class Scheduling & Attendance Types ---
+
+export type SessionStatus = 'SCHEDULED' | 'CANCELLED' | 'COMPLETED';
+export type AttendanceStatus = 'UNMARKED' | 'PRESENT' | 'ABSENT' | 'LATE' | 'EXCUSED';
+export type RsvpStatus = 'ATTENDING' | 'NOT_ATTENDING';
+
+export interface ScheduleDTO {
+  id: string;
+  classId: string;
+  className: string;
+  dayOfWeek: number | null;
+  dayOfWeekName: string | null;
+  startTime: string;
+  endTime: string;
+  location: string | null;
+  isRecurring: boolean;
+  effectiveFrom: string;
+  effectiveUntil: string | null;
+  sessionCount: number;
+  createdAt: string;
+}
+
+export interface SessionDTO {
+  id: string;
+  scheduleId: string | null;
+  classId: string;
+  className: string;
+  sessionDate: string;
+  dayOfWeekName: string;
+  startTime: string;
+  endTime: string;
+  location: string | null;
+  status: SessionStatus;
+  cancelReason: string | null;
+  enrolledCount: number;
+  markedCount: number;
+  notAttendingRsvpCount: number;
+  createdAt: string;
+}
+
+export interface SessionDetailDTO extends Omit<SessionDTO, 'enrolledCount' | 'markedCount' | 'notAttendingRsvpCount'> {
+  attendance: AttendanceDTO[];
+}
+
+export interface AttendanceDTO {
+  id: string;
+  sessionId: string;
+  studentId: string;
+  studentName: string;
+  status: AttendanceStatus;
+  studentRsvp: RsvpStatus;
+  rsvpReason: string | null;
+  markedBy: string | null;
+  markedAt: string | null;
+}
+
+export interface SessionUpdateResponseDTO {
+  session: SessionDTO;
+  warnings: string[];
+}
+
+export interface StudentAttendanceStatsDTO {
+  studentId: string;
+  studentName: string;
+  classId: string;
+  totalSessions: number;
+  presentCount: number;
+  absentCount: number;
+  lateCount: number;
+  excusedCount: number;
+  unmarkedCount: number;
+  attendanceRate: number;
+}
+
+export interface ClassAttendanceStatsDTO {
+  classId: string;
+  className: string;
+  totalSessions: number;
+  sessionsWithAttendance: number;
+  averageAttendanceRate: number;
+  studentStats: StudentAttendanceStatsDTO[];
+}

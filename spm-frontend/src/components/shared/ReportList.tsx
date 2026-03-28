@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Checkbox, Label, Select, TextInput } from 'flowbite-react';
+import { Button, Checkbox, Label, Select, TextInput, ToggleSwitch } from 'flowbite-react';
 import { reportService } from '../../services/reportService';
 import { classService } from '../../services/classService';
 import { PageHeader } from './PageHeader';
@@ -165,16 +165,11 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
           </div>
           <div>
             <Label>Report Period</Label>
-            <p className="mb-1 text-xs text-gray-500 dark:text-gray-400">Only test scores and feedback within this date range will be included.</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label htmlFor="report-start">From</Label>
-                <TextInput id="report-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
-              </div>
-              <div>
-                <Label htmlFor="report-end">To</Label>
-                <TextInput id="report-end" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
-              </div>
+            <p className="mb-2 text-xs text-gray-500 dark:text-gray-400">Only test scores and feedback within this date range will be included.</p>
+            <div className="flex items-center gap-2">
+              <TextInput id="report-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required className="flex-1" />
+              <span className="text-sm text-gray-400">→</span>
+              <TextInput id="report-end" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required className="flex-1" />
             </div>
           </div>
           {startDate && endDate && startDate > endDate && (
@@ -183,24 +178,17 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
 
           {/* Improvement plan opt-in */}
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="include-plan"
-                checked={includePlan}
-                onChange={(e) => {
-                  setIncludePlan(e.target.checked);
-                  if (!e.target.checked) setCompareReportIds([]);
-                }}
-              />
-              <div>
-                <Label htmlFor="include-plan" className="font-medium">
-                  Include strengths &amp; improvement plan
-                </Label>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Uses AI to analyse scores, teacher feedback, and question-level remarks to generate a personalised improvement plan. Takes a few extra seconds.
-                </p>
-              </div>
-            </div>
+            <ToggleSwitch
+              checked={includePlan}
+              label="Include strengths & improvement plan"
+              onChange={(checked) => {
+                setIncludePlan(checked);
+                if (!checked) setCompareReportIds([]);
+              }}
+            />
+            <p className="mt-1 ml-14 text-xs text-gray-500 dark:text-gray-400">
+              Uses AI to analyse scores, teacher feedback, and question-level remarks to generate a personalised improvement plan.
+            </p>
 
             {/* Previous report comparison picker */}
             {includePlan && availablePreviousReports.length > 0 && (

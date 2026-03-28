@@ -205,16 +205,31 @@ public class ScheduleService {
     }
 
     SessionDTO toSessionDTO(ClassSession s) {
+        return toSessionDTO(s, null);
+    }
+
+    SessionDTO toSessionDTO(ClassSession s, UUID studentId) {
         List<SessionAttendance> att = attendanceRepo.findBySessionId(s.getId());
         int enrolled = att.size();
         int marked = (int) att.stream().filter(a -> a.getStatus() != AttendanceStatus.UNMARKED).count();
         int notAttending = (int) att.stream().filter(a -> a.getStudentRsvp() == RsvpStatus.NOT_ATTENDING).count();
         String dayName = s.getSessionDate().getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+        String myRsvp = null;
+        String myRsvpReason = null;
+        if (studentId != null) {
+            var myAtt = att.stream().filter(a -> a.getStudent().getId().equals(studentId)).findFirst();
+            if (myAtt.isPresent()) {
+                myRsvp = myAtt.get().getStudentRsvp().name();
+                myRsvpReason = myAtt.get().getRsvpReason();
+            }
+        }
+
         return new SessionDTO(s.getId(), s.getSchedule() != null ? s.getSchedule().getId() : null,
             s.getTuitionClass().getId(), s.getTuitionClass().getName(), s.getSessionDate(), dayName,
             s.getStartTime(), s.getEndTime(), s.getLocation(), s.getStatus().name(),
             s.getCancelReason(), enrolled, marked, notAttending,
             s.getTopicCovered(), s.getHomeworkGiven(), s.getCommonWeaknesses(), s.getAdditionalNotes(),
-            s.getCreatedAt());
+            s.getCreatedAt(), myRsvp, myRsvpReason);
     }
 }

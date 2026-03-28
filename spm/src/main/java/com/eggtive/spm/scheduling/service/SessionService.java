@@ -47,6 +47,7 @@ public class SessionService {
     public PagedResponse<SessionDTO> getUpcomingSessions(User user, Pageable pageable) {
         LocalDate today = LocalDate.now();
         Page<ClassSession> page;
+        UUID viewingStudentId = null;
 
         if (user.hasRole(Role.ADMIN)) {
             page = sessionRepo.findAllUpcoming(today, pageable);
@@ -57,6 +58,7 @@ public class SessionService {
         } else if (user.hasRole(Role.STUDENT)) {
             var student = studentRepo.findByUserId(user.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Student profile not found"));
+            viewingStudentId = student.getId();
             page = sessionRepo.findUpcomingForStudent(student.getId(), today, pageable);
         } else if (user.hasRole(Role.PARENT)) {
             var parent = parentRepo.findByUserId(user.getId())
@@ -66,7 +68,10 @@ public class SessionService {
             throw new AppException(ErrorCode.FORBIDDEN, "Access denied");
         }
 
-        var dtos = page.getContent().stream().map(scheduleService::toSessionDTO).toList();
+        final UUID studentId = viewingStudentId;
+        var dtos = page.getContent().stream()
+            .map(s -> scheduleService.toSessionDTO(s, studentId))
+            .toList();
         return PagedResponse.from(page, dtos);
     }
 

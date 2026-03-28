@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Button, Select, Badge } from 'flowbite-react';
+import { Select, Textarea } from 'flowbite-react';
+import { schedulingService } from '../../services/schedulingService';
 import type { AttendanceDTO } from '../../types/domain';
 
 interface AttendanceTableProps {
@@ -7,16 +8,21 @@ interface AttendanceTableProps {
   onMarkAttendance: (entries: { studentId: string; status: string }[]) => void;
   readOnly?: boolean;
   loading?: boolean;
+  sessionId?: string;
+  onRsvpUpdated?: () => void;
 }
 
 const STATUS_OPTIONS = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'];
 
-export function AttendanceTable({ attendance, onMarkAttendance, readOnly = false, loading }: AttendanceTableProps) {
+export function AttendanceTable({ attendance, onMarkAttendance, readOnly = false, loading, sessionId, onRsvpUpdated }: AttendanceTableProps) {
   const [localStatus, setLocalStatus] = useState<Map<string, string>>(() => {
     const map = new Map<string, string>();
     attendance.forEach(a => map.set(a.studentId, a.status));
     return map;
   });
+  const [editingRsvp, setEditingRsvp] = useState<string | null>(null);
+  const [rsvpReason, setRsvpReason] = useState('');
+  const [rsvpSaving, setRsvpSaving] = useState(false);
 
   const handleChange = (studentId: string, status: string) => {
     setLocalStatus(prev => new Map(prev).set(studentId, status));
@@ -32,6 +38,20 @@ export function AttendanceTable({ attendance, onMarkAttendance, readOnly = false
     if (entries.length > 0) onMarkAttendance(entries);
   };
 
+  const handleRsvpUpdate = async (studentId: string, rsvpStatus: 'ATTENDING' | 'NOT_ATTENDING') => {
+    if (!sessionId) return;
+    setRsvpSaving(true);
+    try {
+      await schedulingService.updateRsvp(sessionId, {
+        rsvpStatus,
+        reason: rsvpStatus === 'NOT_ATTENDING' ? rsvpReason : undefined,
+      }, studentId);
+      setEditingRsvp(null);
+      setRsvpReason('');
+      onRsvpUpdated?.();
+    } finally { setRsvpSaving(false); }
+  };
+
   // Sort: NOT_ATTENDING at bottom, then alphabetical
   const sorted = [...attendance].sort((a, b) => {
     const aNotAtt = a.studentRsvp === 'NOT_ATTENDING' ? 1 : 0;
@@ -39,6 +59,8 @@ export function AttendanceTable({ attendance, onMarkAttendance, readOnly = false
     if (aNotAtt !== bNotAtt) return aNotAtt - bNotAtt;
     return a.studentName.localeCompare(b.studentName);
   });
+
+  const canEditRsvp = !!sessionId && !readOnly;
 
   return (
     <div data-testid="attendance-table">
@@ -58,12 +80,68 @@ export function AttendanceTable({ attendance, onMarkAttendance, readOnly = false
                   {a.studentName}
                 </td>
                 <td className="px-4 py-3">
-                  {a.studentRsvp === 'NOT_ATTENDING' ? (
-                    <Badge color="warning" data-testid={`rsvp-badge-${a.studentId}`}>
-                      Not Attending{a.rsvpReason ? `: ${a.rsvpReason}` : ''}
-                    </Badge>
+                  {editingRsvp === a.studentId ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        rows={1}
+                        placeholder="Reason (optional)"
+                        value={rsvpReason}
+                        onChange={(e) => setRsvpReason(e.target.value)}
+                        className="text-sm"
+                        data-testid={`rsvp-reason-input-${a.studentId}`}
+                      />
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          disabled={rsvpSaving}
+                          className="rounded-lg bg-red-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                          onClick={() => handleRsvpUpdate(a.studentId, 'NOT_ATTENDING')}
+                          data-testid={`rsvp-save-not-attending-${a.studentId}`}
+                        >
+                          Not Attending
+                        </button>
+                        {a.studentRsvp === 'NOT_ATTENDING' && (
+                          <button
+                            type="button"
+                            disabled={rsvpSaving}
+                            className="rounded-lg bg-green-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                            onClick={() => handleRsvpUpdate(a.studentId, 'ATTENDING')}
+                            data-testid={`rsvp-save-attending-${a.studentId}`}
+                          >
+                            Attending
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          className="rounded-lg border border-gray-300 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300"
+                          onClick={() => { setEditingRsvp(null); setRsvpReason(''); }}
+                          data-testid={`rsvp-cancel-${a.studentId}`}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
                   ) : (
-                    <span className="text-green-600 dark:text-green-400">Attending</span>
+                    <div className="flex items-center gap-2">
+                      {a.studentRsvp === 'NOT_ATTENDING' ? (
+                        <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900 dark:text-red-300" data-testid={`rsvp-badge-${a.studentId}`}>
+                          Not Attending{a.rsvpReason ? `: ${a.rsvpReason}` : ''}
+                        </span>
+                      ) : (
+                        <span className="text-green-600 dark:text-green-400">Attending</span>
+                      )}
+                      {canEditRsvp && (
+                        <button
+                          type="button"
+                          className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                          onClick={() => { setEditingRsvp(a.studentId); setRsvpReason(a.rsvpReason ?? ''); }}
+                          data-testid={`rsvp-edit-${a.studentId}`}
+                          aria-label={`Edit RSVP for ${a.studentName}`}
+                        >
+                          ✎
+                        </button>
+                      )}
+                    </div>
                   )}
                 </td>
                 <td className="px-4 py-3">
@@ -94,9 +172,15 @@ export function AttendanceTable({ attendance, onMarkAttendance, readOnly = false
       </div>
       {!readOnly && (
         <div className="mt-4 flex justify-end">
-          <Button onClick={handleSaveAll} disabled={loading} data-testid="save-attendance">
+          <button
+            type="button"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            onClick={handleSaveAll}
+            disabled={loading}
+            data-testid="save-attendance"
+          >
             {loading ? 'Saving...' : 'Save Attendance'}
-          </Button>
+          </button>
         </div>
       )}
     </div>

@@ -68,14 +68,23 @@ public class AttendanceController {
     }
 
     @PutMapping("/sessions/{sessionId}/rsvp")
-    @PreAuthorize("hasAnyRole('STUDENT', 'PARENT')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'PARENT', 'TEACHER', 'ADMIN')")
     public ApiResponse<AttendanceDTO> updateRsvp(@PathVariable UUID sessionId,
                                                   @Valid @RequestBody RsvpRequestDTO req,
                                                   @RequestParam(required = false) UUID studentId) {
         User user = currentUserService.getCurrentUser();
         UUID resolvedStudentId;
 
-        if (user.hasRole(Role.STUDENT)) {
+        if (user.hasRole(Role.ADMIN) || user.hasRole(Role.TEACHER)) {
+            if (studentId == null) throw new AppException(ErrorCode.INVALID_INPUT, "studentId required for teacher/admin RSVP");
+            if (user.hasRole(Role.TEACHER)) {
+                var teacher = teacherRepo.findByUserId(user.getId())
+                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher profile not found"));
+                var session = sessionService.findSessionOrThrow(sessionId);
+                classService.verifyTeacherOwnsClass(session.getTuitionClass().getId(), teacher.getId());
+            }
+            resolvedStudentId = studentId;
+        } else if (user.hasRole(Role.STUDENT)) {
             var student = studentRepo.findByUserId(user.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Student profile not found"));
             resolvedStudentId = student.getId();

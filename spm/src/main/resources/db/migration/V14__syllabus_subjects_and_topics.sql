@@ -15,31 +15,33 @@
 -- Mathematics: keep same ID, update name/code/description
 UPDATE subjects SET
   name = '4052 Mathematics',
-  code = '4052',
+  code = 'EMATH',
   description = 'Singapore-Cambridge GCE O-Level Mathematics'
 WHERE id = 'a0000000-0000-0000-0000-000000000001';
 
 -- Physics: keep same ID, update name/code/description
 UPDATE subjects SET
   name = '6091 Physics',
-  code = '6091',
+  code = 'PHY',
   description = 'Singapore-Cambridge GCE O-Level Physics'
 WHERE id = 'a0000000-0000-0000-0000-000000000006';
 
--- Deactivate generic subjects that don't map to O-Level syllabuses we have
-UPDATE subjects SET is_active = false WHERE id = 'a0000000-0000-0000-0000-000000000002'; -- Science
-UPDATE subjects SET is_active = false WHERE id = 'a0000000-0000-0000-0000-000000000003'; -- English
-UPDATE subjects SET is_active = false WHERE id = 'a0000000-0000-0000-0000-000000000004'; -- History
-UPDATE subjects SET is_active = false WHERE id = 'a0000000-0000-0000-0000-000000000005'; -- ICT
+-- Delete generic subjects that don't map to O-Level syllabuses we have
+-- (no classes or topics with FK references to these)
+DELETE FROM topics   WHERE subject_id = 'a0000000-0000-0000-0000-000000000002'; -- Science topics
+DELETE FROM subjects WHERE id = 'a0000000-0000-0000-0000-000000000002'; -- Science
+DELETE FROM subjects WHERE id = 'a0000000-0000-0000-0000-000000000003'; -- English
+DELETE FROM subjects WHERE id = 'a0000000-0000-0000-0000-000000000004'; -- History
+DELETE FROM subjects WHERE id = 'a0000000-0000-0000-0000-000000000005'; -- ICT
 
 -- ============================================================
 -- STEP 2: Insert new subjects
 -- ============================================================
 
 INSERT INTO subjects (id, name, code, description, is_default, is_active) VALUES
-  ('a0000000-0000-0000-0000-000000000007', '4049 Additional Mathematics', '4049', 'Singapore-Cambridge GCE O-Level Additional Mathematics', true, true),
-  ('a0000000-0000-0000-0000-000000000008', '6092 Chemistry',              '6092', 'Singapore-Cambridge GCE O-Level Chemistry',              true, true),
-  ('a0000000-0000-0000-0000-000000000009', '6093 Biology',                '6093', 'Singapore-Cambridge GCE O-Level Biology',                true, true);
+  ('a0000000-0000-0000-0000-000000000007', '4049 Additional Mathematics', 'AMATH', 'Singapore-Cambridge GCE O-Level Additional Mathematics', true, true),
+  ('a0000000-0000-0000-0000-000000000008', '6092 Chemistry',              'CHEM',  'Singapore-Cambridge GCE O-Level Chemistry',              true, true),
+  ('a0000000-0000-0000-0000-000000000009', '6093 Biology',                'BIO',   'Singapore-Cambridge GCE O-Level Biology',                true, true);
 
 -- ============================================================
 -- STEP 3: Update existing Math topics to match O-Level syllabus
@@ -48,24 +50,20 @@ INSERT INTO subjects (id, name, code, description, is_default, is_active) VALUES
 -- to preserve sub_question FK references.
 -- ============================================================
 
-UPDATE topics SET name = 'N5 Algebraic Expressions and Formulae', code = 'MATH-N5', description = 'Using letters to represent numbers, algebraic manipulation, factorisation, formulae' WHERE id = 'b0000000-0000-0000-0000-000000000001';
-UPDATE topics SET name = 'G1 Angles, Triangles and Polygons',     code = 'MATH-G1', description = 'Angle properties, triangles, quadrilaterals, polygons, constructions'             WHERE id = 'b0000000-0000-0000-0000-000000000002';
-UPDATE topics SET name = 'S1 Data Handling and Analysis',         code = 'MATH-S1', description = 'Statistical representations, central tendency, spread, standard deviation'        WHERE id = 'b0000000-0000-0000-0000-000000000003';
-UPDATE topics SET name = 'G4 Pythagoras Theorem and Trigonometry',code = 'MATH-G4', description = 'Pythagoras theorem, trigonometric ratios, sine/cosine rules, bearings'             WHERE id = 'b0000000-0000-0000-0000-000000000004';
+UPDATE topics SET name = 'N5 Algebra',           code = 'EMATH-N5', description = 'Algebraic expressions and formulae: manipulation, factorisation, formulae'   WHERE id = 'b0000000-0000-0000-0000-000000000001';
+UPDATE topics SET name = 'G1 Angles & Polygons', code = 'EMATH-G1', description = 'Angles, triangles and polygons: properties, constructions, symmetry'              WHERE id = 'b0000000-0000-0000-0000-000000000002';
+UPDATE topics SET name = 'S1 Data Analysis',     code = 'EMATH-S1', description = 'Data handling and analysis: statistical representations, central tendency, spread'  WHERE id = 'b0000000-0000-0000-0000-000000000003';
+UPDATE topics SET name = 'G4 Trigonometry',      code = 'EMATH-G4', description = 'Pythagoras theorem and trigonometry: trig ratios, sine/cosine rules, bearings'     WHERE id = 'b0000000-0000-0000-0000-000000000004';
 
 -- ============================================================
 -- STEP 4: Update existing Physics topics to match O-Level syllabus
 -- Existing: MECH(b..07), THERM(b..08), WAVE(b..09), ELEC(b..0a)
 -- ============================================================
 
-UPDATE topics SET name = '3 Dynamics',                  code = 'PHY-03', description = 'Newton''s laws of motion, mass, weight, friction, free-body diagrams'       WHERE id = 'b0000000-0000-0000-0000-000000000007';
-UPDATE topics SET name = '9 Thermal Properties of Matter', code = 'PHY-09', description = 'Specific heat capacity, melting, boiling, latent heat, heating/cooling curves' WHERE id = 'b0000000-0000-0000-0000-000000000008';
-UPDATE topics SET name = '10 General Properties of Waves', code = 'PHY-10', description = 'Transverse and longitudinal waves, wave properties, wave equation'            WHERE id = 'b0000000-0000-0000-0000-000000000009';
-UPDATE topics SET name = '14 Current of Electricity',      code = 'PHY-14', description = 'Electric current, EMF, potential difference, resistance, Ohm''s law'           WHERE id = 'b0000000-0000-0000-0000-00000000000a';
-
--- Deactivate old Science topics (no longer relevant)
-UPDATE topics SET is_active = false WHERE id = 'b0000000-0000-0000-0000-000000000005'; -- SCI-CHEM
-UPDATE topics SET is_active = false WHERE id = 'b0000000-0000-0000-0000-000000000006'; -- SCI-BIO
+UPDATE topics SET name = '3 Dynamics',            code = 'PHY-03', description = 'Newton''s laws of motion, mass, weight, friction, free-body diagrams'       WHERE id = 'b0000000-0000-0000-0000-000000000007';
+UPDATE topics SET name = '9 Thermal Properties',  code = 'PHY-09', description = 'Specific heat capacity, melting, boiling, latent heat, heating/cooling curves' WHERE id = 'b0000000-0000-0000-0000-000000000008';
+UPDATE topics SET name = '10 Waves',              code = 'PHY-10', description = 'General properties of waves: transverse, longitudinal, wave equation'           WHERE id = 'b0000000-0000-0000-0000-000000000009';
+UPDATE topics SET name = '14 Current Electricity', code = 'PHY-14', description = 'Electric current, EMF, potential difference, resistance, Ohm''s law'           WHERE id = 'b0000000-0000-0000-0000-00000000000a';
 
 
 -- ============================================================
@@ -74,36 +72,36 @@ UPDATE topics SET is_active = false WHERE id = 'b0000000-0000-0000-0000-00000000
 -- ============================================================
 
 INSERT INTO topics (id, subject_id, name, code, description, is_default, is_active) VALUES
-  ('b0000000-0000-0000-0000-000000000101', 'a0000000-0000-0000-0000-000000000001', 'N1 Numbers and Their Operations',   'MATH-N1', 'Primes, HCF/LCM, indices, standard form, real numbers',                    true, true),
-  ('b0000000-0000-0000-0000-000000000102', 'a0000000-0000-0000-0000-000000000001', 'N2 Ratio and Proportion',           'MATH-N2', 'Ratios, map scales, direct and inverse proportion',                        true, true),
-  ('b0000000-0000-0000-0000-000000000103', 'a0000000-0000-0000-0000-000000000001', 'N3 Percentage',                     'MATH-N3', 'Percentage increase/decrease, reverse percentages, comparisons',            true, true),
-  ('b0000000-0000-0000-0000-000000000104', 'a0000000-0000-0000-0000-000000000001', 'N4 Rate and Speed',                 'MATH-N4', 'Average rate, average speed, unit conversion',                             true, true),
-  ('b0000000-0000-0000-0000-000000000105', 'a0000000-0000-0000-0000-000000000001', 'N6 Functions and Graphs',           'MATH-N6', 'Linear/quadratic/power/exponential functions, gradient, graph sketching',   true, true),
-  ('b0000000-0000-0000-0000-000000000106', 'a0000000-0000-0000-0000-000000000001', 'N7 Equations and Inequalities',     'MATH-N7', 'Linear, quadratic, simultaneous equations, fractional equations, inequalities', true, true),
-  ('b0000000-0000-0000-0000-000000000107', 'a0000000-0000-0000-0000-000000000001', 'N8 Set Language and Notation',      'MATH-N8', 'Set notation, union, intersection, Venn diagrams',                        true, true),
-  ('b0000000-0000-0000-0000-000000000108', 'a0000000-0000-0000-0000-000000000001', 'N9 Matrices',                       'MATH-N9', 'Matrix operations, scalar multiplication, sum and product of matrices',    true, true),
-  ('b0000000-0000-0000-0000-000000000109', 'a0000000-0000-0000-0000-000000000001', 'G2 Congruence and Similarity',      'MATH-G2', 'Congruent/similar figures, scale drawings, ratio of areas/volumes',        true, true),
-  ('b0000000-0000-0000-0000-000000000110', 'a0000000-0000-0000-0000-000000000001', 'G3 Properties of Circles',          'MATH-G3', 'Symmetry properties, angle properties, tangent properties of circles',     true, true),
-  ('b0000000-0000-0000-0000-000000000111', 'a0000000-0000-0000-0000-000000000001', 'G5 Mensuration',                    'MATH-G5', 'Area, volume, surface area of solids, arc length, sector area, radians',   true, true),
-  ('b0000000-0000-0000-0000-000000000112', 'a0000000-0000-0000-0000-000000000001', 'G6 Coordinate Geometry',            'MATH-G6', 'Gradient, length of line segment, equation of straight line',              true, true),
-  ('b0000000-0000-0000-0000-000000000113', 'a0000000-0000-0000-0000-000000000001', 'G7 Vectors in Two Dimensions',      'MATH-G7', 'Vector notation, translation, position vectors, magnitude, geometric problems', true, true),
-  ('b0000000-0000-0000-0000-000000000114', 'a0000000-0000-0000-0000-000000000001', 'S2 Probability',                    'MATH-S2', 'Single/combined events, possibility diagrams, tree diagrams, addition/multiplication rules', true, true);
+  ('b0000000-0000-0000-0000-000000000101', 'a0000000-0000-0000-0000-000000000001', 'N1 Numbers',            'EMATH-N1', 'Numbers and their operations: primes, HCF/LCM, indices, standard form',        true, true),
+  ('b0000000-0000-0000-0000-000000000102', 'a0000000-0000-0000-0000-000000000001', 'N2 Ratio & Proportion', 'EMATH-N2', 'Ratio and proportion: map scales, direct and inverse proportion',               true, true),
+  ('b0000000-0000-0000-0000-000000000103', 'a0000000-0000-0000-0000-000000000001', 'N3 Percentage',         'EMATH-N3', 'Percentage: increase/decrease, reverse percentages, comparisons',               true, true),
+  ('b0000000-0000-0000-0000-000000000104', 'a0000000-0000-0000-0000-000000000001', 'N4 Rate & Speed',       'EMATH-N4', 'Rate and speed: average rate, average speed, unit conversion',                  true, true),
+  ('b0000000-0000-0000-0000-000000000105', 'a0000000-0000-0000-0000-000000000001', 'N6 Functions & Graphs', 'EMATH-N6', 'Functions and graphs: linear, quadratic, power, exponential, gradient',         true, true),
+  ('b0000000-0000-0000-0000-000000000106', 'a0000000-0000-0000-0000-000000000001', 'N7 Equations',          'EMATH-N7', 'Equations and inequalities: linear, quadratic, simultaneous, fractional',       true, true),
+  ('b0000000-0000-0000-0000-000000000107', 'a0000000-0000-0000-0000-000000000001', 'N8 Sets',               'EMATH-N8', 'Set language and notation: union, intersection, Venn diagrams',                 true, true),
+  ('b0000000-0000-0000-0000-000000000108', 'a0000000-0000-0000-0000-000000000001', 'N9 Matrices',           'EMATH-N9', 'Matrices: operations, scalar multiplication, sum and product',                  true, true),
+  ('b0000000-0000-0000-0000-000000000109', 'a0000000-0000-0000-0000-000000000001', 'G2 Similarity',         'EMATH-G2', 'Congruence and similarity: scale drawings, ratio of areas/volumes',             true, true),
+  ('b0000000-0000-0000-0000-000000000110', 'a0000000-0000-0000-0000-000000000001', 'G3 Circles',            'EMATH-G3', 'Properties of circles: symmetry, angle, tangent properties',                    true, true),
+  ('b0000000-0000-0000-0000-000000000111', 'a0000000-0000-0000-0000-000000000001', 'G5 Mensuration',        'EMATH-G5', 'Mensuration: area, volume, surface area, arc length, sector area, radians',    true, true),
+  ('b0000000-0000-0000-0000-000000000112', 'a0000000-0000-0000-0000-000000000001', 'G6 Coord Geometry',     'EMATH-G6', 'Coordinate geometry: gradient, line segment length, equation of straight line', true, true),
+  ('b0000000-0000-0000-0000-000000000113', 'a0000000-0000-0000-0000-000000000001', 'G7 Vectors',            'EMATH-G7', 'Vectors in two dimensions: notation, translation, magnitude, geometric problems', true, true),
+  ('b0000000-0000-0000-0000-000000000114', 'a0000000-0000-0000-0000-000000000001', 'S2 Probability',        'EMATH-S2', 'Probability: single/combined events, tree diagrams, addition/multiplication rules', true, true);
 
 -- ============================================================
 -- STEP 6: Insert Additional Mathematics (4049) topics
 -- ============================================================
 
 INSERT INTO topics (id, subject_id, name, code, description, is_default, is_active) VALUES
-  ('b0000000-0000-0000-0000-000000000201', 'a0000000-0000-0000-0000-000000000007', 'A1 Quadratic Functions',                        'AMATH-A1', 'Completing the square, max/min values, always positive/negative conditions',       true, true),
-  ('b0000000-0000-0000-0000-000000000202', 'a0000000-0000-0000-0000-000000000007', 'A2 Equations and Inequalities',                 'AMATH-A2', 'Discriminant conditions, simultaneous equations, quadratic inequalities',           true, true),
-  ('b0000000-0000-0000-0000-000000000203', 'a0000000-0000-0000-0000-000000000007', 'A3 Surds',                                      'AMATH-A3', 'Operations on surds, rationalising denominators, solving surd equations',           true, true),
-  ('b0000000-0000-0000-0000-000000000204', 'a0000000-0000-0000-0000-000000000007', 'A4 Polynomials and Partial Fractions',           'AMATH-A4', 'Remainder/factor theorems, cubic equations, partial fractions',                    true, true),
-  ('b0000000-0000-0000-0000-000000000205', 'a0000000-0000-0000-0000-000000000007', 'A5 Binomial Expansions',                        'AMATH-A5', 'Binomial theorem, nCr notation, general term',                                    true, true),
-  ('b0000000-0000-0000-0000-000000000206', 'a0000000-0000-0000-0000-000000000007', 'A6 Exponential and Logarithmic Functions',       'AMATH-A6', 'Laws of logarithms, exponential/log equations, change of base',                   true, true),
-  ('b0000000-0000-0000-0000-000000000207', 'a0000000-0000-0000-0000-000000000007', 'G1 Trigonometric Functions, Identities and Equations', 'AMATH-G1', 'Six trig functions, identities, R-formula, trig equations, graphs',         true, true),
-  ('b0000000-0000-0000-0000-000000000208', 'a0000000-0000-0000-0000-000000000007', 'G2 Coordinate Geometry in Two Dimensions',       'AMATH-G2', 'Parallel/perpendicular lines, circles, linear law transformation',                true, true),
-  ('b0000000-0000-0000-0000-000000000209', 'a0000000-0000-0000-0000-000000000007', 'G3 Proofs in Plane Geometry',                    'AMATH-G3', 'Midpoint theorem, tangent-chord theorem, congruent/similar triangles',            true, true),
-  ('b0000000-0000-0000-0000-000000000210', 'a0000000-0000-0000-0000-000000000007', 'C1 Differentiation and Integration',             'AMATH-C1', 'Derivatives, chain/product/quotient rules, stationary points, definite integrals, area under curve', true, true);
+  ('b0000000-0000-0000-0000-000000000201', 'a0000000-0000-0000-0000-000000000007', 'A1 Quadratics',          'AMATH-A1', 'Quadratic functions: completing the square, max/min, always positive/negative',    true, true),
+  ('b0000000-0000-0000-0000-000000000202', 'a0000000-0000-0000-0000-000000000007', 'A2 Equations',           'AMATH-A2', 'Equations and inequalities: discriminant, simultaneous, quadratic inequalities',    true, true),
+  ('b0000000-0000-0000-0000-000000000203', 'a0000000-0000-0000-0000-000000000007', 'A3 Surds',               'AMATH-A3', 'Surds: operations, rationalising denominators, solving surd equations',             true, true),
+  ('b0000000-0000-0000-0000-000000000204', 'a0000000-0000-0000-0000-000000000007', 'A4 Polynomials',         'AMATH-A4', 'Polynomials and partial fractions: remainder/factor theorems, cubic equations',     true, true),
+  ('b0000000-0000-0000-0000-000000000205', 'a0000000-0000-0000-0000-000000000007', 'A5 Binomial',            'AMATH-A5', 'Binomial expansions: binomial theorem, nCr notation, general term',                true, true),
+  ('b0000000-0000-0000-0000-000000000206', 'a0000000-0000-0000-0000-000000000007', 'A6 Exp & Log',           'AMATH-A6', 'Exponential and logarithmic functions: laws of logarithms, change of base',        true, true),
+  ('b0000000-0000-0000-0000-000000000207', 'a0000000-0000-0000-0000-000000000007', 'G1 Trig Functions',      'AMATH-G1', 'Trigonometric functions, identities and equations: R-formula, trig graphs',        true, true),
+  ('b0000000-0000-0000-0000-000000000208', 'a0000000-0000-0000-0000-000000000007', 'G2 Coord Geometry',      'AMATH-G2', 'Coordinate geometry in two dimensions: circles, linear law transformation',        true, true),
+  ('b0000000-0000-0000-0000-000000000209', 'a0000000-0000-0000-0000-000000000007', 'G3 Plane Geometry',      'AMATH-G3', 'Proofs in plane geometry: midpoint theorem, tangent-chord theorem',                true, true),
+  ('b0000000-0000-0000-0000-000000000210', 'a0000000-0000-0000-0000-000000000007', 'C1 Calculus',            'AMATH-C1', 'Differentiation and integration: derivatives, chain rule, stationary points, area under curve', true, true);
 
 
 -- ============================================================

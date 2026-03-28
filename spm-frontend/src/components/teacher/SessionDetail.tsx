@@ -99,6 +99,8 @@ export function SessionDetail() {
           onMarkAttendance={handleMarkAttendance}
           readOnly={session.status === 'CANCELLED'}
           loading={saving}
+          sessionId={sessionId}
+          onRsvpUpdated={fetchData}
         />
       </div>
 

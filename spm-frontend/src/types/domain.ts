@@ -438,6 +438,8 @@ export interface SessionDTO {
   commonWeaknesses: string | null;
   additionalNotes: string | null;
   createdAt: string;
+  myRsvp: RsvpStatus | null;
+  myRsvpReason: string | null;
 }
 
 export interface SessionDetailDTO extends Omit<SessionDTO, 'enrolledCount' | 'markedCount' | 'notAttendingRsvpCount'> {

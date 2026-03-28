@@ -24,5 +24,7 @@ public record SessionDTO(
     String homeworkGiven,
     String commonWeaknesses,
     String additionalNotes,
-    Instant createdAt
+    Instant createdAt,
+    String myRsvp,
+    String myRsvpReason
 ) {}

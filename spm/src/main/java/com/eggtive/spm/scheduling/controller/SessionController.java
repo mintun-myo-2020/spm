@@ -108,7 +108,8 @@ public class SessionController {
                 s.id(), s.scheduleId(), s.classId(), s.className(), s.sessionDate(), s.dayOfWeekName(),
                 s.startTime(), s.endTime(), s.location(), s.status(), s.cancelReason(),
                 s.enrolledCount(), s.markedCount(), s.notAttendingRsvpCount(),
-                s.topicCovered(), s.homeworkGiven(), null, null, s.createdAt()
+                s.topicCovered(), s.homeworkGiven(), null, null, s.createdAt(),
+                s.myRsvp(), s.myRsvpReason()
             )).toList();
             return new PagedResponse<>(filtered, dtos.page(), dtos.size(), dtos.totalElements(), dtos.totalPages(), dtos.first(), dtos.last());
         }

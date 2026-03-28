@@ -50,4 +50,8 @@ public interface ClassSessionRepository extends JpaRepository<ClassSession, UUID
     @Modifying
     @Query("UPDATE ClassSession s SET s.status = 'CANCELLED', s.cancelReason = :reason WHERE s.schedule.id = :scheduleId AND s.sessionDate > :afterDate AND s.status = 'SCHEDULED'")
     int cancelFutureSessionsBySchedule(UUID scheduleId, LocalDate afterDate, String reason);
+
+    // Sessions with notes for a class (any note field non-null), sorted by date desc
+    @Query("SELECT s FROM ClassSession s WHERE s.tuitionClass.id = :classId ORDER BY s.sessionDate DESC, s.startTime DESC")
+    Page<ClassSession> findByClassIdWithNotes(UUID classId, Pageable pageable);
 }

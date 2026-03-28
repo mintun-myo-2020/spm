@@ -433,6 +433,10 @@ export interface SessionDTO {
   enrolledCount: number;
   markedCount: number;
   notAttendingRsvpCount: number;
+  topicCovered: string | null;
+  homeworkGiven: string | null;
+  commonWeaknesses: string | null;
+  additionalNotes: string | null;
   createdAt: string;
 }
 

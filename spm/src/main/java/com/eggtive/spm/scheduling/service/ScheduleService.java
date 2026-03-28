@@ -213,6 +213,8 @@ public class ScheduleService {
         return new SessionDTO(s.getId(), s.getSchedule() != null ? s.getSchedule().getId() : null,
             s.getTuitionClass().getId(), s.getTuitionClass().getName(), s.getSessionDate(), dayName,
             s.getStartTime(), s.getEndTime(), s.getLocation(), s.getStatus().name(),
-            s.getCancelReason(), enrolled, marked, notAttending, s.getCreatedAt());
+            s.getCancelReason(), enrolled, marked, notAttending,
+            s.getTopicCovered(), s.getHomeworkGiven(), s.getCommonWeaknesses(), s.getAdditionalNotes(),
+            s.getCreatedAt());
     }
 }

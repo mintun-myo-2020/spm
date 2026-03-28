@@ -95,7 +95,10 @@ public class SessionService {
             session.getTuitionClass().getId(), session.getTuitionClass().getName(),
             session.getSessionDate(), dayName, session.getStartTime(), session.getEndTime(),
             session.getLocation(), session.getStatus().name(), session.getCancelReason(),
-            attDtos, session.getCreatedAt());
+            attDtos,
+            session.getTopicCovered(), session.getHomeworkGiven(),
+            session.getCommonWeaknesses(), session.getAdditionalNotes(),
+            session.getCreatedAt());
     }
 
     public SessionUpdateResponseDTO rescheduleSession(UUID sessionId, RescheduleSessionRequestDTO req) {
@@ -135,6 +138,22 @@ public class SessionService {
     public ClassSession findSessionOrThrow(UUID sessionId) {
         return sessionRepo.findById(sessionId)
             .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Session not found"));
+    }
+
+    public SessionDTO updateSessionNotes(UUID sessionId, UpdateSessionNotesRequestDTO req) {
+        ClassSession session = findSessionOrThrow(sessionId);
+        session.setTopicCovered(req.topicCovered());
+        session.setHomeworkGiven(req.homeworkGiven());
+        session.setCommonWeaknesses(req.commonWeaknesses());
+        session.setAdditionalNotes(req.additionalNotes());
+        return scheduleService.toSessionDTO(sessionRepo.save(session));
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<SessionDTO> getClassSessionNotes(UUID classId, Pageable pageable) {
+        Page<ClassSession> page = sessionRepo.findByClassIdWithNotes(classId, pageable);
+        var dtos = page.getContent().stream().map(scheduleService::toSessionDTO).toList();
+        return PagedResponse.from(page, dtos);
     }
 
     private AttendanceDTO toAttendanceDTO(SessionAttendance a) {

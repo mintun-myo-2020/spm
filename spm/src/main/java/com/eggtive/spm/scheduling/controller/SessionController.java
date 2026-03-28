@@ -86,4 +86,32 @@ public class SessionController {
             .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher profile not found"));
         classService.verifyTeacherOwnsClass(classId, teacher.getId());
     }
+
+    @PutMapping("/{sessionId}/notes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
+    public ApiResponse<SessionDTO> updateSessionNotes(@PathVariable UUID sessionId,
+                                                       @RequestBody UpdateSessionNotesRequestDTO req) {
+        User user = currentUserService.getCurrentUser();
+        var session = sessionService.findSessionOrThrow(sessionId);
+        verifyClassAccess(session.getTuitionClass().getId(), user);
+        return ApiResponse.ok(sessionService.updateSessionNotes(sessionId, req));
+    }
+
+    @GetMapping("/class/{classId}/notes")
+    @PreAuthorize("isAuthenticated()")
+    public PagedResponse<SessionDTO> getClassSessionNotes(@PathVariable UUID classId, Pageable pageable) {
+        User user = currentUserService.getCurrentUser();
+        var dtos = sessionService.getClassSessionNotes(classId, pageable);
+        // Role-based filtering: strip sensitive fields for parents and students
+        if (user.hasRole(Role.PARENT) || user.hasRole(Role.STUDENT)) {
+            var filtered = dtos.content().stream().map(s -> new SessionDTO(
+                s.id(), s.scheduleId(), s.classId(), s.className(), s.sessionDate(), s.dayOfWeekName(),
+                s.startTime(), s.endTime(), s.location(), s.status(), s.cancelReason(),
+                s.enrolledCount(), s.markedCount(), s.notAttendingRsvpCount(),
+                s.topicCovered(), s.homeworkGiven(), null, null, s.createdAt()
+            )).toList();
+            return new PagedResponse<>(filtered, dtos.page(), dtos.size(), dtos.totalElements(), dtos.totalPages(), dtos.first(), dtos.last());
+        }
+        return dtos;
+    }
 }

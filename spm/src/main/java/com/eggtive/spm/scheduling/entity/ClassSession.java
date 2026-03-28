@@ -37,6 +37,18 @@ public class ClassSession extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String cancelReason;
 
+    @Column(columnDefinition = "TEXT")
+    private String topicCovered;
+
+    @Column(columnDefinition = "TEXT")
+    private String homeworkGiven;
+
+    @Column(columnDefinition = "TEXT")
+    private String commonWeaknesses;
+
+    @Column(columnDefinition = "TEXT")
+    private String additionalNotes;
+
     public ClassSchedule getSchedule() { return schedule; }
     public void setSchedule(ClassSchedule schedule) { this.schedule = schedule; }
     public TuitionClass getTuitionClass() { return tuitionClass; }
@@ -53,4 +65,12 @@ public class ClassSession extends BaseEntity {
     public void setStatus(SessionStatus status) { this.status = status; }
     public String getCancelReason() { return cancelReason; }
     public void setCancelReason(String cancelReason) { this.cancelReason = cancelReason; }
+    public String getTopicCovered() { return topicCovered; }
+    public void setTopicCovered(String topicCovered) { this.topicCovered = topicCovered; }
+    public String getHomeworkGiven() { return homeworkGiven; }
+    public void setHomeworkGiven(String homeworkGiven) { this.homeworkGiven = homeworkGiven; }
+    public String getCommonWeaknesses() { return commonWeaknesses; }
+    public void setCommonWeaknesses(String commonWeaknesses) { this.commonWeaknesses = commonWeaknesses; }
+    public String getAdditionalNotes() { return additionalNotes; }
+    public void setAdditionalNotes(String additionalNotes) { this.additionalNotes = additionalNotes; }
 }

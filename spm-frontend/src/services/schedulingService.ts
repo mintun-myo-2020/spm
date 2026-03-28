@@ -61,4 +61,12 @@ export const schedulingService = {
   getStudentAttendanceStats(studentId: string, classId: string, params?: { startDate?: string; endDate?: string }) {
     return apiClient.get<ApiResponse<StudentAttendanceStatsDTO>>(`/students/${studentId}/classes/${classId}/attendance-stats`, { params });
   },
+
+  // --- Notes ---
+  updateSessionNotes(sessionId: string, data: import('../types/forms').UpdateSessionNotesForm) {
+    return apiClient.put<ApiResponse<SessionDTO>>(`/sessions/${sessionId}/notes`, data);
+  },
+  getClassSessionNotes(classId: string, params?: PaginationParams) {
+    return apiClient.get<PagedResponse<SessionDTO>>(`/sessions/class/${classId}/notes`, { params });
+  },
 };

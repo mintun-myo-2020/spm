@@ -19,5 +19,9 @@ public record SessionDetailDTO(
     String status,
     String cancelReason,
     List<AttendanceDTO> attendance,
+    String topicCovered,
+    String homeworkGiven,
+    String commonWeaknesses,
+    String additionalNotes,
     Instant createdAt
 ) {}

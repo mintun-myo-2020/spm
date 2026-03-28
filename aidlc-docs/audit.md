@@ -1157,3 +1157,55 @@ All 19 steps complete. Unit 2 Code Generation marked COMPLETED in aidlc-state.md
 **Context**: Post-sprint 2 strategic planning. All 3 units complete. Shifting from feature development to hardening.
 
 ---
+
+
+---
+
+## Sprint 4 — Class Page Restructuring & Class Notes
+
+### Workspace Detection
+**Timestamp**: 2026-03-28T10:00:00Z
+**User Input**: "on the class page, i dont like how students and schedule are just usestate or something i want it to be a real page like /students , /schedule in /classes/<classid>. also classes should allow teacher to add notes/description like what topic was gone through, what homework was given, common student weaknesses"
+**AI Response**: Starting Sprint 4 workflow — customer-driven feature request. Two features: (1) Convert ClassDetails tabs to nested routes (/classes/:classId/students, /classes/:classId/schedule), (2) Add class session notes functionality (topics covered, homework, student weaknesses).
+**Context**: Brownfield project, Sprint 4. This is a customer-driven feature request (highest priority per aidlc-state.md).
+
+---
+
+### Requirements Analysis - Answers Received
+**Timestamp**: 2026-03-28T10:10:00Z
+**User Input**: "done"
+**AI Response**: Reading answers. Q1: A (per-session notes), Q2: B (structured fields — topic, homework, weaknesses, additional notes), Q3: D with caveat (everyone can see, but parents/students cannot see weaknesses — only topic and homework), Q4: B (students list as default, keep current behaviour).
+**Context**: Requirements Analysis — all answers clear, no contradictions detected. Proceeding to generate requirements and execution plan.
+
+---
+
+### Testing Gap Analysis — Unit Tests Added
+**Timestamp**: 2026-03-28T15:00:00Z
+**User Input**: "Backend has 1 test file — the default Spring Boot context load test (SpmApplicationTests.java). Zero actual unit tests for any service, controller, or business logic. Frontend has 8 test files covering some shared components and hooks. Nothing for the scheduling module or most services. Address the testing gaps now."
+**AI Response**: Created 8 new test files (5 backend, 3 frontend) covering the business-critical services identified in the gap analysis. All tests pass (54 backend tests, 53 frontend tests total).
+
+**Backend test files created:**
+- `ScheduleServiceTest.java` — 10 tests (schedule creation, time validation, session generation, attendance pre-population)
+- `AttendanceServiceTest.java` — 10 tests (batch marking, RSVP validation, stats calculation)
+- `ProgressServiceTest.java` — 10 tests (overall progress, class-filtered progress, topic aggregation, class summary)
+- `TestScoreServiceTest.java` — 10 tests (score creation/validation, update, delete, question hierarchy)
+- `SimpleProgressCalculatorTest.java` — 9 tests (average, velocity, trend determination)
+
+**Frontend test files created:**
+- `schedulingService.test.ts` — 13 tests (all schedule, session, attendance, stats API endpoints)
+- `testScoreService.test.ts` — 5 tests (CRUD operations and filtering)
+- `progressService.test.ts` — 5 tests (all progress endpoints)
+
+**Context**: Maintainability & Prod-Readiness — test coverage improvements. Addressed the testing gap for ScheduleService, AttendanceService, ProgressService, TestScoreService, and SimpleProgressCalculator on backend; schedulingService, testScoreService, progressService on frontend.
+
+---
+
+### Code Generation — Complete
+**Timestamp**: 2026-03-28T10:30:00Z
+**AI Response**: Sprint 4 code generation complete. All 9 steps executed:
+- Backend: V13 migration (4 TEXT columns on class_sessions), ClassSession entity, SessionDTO/SessionDetailDTO updated, UpdateSessionNotesRequestDTO, SessionService (updateSessionNotes, getClassSessionNotes), SessionController (PUT notes, GET notes with role-based filtering)
+- Frontend: domain.ts + forms.ts types, schedulingService API methods, ClassLayout (nested routes + sub-nav), ClassStudents (extracted), SessionNotesTab, SessionNotesForm, SessionDetail (notes section added), TeacherRoutes (nested route structure)
+- TypeScript compilation: clean (no new errors)
+**Context**: Sprint 4 — customer-driven feature request complete
+
+---

@@ -20,5 +20,9 @@ public record SessionDTO(
     int enrolledCount,
     int markedCount,
     int notAttendingRsvpCount,
+    String topicCovered,
+    String homeworkGiven,
+    String commonWeaknesses,
+    String additionalNotes,
     Instant createdAt
 ) {}

@@ -137,3 +137,10 @@ export interface RsvpForm {
   rsvpStatus: 'ATTENDING' | 'NOT_ATTENDING';
   reason?: string;
 }
+
+export interface UpdateSessionNotesForm {
+  topicCovered?: string;
+  homeworkGiven?: string;
+  commonWeaknesses?: string;
+  additionalNotes?: string;
+}

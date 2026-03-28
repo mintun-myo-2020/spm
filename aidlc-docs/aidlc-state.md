@@ -67,9 +67,19 @@ All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Fro
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: Sprint 2 Unit 3 Code Generation — COMPLETED. Feature development paused.
+- **Current Stage**: Sprint 4 Code Generation — COMPLETED
 - **Next Stage**: Maintainability & Prod-Readiness (no new features unless customer-driven)
-- **Status**: All 3 sprint 2 units complete. Shifting focus to maintainability, abstraction, and prod-readiness. New features only if driven by customer conversations. Otherwise: reduce vendor lock-in, improve swappability of integrations, harden for production.
+- **Status**: Sprint 4 complete. Class detail page restructured to nested routes. Session notes feature added. Shifting back to maintainability focus.
+
+## Sprint 4 — Class Page Restructuring & Session Notes
+
+### Completed
+- [x] Nested routes: `/classes/:classId/students`, `/classes/:classId/schedule`, `/classes/:classId/notes`
+- [x] ClassLayout with persistent sub-nav (Students | Schedule | Notes)
+- [x] Session notes: per-session structured fields (topic, homework, weaknesses, additional notes)
+- [x] Backend: V13 migration, entity fields, DTOs, service methods, REST endpoints
+- [x] Role-based filtering: parents/students see only topic + homework (no weaknesses/additional notes)
+- [x] Notes editable from both Notes tab and SessionDetail page
 
 ## Sprint 3 — Report Plan Improvements
 
@@ -121,7 +131,7 @@ The backend is NOT locked into Keycloak. It uses `spring-boot-starter-oauth2-res
 - [ ] SQS-based ReportJobDispatcher implementation
 - [ ] S3-based ReportStorage implementation
 - [ ] Frontend report detail view (render planJson interactively with checkable action items)
-- [ ] Test coverage improvements
+- [x] Test coverage improvements (Sprint 4 — 54 backend unit tests, 53 frontend tests)
 - [ ] CI/CD pipeline
 - [ ] Deployment automation (ECS/Fargate or similar)
 - [ ] Monitoring & alerting setup

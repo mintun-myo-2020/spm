@@ -56,20 +56,20 @@ All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Fro
 - [x] Code Generation - COMPLETED
 
 ### CONSTRUCTION PHASE — Unit 3: Class Scheduling & Attendance
-- [ ] Functional Design - EXECUTE
+- [x] Functional Design - COMPLETED
 - [ ] NFR Requirements - SKIP
 - [ ] NFR Design - SKIP
 - [ ] Infrastructure Design - SKIP
-- [ ] Code Generation - EXECUTE
+- [ ] Code Generation - IN PROGRESS
 
 ### Build and Test
 - [ ] Build and Test - EXECUTE
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: Sprint 3 — Report Plan Improvements — COMPLETED
-- **Next Stage**: Functional Design (Unit 3 - Class Scheduling & Attendance) OR frontend report detail view with interactive checklist
-- **Status**: Sprint 3 complete. Remaining work from sprint 3 requirements: frontend report detail view that renders planJson interactively with checkable action items (currently only the static HTML view exists).
+- **Current Stage**: CONSTRUCTION - Code Generation (Unit 3: Class Scheduling & Attendance) - IN PROGRESS
+- **Next Stage**: Build and Test
+- **Status**: Functional design complete for Unit 3. Starting code generation for scheduling module (backend + frontend).
 
 ## Sprint 3 — Report Plan Improvements
 

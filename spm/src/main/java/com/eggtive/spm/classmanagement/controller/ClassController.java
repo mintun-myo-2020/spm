@@ -10,6 +10,8 @@ import com.eggtive.spm.user.entity.User;
 import com.eggtive.spm.user.repository.TeacherRepository;
 import com.eggtive.spm.common.enums.ErrorCode;
 import com.eggtive.spm.common.exception.AppException;
+import com.eggtive.spm.scheduling.dto.CreateScheduleRequestDTO;
+import com.eggtive.spm.scheduling.service.ScheduleService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -26,14 +28,17 @@ public class ClassController {
     private final CurrentUserService currentUserService;
     private final TeacherRepository teacherRepository;
     private final com.eggtive.spm.user.repository.StudentRepository studentRepository;
+    private final ScheduleService scheduleService;
 
     public ClassController(ClassService classService, CurrentUserService currentUserService,
                            TeacherRepository teacherRepository,
-                           com.eggtive.spm.user.repository.StudentRepository studentRepository) {
+                           com.eggtive.spm.user.repository.StudentRepository studentRepository,
+                           ScheduleService scheduleService) {
         this.classService = classService;
         this.currentUserService = currentUserService;
         this.teacherRepository = teacherRepository;
         this.studentRepository = studentRepository;
+        this.scheduleService = scheduleService;
     }
 
     @GetMapping
@@ -50,9 +55,21 @@ public class ClassController {
         if (user.hasRole(com.eggtive.spm.common.enums.Role.TEACHER)) {
             Teacher teacher = teacherRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Teacher profile not found"));
-            req = new CreateClassRequestDTO(req.name(), req.subjectId(), teacher.getId(), req.description(), req.maxStudents());
+            req = new CreateClassRequestDTO(req.name(), req.subjectId(), teacher.getId(), req.description(), req.maxStudents(),
+                req.scheduleDayOfWeek(), req.scheduleStartTime(), req.scheduleEndTime(),
+                req.scheduleLocation(), req.scheduleEffectiveFrom(), req.scheduleEffectiveUntil());
         }
-        return ApiResponse.ok(classService.createClass(req));
+        ClassDTO classDTO = classService.createClass(req);
+
+        // FR-14.8: Create initial schedule if schedule fields provided
+        if (req.scheduleDayOfWeek() != null) {
+            var scheduleReq = new CreateScheduleRequestDTO(
+                req.scheduleDayOfWeek(), req.scheduleStartTime(), req.scheduleEndTime(),
+                req.scheduleLocation(), req.scheduleEffectiveFrom(), req.scheduleEffectiveUntil());
+            scheduleService.createSchedule(classDTO.id(), scheduleReq, user);
+        }
+
+        return ApiResponse.ok(classDTO);
     }
 
     @GetMapping("/my-classes")

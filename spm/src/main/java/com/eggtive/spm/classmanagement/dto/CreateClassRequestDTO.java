@@ -9,5 +9,12 @@ public record CreateClassRequestDTO(
     @NotNull UUID subjectId,
     @NotNull UUID teacherId,
     String description,
-    Integer maxStudents
+    Integer maxStudents,
+    // Optional initial schedule (FR-14.8)
+    Integer scheduleDayOfWeek,
+    java.time.LocalTime scheduleStartTime,
+    java.time.LocalTime scheduleEndTime,
+    String scheduleLocation,
+    java.time.LocalDate scheduleEffectiveFrom,
+    java.time.LocalDate scheduleEffectiveUntil
 ) {}

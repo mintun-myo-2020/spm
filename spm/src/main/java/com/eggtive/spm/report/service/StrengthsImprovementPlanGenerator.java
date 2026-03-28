@@ -235,7 +235,7 @@ public class StrengthsImprovementPlanGenerator {
                 actionPlan.add(new StrengthsImprovementPlan.ActionItem(
                     a.has("priority") ? a.get("priority").asInt() : 0,
                     text(a, "action"), text(a, "targetTopic"),
-                    text(a, "timeframe"), text(a, "expectedOutcome")));
+                    text(a, "timeframe"), text(a, "expectedOutcome"), false));
             }
         }
 
@@ -288,7 +288,7 @@ public class StrengthsImprovementPlanGenerator {
                 "Practice " + t.topicName() + " with targeted exercises focusing on weak sub-topics",
                 t.topicName(),
                 "Next 2 weeks",
-                "Improve " + t.topicName() + " average above 70%"));
+                "Improve " + t.topicName() + " average above 70%", false));
         }
         // Add a general action item for maintaining strengths
         if (!strengths.isEmpty()) {
@@ -297,7 +297,7 @@ public class StrengthsImprovementPlanGenerator {
                 "Continue regular revision of strong topics to maintain performance",
                 null,
                 "Ongoing",
-                "Maintain current averages in strong topics"));
+                "Maintain current averages in strong topics", false));
         }
 
         String summary = String.format(
@@ -361,11 +361,22 @@ public class StrengthsImprovementPlanGenerator {
             Specifically:
             - Identify genuine strengths backed by both quantitative data AND teacher observations
             - Identify improvement areas where low scores AND teacher remarks converge
-            - Create a prioritised action plan with concrete, specific steps
+            - Create a prioritised action plan with concrete, specific steps that can be used \
+              as a follow-up checklist (each item should be verifiable as done or not done)
             - Use the teacher's own language and observations as evidence where possible
             - Be encouraging but honest — parents and students will read this
 
-            IMPORTANT:
+            IMPORTANT LANGUAGE RULES:
+            - Use GENDER-NEUTRAL language throughout. Use "the student", "they/them/their", \
+              or the student's name. NEVER use "he", "she", "him", "her", "his", "hers".
+            - Do NOT give prescriptive subject-specific advice that assumes a single correct \
+              approach. For example, do NOT say "use exact π values" — instead say something \
+              like "read the question carefully to identify what form the answer should be in".
+            - When a question requires a specific method or value, guide the student to \
+              "check what the question is asking for" rather than prescribing one approach.
+            - Avoid generic fluffy summaries. Be specific and reference actual data.
+
+            OTHER RULES:
             - Do NOT invent information. Only reference topics, scores, and feedback actually provided.
             - If teacher remarks mention specific misconceptions or errors, incorporate those.
             - Prioritise improvement areas by impact (low score + declining trend = highest priority).
@@ -403,7 +414,7 @@ public class StrengthsImprovementPlanGenerator {
               "actionPlan": [
                 {
                   "priority": 1,
-                  "action": "Specific actionable step",
+                  "action": "Specific actionable step — must be verifiable as done/not done",
                   "targetTopic": "Which topic this addresses",
                   "timeframe": "e.g. 'Next 2 weeks', 'Ongoing'",
                   "expectedOutcome": "What improvement to expect"
@@ -417,9 +428,14 @@ public class StrengthsImprovementPlanGenerator {
             - Include 2-5 strengths (only topics with genuine evidence of competence)
             - Include 1-5 improvement areas (prioritised by severity)
             - Include 3-7 action items (ordered by priority, most urgent first)
+            - Each action item MUST be a concrete, checkable task (e.g. "Complete 10 practice \
+              problems on quadratic equations" not "improve algebra skills")
             - periodComparisons should be an empty array (no previous data provided)
             - Every strength and improvement MUST reference specific evidence from the data provided
-            - Action items must be concrete and achievable, not generic advice""";
+            - Action items must be concrete and achievable, not generic advice
+            - Use gender-neutral language (they/them/their or the student's name, NEVER he/she)
+            - Do NOT prescribe specific methods when the question determines the approach — \
+              instead guide to "read the question carefully" or "check what form is required\"""";
 
     static final String OUTPUT_INSTRUCTION_WITH_COMPARISON = """
             Return ONLY valid JSON (no markdown fences, no explanation) with this exact schema:
@@ -442,7 +458,7 @@ public class StrengthsImprovementPlanGenerator {
               "actionPlan": [
                 {
                   "priority": 1,
-                  "action": "Specific actionable step",
+                  "action": "Specific actionable step — must be verifiable as done/not done",
                   "targetTopic": "Which topic this addresses",
                   "timeframe": "e.g. 'Next 2 weeks', 'Ongoing'",
                   "expectedOutcome": "What improvement to expect, informed by rate of past progress"
@@ -465,9 +481,14 @@ public class StrengthsImprovementPlanGenerator {
             - Include 2-5 strengths (reference previous period data where relevant)
             - Include 1-5 improvement areas (flag recurring issues from previous periods with higher priority)
             - Include 3-7 action items (adjust strategies if previous recommendations didn't work)
+            - Each action item MUST be a concrete, checkable task (e.g. "Complete 10 practice \
+              problems on quadratic equations" not "improve algebra skills")
             - Include periodComparisons for EVERY topic that appears in both current and previous data
             - change = currentAvgPercent - previousAvgPercent (positive = improvement)
             - If multiple previous periods exist, compare against the most recent one for periodComparisons
             - Every strength and improvement MUST reference specific evidence from the data provided
-            - Action items must be concrete and achievable, not generic advice""";
+            - Action items must be concrete and achievable, not generic advice
+            - Use gender-neutral language (they/them/their or the student's name, NEVER he/she)
+            - Do NOT prescribe specific methods when the question determines the approach — \
+              instead guide to "read the question carefully" or "check what form is required\"""";
 }

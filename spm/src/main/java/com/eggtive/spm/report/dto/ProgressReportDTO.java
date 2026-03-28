@@ -7,5 +7,6 @@ import java.util.UUID;
 public record ProgressReportDTO(
     UUID id, UUID studentId, String reportType,
     LocalDate startDate, LocalDate endDate,
-    String reportUrl, Instant generatedAt, Instant expiresAt
+    String reportUrl, Instant generatedAt, Instant expiresAt,
+    String status, String planJson, String errorMessage
 ) {}

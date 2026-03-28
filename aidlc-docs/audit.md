@@ -920,3 +920,75 @@ All 19 steps complete. Unit 2 Code Generation marked COMPLETED in aidlc-state.md
 **Context**: Code Generation (Unit 2) — All steps complete
 
 ---
+
+## Sprint 3 — Report Plan Improvements
+
+### Session Start
+**Timestamp**: 2026-03-26T15:00:00Z
+**Context**: Continuing from previous session. Tasks 1-4 from prior sprint (LLM plan generator, previous report comparison, HTML embed, frontend) were completed.
+
+---
+
+### Frontend Diagnostics Fix
+**Timestamp**: 2026-03-26T15:05:00Z
+**User Input**: (continuation from previous session — frontend diagnostics pending)
+**AI Response**: Fixed 7 issues in ReportList.tsx: removed unused Card import, changed user?.role to user?.profileType, converted all Label components from value prop to children syntax. All frontend and backend diagnostics clean.
+**Context**: Bug fix — ReportList.tsx, reportService.ts, forms.ts
+
+---
+
+### Progress Page — Percentage Fix
+**Timestamp**: 2026-03-26T15:10:00Z
+**User Input**: "still doesnt use the llm for progress??? also for 'Average Score' and 'Improvement' in student progress page, it should use the percentage not raw score"
+**AI Response**: Fixed ProgressService.getOverallProgress() and getProgressByClass() to use percentage (overallScore/maxScore*100) instead of raw scores. Added toPercentage() helper. Updated StudentProgressView.tsx to display % symbol on Average Score, Improvement, and chart labels.
+**Context**: Bug fix — ProgressService.java, StudentProgressView.tsx
+
+---
+
+### LLM Stub Issue — Empty Plan
+**Timestamp**: 2026-03-26T15:20:00Z
+**User Input**: (user showed HTML report with empty plan section — "Plan generated successfully." but no content)
+**AI Response**: Root cause: StubLlmService returns "{}", parseResponse parses it without error (no exception → no fallback). Added validation in parseResponse: if both strengths and improvementAreas are empty after parsing, fall back to data-driven plan. Improved buildFallbackPlan to generate action items and meaningful summary.
+**Context**: Bug fix — StrengthsImprovementPlanGenerator.java
+
+---
+
+### Switch to Bedrock LLM
+**Timestamp**: 2026-03-26T15:30:00Z
+**User Input**: "i dont want to use the stub. i want to use my actual bedrock which i have configured in my .env"
+**AI Response**: .env was missing APP_LLM_TYPE=bedrock — only had extraction layer configured. Added APP_LLM_TYPE=bedrock and related vars to .env. Also added APP_LLM_* passthrough to docker-compose.yml (was missing).
+**Context**: Config fix — .env, docker-compose.yml
+
+---
+
+### Startup Logging — Which LLM is Active
+**Timestamp**: 2026-03-26T15:35:00Z
+**User Input**: "how do i know on startup? is it visible?"
+**AI Response**: Added startup log in StrengthsImprovementPlanGenerator constructor: `log.info("LLM service active: {}", llmService.getClass().getSimpleName())`. User pointed out logging should be at the consumer, not in each implementation — agreed and moved it there.
+**Context**: Observability — StrengthsImprovementPlanGenerator.java
+
+---
+
+### Bean Conflict — Duplicate BedrockConfig
+**Timestamp**: 2026-03-26T15:45:00Z
+**User Input**: (app failed to start — ConflictingBeanDefinitionException: bedrockConfig)
+**AI Response**: Two BedrockConfig classes (testpaper.llm.BedrockConfig and common.llm.BedrockConfig) both created bedrockRuntimeClient bean. User insisted on keeping ability to use different models per layer. Consolidated: created single BedrockClientConfig in common.llm with @ConditionalOnExpression (either extraction or llm = bedrock), deleted extraction's BedrockConfig. Each consumer passes its own model ID per request. Added shared app.bedrock.region config.
+**Context**: Architecture fix — BedrockClientConfig.java, deleted testpaper/llm/BedrockConfig.java, application.yml, docker-compose.yml, .env
+
+---
+
+### Report Plan — Major Requirements
+**Timestamp**: 2026-03-26T16:00:00Z
+**User Input**: "this is a ridiculous and useless thing to read:GoodStudent Alice shows strong foundational skills in Algebra, Geometry, and Trigonometry but needs focused work on angle classification, statistical analysis depth, and algebraic method differentiation. With targeted practice on these priority areas over the next month, she can raise her average and reverse the declining trend. use exact π values in calculations -> also no. depends on whether question wants exact pi value or not. in these situations we instead want something like 'read question carefully to see what the value of pi they should use is' also no using gendered language of 'he or she' update all this into the prompt in action plan, i want something that can be 'followed up' on ie to say like a checklist that they can see whether completed or not. so is it better save the report as a json which gets rendered as html instead of being a blob? ALSO it is not synchronus instead of async fire and forget and then it shows up as 'in progress' and 'completed' after done which is a better user experience no?"
+**AI Response**: Captured requirements. Multiple changes needed:
+**Context**: Requirements gathering — Sprint 3 report plan improvements
+
+**Requirements identified**:
+1. **Prompt fixes**: No gendered language (he/she → they/the student). No prescriptive subject-specific advice (e.g. "use exact π values") — instead guide to "read the question carefully to understand what is being asked". Avoid generic/fluffy summaries.
+2. **Action plan as checklist**: Action items should be trackable — each item gets a completed/not-completed status that teachers/parents can check off during follow-up.
+3. **Store plan as structured JSON**: Instead of HTML blob, store the plan as JSON in the database. Render to HTML dynamically on the frontend. This enables the checklist functionality (can update individual action item status).
+4. **Async report generation**: Fire-and-forget instead of synchronous. Report shows as "IN_PROGRESS" immediately, updates to "COMPLETED" when LLM finishes. Better UX — teacher doesn't wait.
+
+**Status**: Requirements logged, implementation pending.
+
+---

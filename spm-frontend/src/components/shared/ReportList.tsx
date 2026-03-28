@@ -99,6 +99,14 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
     finally { setGenerating(false); }
   };
 
+  // Poll for in-progress reports
+  useEffect(() => {
+    const hasInProgress = reports.some((r) => r.status === 'IN_PROGRESS');
+    if (!hasInProgress) return;
+    const interval = setInterval(() => { fetchReports(); }, 3000);
+    return () => clearInterval(interval);
+  }, [reports]);
+
   const handleViewReport = async (reportUrl: string) => {
     try {
       const res = await reportService.getReportContent(reportUrl);
@@ -110,12 +118,19 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
     }
   };
 
+  const statusBadge = (r: ProgressReportDTO) => {
+    if (r.status === 'IN_PROGRESS') return <span className="inline-flex items-center gap-1 text-xs text-blue-600"><span className="h-2 w-2 animate-pulse rounded-full bg-blue-500" />Generating...</span>;
+    if (r.status === 'FAILED') return <span className="text-xs text-red-600" title={r.errorMessage ?? ''}>Failed</span>;
+    return <span className="text-xs text-green-600">Ready</span>;
+  };
+
   const columns: Column<ProgressReportDTO>[] = [
     { key: 'reportType', header: 'Type' },
     { key: 'generatedAt', header: 'Generated', render: (r) => new Date(r.generatedAt).toLocaleDateString() },
     { key: 'startDate', header: 'Period', render: (r) => r.startDate && r.endDate ? `${r.startDate} – ${r.endDate}` : '—' },
-    { key: 'actions', header: '', render: (r) => r.reportUrl ? (
-      <Button size="xs" color="light" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleViewReport(r.reportUrl); }} data-testid={`view-report-${r.id}`}>View</Button>
+    { key: 'status', header: 'Status', render: statusBadge },
+    { key: 'actions', header: '', render: (r) => r.status === 'COMPLETED' && r.reportUrl ? (
+      <Button size="xs" color="light" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleViewReport(r.reportUrl!); }} data-testid={`view-report-${r.id}`}>View</Button>
     ) : null },
   ];
 
@@ -213,9 +228,7 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
           <div className="flex justify-end gap-3">
             <Button color="gray" onClick={() => setShowGenerate(false)}>Cancel</Button>
             <Button onClick={handleGenerate} disabled={generating || !canSubmit} data-testid="confirm-generate">
-              {generating
-                ? (includePlan ? 'Generating plan...' : 'Generating...')
-                : (includePlan ? 'Generate with Plan' : 'Generate')}
+              {generating ? 'Submitting...' : (includePlan ? 'Generate with Plan' : 'Generate')}
             </Button>
           </div>
         </div>

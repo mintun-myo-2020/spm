@@ -56,6 +56,13 @@ public class ReportController {
         return ApiResponse.ok(reportService.getReport(reportId));
     }
 
+    @PatchMapping("/reports/{reportId}/actions/{actionIndex}")
+    public ApiResponse<ProgressReportDTO> toggleAction(@PathVariable UUID reportId,
+                                                        @PathVariable int actionIndex,
+                                                        @RequestParam boolean completed) {
+        return ApiResponse.ok(reportService.toggleActionItem(reportId, actionIndex, completed));
+    }
+
     @GetMapping("/students/{studentId}/reports")
     public PagedResponse<ProgressReportDTO> listReports(@PathVariable UUID studentId, Pageable pageable) {
         studentAccessService.verifyAccess(currentUserService.getCurrentUser(), studentId);

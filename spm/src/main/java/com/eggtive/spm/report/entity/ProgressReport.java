@@ -37,6 +37,16 @@ public class ProgressReport extends BaseEntity {
     @Column(nullable = false)
     private Instant expiresAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReportStatus status = ReportStatus.IN_PROGRESS;
+
+    @Column(name = "plan_json", columnDefinition = "TEXT")
+    private String planJson;
+
+    @Column(name = "error_message", columnDefinition = "TEXT")
+    private String errorMessage;
+
     public Student getStudent() { return student; }
     public void setStudent(Student student) { this.student = student; }
     public User getGeneratedBy() { return generatedBy; }
@@ -55,4 +65,10 @@ public class ProgressReport extends BaseEntity {
     public void setGeneratedAt(Instant generatedAt) { this.generatedAt = generatedAt; }
     public Instant getExpiresAt() { return expiresAt; }
     public void setExpiresAt(Instant expiresAt) { this.expiresAt = expiresAt; }
+    public ReportStatus getStatus() { return status; }
+    public void setStatus(ReportStatus status) { this.status = status; }
+    public String getPlanJson() { return planJson; }
+    public void setPlanJson(String planJson) { this.planJson = planJson; }
+    public String getErrorMessage() { return errorMessage; }
+    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
 }

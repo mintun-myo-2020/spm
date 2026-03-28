@@ -263,9 +263,12 @@ export interface ProgressReportDTO {
   reportType: string;
   startDate: string;
   endDate: string;
-  reportUrl: string;
+  reportUrl: string | null;
   generatedAt: string;
   expiresAt: string;
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+  planJson: string | null;
+  errorMessage: string | null;
 }
 
 export interface ClassSummaryDTO {

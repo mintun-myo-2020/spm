@@ -36,7 +36,8 @@ public record StrengthsImprovementPlan(
         String action,
         String targetTopic,
         String timeframe,
-        String expectedOutcome
+        String expectedOutcome,
+        boolean completed
     ) {}
 
     /** Comparison of a topic's performance between the current and a previous period. */

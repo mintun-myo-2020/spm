@@ -271,6 +271,48 @@ export interface ProgressReportDTO {
   errorMessage: string | null;
 }
 
+// Structured plan parsed from planJson
+export interface ImprovementPlan {
+  studentName: string;
+  subjectName: string;
+  strengths: PlanStrength[];
+  improvementAreas: PlanImprovementArea[];
+  actionPlan: PlanActionItem[];
+  periodComparisons: PlanPeriodComparison[];
+  overallSummary: string;
+}
+
+export interface PlanStrength {
+  topic: string;
+  description: string;
+  evidence: string;
+}
+
+export interface PlanImprovementArea {
+  topic: string;
+  description: string;
+  evidence: string;
+  suggestedApproach: string;
+}
+
+export interface PlanActionItem {
+  priority: number;
+  action: string;
+  targetTopic: string;
+  timeframe: string;
+  expectedOutcome: string;
+  completed: boolean;
+}
+
+export interface PlanPeriodComparison {
+  topic: string;
+  previousPeriod: string;
+  previousAvgPercent: number;
+  currentAvgPercent: number;
+  change: number;
+  commentary: string;
+}
+
 export interface ClassSummaryDTO {
   classId: string;
   studentCount: number;

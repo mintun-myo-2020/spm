@@ -9,6 +9,7 @@ import { ErrorMessage } from './ErrorMessage';
 import { EmptyState } from './EmptyState';
 import { useToast } from './Toast';
 import { Modal } from './Modal';
+import { ReportPlanView } from './ReportPlanView';
 import { usePagination } from '../../hooks/usePagination';
 import { useAuth } from '../../hooks/useAuth';
 import type { ProgressReportDTO, ClassDTO } from '../../types/domain';
@@ -36,6 +37,7 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
   const [endDate, setEndDate] = useState('');
   const [includePlan, setIncludePlan] = useState(false);
   const [compareReportIds, setCompareReportIds] = useState<string[]>([]);
+  const [planReport, setPlanReport] = useState<ProgressReportDTO | null>(null);
 
   const fetchReports = () => {
     setLoading(true);
@@ -129,8 +131,11 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
     { key: 'generatedAt', header: 'Generated', render: (r) => new Date(r.generatedAt).toLocaleDateString() },
     { key: 'startDate', header: 'Period', render: (r) => r.startDate && r.endDate ? `${r.startDate} – ${r.endDate}` : '—' },
     { key: 'status', header: 'Status', render: statusBadge },
-    { key: 'actions', header: '', render: (r) => r.status === 'COMPLETED' && r.reportUrl ? (
-      <Button size="xs" color="light" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleViewReport(r.reportUrl!); }} data-testid={`view-report-${r.id}`}>View</Button>
+    { key: 'actions', header: '', render: (r) => r.status === 'COMPLETED' ? (
+      <div className="flex gap-1">
+        {r.planJson && <Button size="xs" color="blue" onClick={(e: React.MouseEvent) => { e.stopPropagation(); setPlanReport(r); }} data-testid={`plan-report-${r.id}`}>View Plan</Button>}
+        {r.reportUrl && <Button size="xs" color="gray" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleViewReport(r.reportUrl!); }} data-testid={`view-report-${r.id}`}>Full Report</Button>}
+      </div>
     ) : null },
   ];
 
@@ -232,6 +237,18 @@ export function ReportList({ studentId, studentName, canGenerate = false, backTo
             </Button>
           </div>
         </div>
+      </Modal>
+      <Modal isOpen={!!planReport} onClose={() => setPlanReport(null)} title="Strengths & Improvement Plan" size="xl">
+        {planReport && (
+          <ReportPlanView
+            report={planReport}
+            onClose={() => setPlanReport(null)}
+            onUpdated={(updated) => {
+              setPlanReport(updated);
+              setReports((prev) => prev.map((r) => r.id === updated.id ? updated : r));
+            }}
+          />
+        )}
       </Modal>
     </div>
   );

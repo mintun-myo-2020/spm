@@ -32,7 +32,7 @@ export function AttendanceTable({ attendance, onMarkAttendance, readOnly = false
     const entries = Array.from(localStatus.entries())
       .filter(([sid, status]) => {
         const original = attendance.find(a => a.studentId === sid);
-        return original && original.status !== status && status !== 'UNMARKED';
+        return original && original.status !== status;
       })
       .map(([studentId, status]) => ({ studentId, status }));
     if (entries.length > 0) onMarkAttendance(entries);

@@ -134,6 +134,7 @@ export function SessionDetail() {
         title="Cancel Session"
         message="Are you sure you want to cancel this session?"
         confirmLabel="Cancel Session"
+        variant='danger'
         onConfirm={handleCancel}
         onClose={() => setShowCancel(false)}
       />

@@ -25,7 +25,8 @@ export function ScheduleTab({ classId, basePath }: Props) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [generateScheduleId, setGenerateScheduleId] = useState<string | null>(null);
+  const [showOneOff, setShowOneOff] = useState(false);
+  const [generateSchedule, setGenerateSchedule] = useState<ScheduleDTO | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -62,7 +63,7 @@ export function ScheduleTab({ classId, basePath }: Props) {
                   {s.location && ` · ${s.location}`}
                 </span>
                 {s.isRecurring && (
-                  <Button size="xs" color="gray" onClick={() => setGenerateScheduleId(s.id)} data-testid={`generate-btn-${s.id}`}>
+                  <Button size="xs" color="gray" onClick={() => setGenerateSchedule(s)} data-testid={`generate-btn-${s.id}`}>
                     Generate Sessions
                   </Button>
                 )}
@@ -74,7 +75,11 @@ export function ScheduleTab({ classId, basePath }: Props) {
 
       {/* Actions */}
       <div className="flex gap-2">
-        <Button size="sm" onClick={() => setShowCreate(true)} data-testid="add-schedule-btn">Add Schedule</Button>
+        <Button size="sm" onClick={() => setShowCreate(true)} data-testid="add-schedule-btn">Add Weekly Schedule</Button>
+        <Button size="sm" color="gray" onClick={() => setShowOneOff(true)} data-testid="add-oneoff-btn">Add One-off Session</Button>
+        {selectedDate && (
+          <Button size="sm" color="light" onClick={() => setSelectedDate(null)} data-testid="show-all-sessions-btn">Show All Upcoming</Button>
+        )}
       </div>
 
       {/* Calendar + Session list */}
@@ -91,14 +96,19 @@ export function ScheduleTab({ classId, basePath }: Props) {
         </div>
       </div>
 
-      {/* Create schedule modal */}
-      <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Create Schedule">
-        <CreateScheduleForm classId={classId} onSuccess={() => { setShowCreate(false); fetchData(); }} onCancel={() => setShowCreate(false)} />
+      {/* Create recurring schedule modal */}
+      <Modal isOpen={showCreate} onClose={() => setShowCreate(false)} title="Add Weekly Schedule">
+        <CreateScheduleForm classId={classId} mode="recurring" onSuccess={() => { setShowCreate(false); fetchData(); }} onCancel={() => setShowCreate(false)} />
+      </Modal>
+
+      {/* Create one-off session modal */}
+      <Modal isOpen={showOneOff} onClose={() => setShowOneOff(false)} title="Add One-off Session">
+        <CreateScheduleForm classId={classId} mode="one-off" onSuccess={() => { setShowOneOff(false); fetchData(); }} onCancel={() => setShowOneOff(false)} />
       </Modal>
 
       {/* Generate sessions modal */}
-      {generateScheduleId && (
-        <GenerateSessionsModal scheduleId={generateScheduleId} onSuccess={() => { setGenerateScheduleId(null); fetchData(); }} onClose={() => setGenerateScheduleId(null)} />
+      {generateSchedule && (
+        <GenerateSessionsModal schedule={generateSchedule} onSuccess={() => { setGenerateSchedule(null); fetchData(); }} onClose={() => setGenerateSchedule(null)} />
       )}
     </div>
   );

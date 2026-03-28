@@ -1149,3 +1149,11 @@ All 19 steps complete. Unit 2 Code Generation marked COMPLETED in aidlc-state.md
 **Context**: Code Generation stage complete for Unit 3. Next stage: Build and Test (or user approval first).
 
 ---
+
+## Strategic Direction Update
+**Timestamp**: 2026-03-28T12:30:00Z
+**User Input**: "update aidlc and note that we need to focus on maintainability and improving prod-readiness next, rather than developing more features. however, more features will come from customer conversations and should be prioritised. no new customer feature requests then we will focus on abstraction and ease of swapping out tools so we're not locked in (are we locked into keycloak now? etc)"
+**AI Response**: Updated aidlc-state.md with strategic direction: feature development paused, focus shifts to maintainability and prod-readiness. Customer-driven features jump the queue if they come in. Added vendor lock-in assessment table — Keycloak lock-in is LOW on backend (generic Spring Security OAuth2), MEDIUM on frontend (keycloak-js wrapper, one file to swap). Added prod-readiness backlog items.
+**Context**: Post-sprint 2 strategic planning. All 3 units complete. Shifting from feature development to hardening.
+
+---

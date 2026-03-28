@@ -67,9 +67,9 @@ All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Fro
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: CONSTRUCTION - Code Generation (Unit 3: Class Scheduling & Attendance) - COMPLETED
-- **Next Stage**: Build and Test
-- **Status**: All 3 units complete. Backend compiles clean, frontend has zero new TS errors (one pre-existing Sidebar type issue). Ready for Build and Test stage.
+- **Current Stage**: Sprint 2 Unit 3 Code Generation — COMPLETED. Feature development paused.
+- **Next Stage**: Maintainability & Prod-Readiness (no new features unless customer-driven)
+- **Status**: All 3 sprint 2 units complete. Shifting focus to maintainability, abstraction, and prod-readiness. New features only if driven by customer conversations. Otherwise: reduce vendor lock-in, improve swappability of integrations, harden for production.
 
 ## Sprint 3 — Report Plan Improvements
 
@@ -90,3 +90,39 @@ All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Fro
 - [ ] Frontend report detail view — render planJson interactively with checkable action items
 - [ ] SQS-based ReportJobDispatcher implementation (when needed for prod)
 - [ ] S3-based ReportStorage implementation (when needed for prod)
+
+
+## Next Phase: Maintainability & Prod-Readiness
+
+### Priority Order
+1. Customer-driven feature requests (highest priority — if they come in, they jump the queue)
+2. Abstraction & vendor lock-in reduction
+3. Prod-readiness hardening
+
+### Vendor Lock-in Assessment
+
+| Component | Current Implementation | Lock-in Risk | Abstraction Status |
+|---|---|---|---|
+| Auth (IdP) | Keycloak | LOW | Backend uses Spring Security OAuth2 Resource Server (generic OIDC/JWT). No Keycloak-specific APIs in business logic. Frontend uses keycloak-js adapter. Swapping IdP = change Keycloak JS config + issuer URL. |
+| File Storage | LocalFileStorageService / S3 | LOW | Behind `FileStorageService` interface. S3 impl ready. |
+| OCR | StubOcrService / Textract | LOW | Behind `OcrService` interface. Textract impl ready. |
+| LLM | BedrockLlmService | MEDIUM | Behind `LlmService` interface but prompt format is Bedrock-specific. |
+| Job Dispatch | Sync (local) / SQS | LOW | Behind `ReportJobDispatcher` interface. SQS impl planned. |
+| Report Storage | StubReportStorage / S3 | LOW | Behind `ReportStorage` interface. S3 impl planned. |
+| Database | PostgreSQL 18 | MEDIUM | JPA/Hibernate abstracts most SQL. Some native queries exist. |
+| Frontend Auth | keycloak-js | MEDIUM | Wrapped in `keycloakService.ts`. Swap = rewrite this one file to use generic OIDC client (e.g., oidc-client-ts). |
+
+### Keycloak Specifically
+The backend is NOT locked into Keycloak. It uses `spring-boot-starter-oauth2-resource-server` which validates any OIDC-compliant JWT. The only Keycloak-specific code is `KeycloakRoleConverter` which reads roles from Keycloak's JWT structure (`realm_access.roles`). Swapping to another IdP (Auth0, Cognito, etc.) requires:
+- Backend: Update `RoleConverter` to read roles from the new IdP's JWT claim structure + change issuer/jwk-set-uri in application.yml
+- Frontend: Replace `keycloakService.ts` with a generic OIDC client wrapper
+
+### Prod-Readiness Backlog
+- [ ] SQS-based ReportJobDispatcher implementation
+- [ ] S3-based ReportStorage implementation
+- [ ] Frontend report detail view (render planJson interactively with checkable action items)
+- [ ] Test coverage improvements
+- [ ] CI/CD pipeline
+- [ ] Deployment automation (ECS/Fargate or similar)
+- [ ] Monitoring & alerting setup
+- [ ] Error tracking integration

@@ -10,12 +10,6 @@ on:
         required: false
         type: string
         default: ap-southeast-1
-      s3-bucket:
-        required: true
-        type: string
-      cloudfront-comment:
-        required: true
-        type: string
 
 permissions:
   id-token: write
@@ -53,12 +47,12 @@ jobs:
           aws-region: ${{ inputs.aws-region }}
 
       - name: Deploy to S3
-        run: aws s3 sync spm-frontend/dist/ s3://${{ inputs.s3-bucket }}/ --delete
+        run: aws s3 sync spm-frontend/dist/ s3://${{ secrets.FRONTEND_BUCKET }}/ --delete
 
       - name: Invalidate CloudFront
         run: |
           DIST_ID=$(aws cloudfront list-distributions \
-            --query "DistributionList.Items[?Comment=='${{ inputs.cloudfront-comment }}'].Id" \
+            --query "DistributionList.Items[?Comment=='${{ secrets.CLOUDFRONT_COMMENT }}'].Id" \
             --output text)
           if [ -n "$DIST_ID" ] && [ "$DIST_ID" != "None" ]; then
             aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"

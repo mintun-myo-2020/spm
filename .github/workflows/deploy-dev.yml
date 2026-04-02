@@ -20,6 +20,4 @@ jobs:
     uses: ./.github/workflows/_deploy-frontend.yml
     with:
       environment: dev
-      s3-bucket: spm-dev-frontend
-      cloudfront-comment: spm-dev
     secrets: inherit

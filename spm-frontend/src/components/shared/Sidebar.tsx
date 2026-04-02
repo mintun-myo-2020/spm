@@ -1,14 +1,22 @@
 import { Sidebar as FlowbiteSidebar, SidebarItems, SidebarItemGroup, SidebarItem } from 'flowbite-react';
+import type { SidebarItemProps } from 'flowbite-react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { HiAcademicCap, HiChartBar, HiClipboardList, HiHome, HiUserGroup, HiBookOpen, HiBell, HiDocumentReport, HiUpload, HiCalendar, HiCog } from 'react-icons/hi';
-import type { FC, SVGProps } from 'react';
+import type { FC, SVGProps, ReactNode } from 'react';
+
+// Flowbite's SidebarItem types don't support polymorphic prop forwarding (e.g. NavLink's `to`).
+// The component does pass rest props through, so `to` works at runtime — we just need to extend the type.
+type NavSidebarItemProps = SidebarItemProps & { to?: string; children?: ReactNode };
 
 interface NavItem {
   label: string;
   to: string;
   icon: FC<SVGProps<SVGSVGElement>>;
 }
+
+// Cast SidebarItem to accept NavLink's `to` prop
+const NavSidebarItem: FC<NavSidebarItemProps> = SidebarItem as FC<NavSidebarItemProps>;
 
 const navByRole: Record<string, NavItem[]> = {
   TEACHER: [
@@ -65,7 +73,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
               {items.map((item) => {
                 const isActive = location.pathname === item.to || location.pathname.startsWith(item.to + '/');
                 return (
-                  <SidebarItem
+                  <NavSidebarItem
                     key={item.to}
                     as={NavLink}
                     to={item.to}
@@ -75,7 +83,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                     data-testid={`sidebar-link-${item.label.toLowerCase().replace(/\s/g, '-')}`}
                   >
                     {item.label}
-                  </SidebarItem>
+                  </NavSidebarItem>
                 );
               })}
             </SidebarItemGroup>
@@ -83,7 +91,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
             <div className="mt-auto" />
 
             <SidebarItemGroup>
-              <SidebarItem
+              <NavSidebarItem
                 as={NavLink}
                 to={settingsPath}
                 icon={HiCog}
@@ -92,7 +100,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
                 data-testid="sidebar-link-settings"
               >
                 Settings
-              </SidebarItem>
+              </NavSidebarItem>
             </SidebarItemGroup>
           </SidebarItems>
         </FlowbiteSidebar>

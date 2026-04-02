@@ -1,6 +1,7 @@
 name: Backend Deploy (Dev)
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths: ['spm/**']

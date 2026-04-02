@@ -1,0 +1,23 @@
+name: Deploy to Dev
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  backend:
+    if: github.event_name == 'workflow_dispatch' || contains(join(github.event.commits.*.modified, ','), 'spm/')
+    uses: ./.github/workflows/_deploy-backend.yml
+    with:
+      environment: dev
+    secrets: inherit
+
+  frontend:
+    if: github.event_name == 'workflow_dispatch' || contains(join(github.event.commits.*.modified, ','), 'spm-frontend/')
+    uses: ./.github/workflows/_deploy-frontend.yml
+    with:
+      environment: dev
+      s3-bucket: spm-dev-frontend
+      cloudfront-comment: spm-dev
+    secrets: inherit

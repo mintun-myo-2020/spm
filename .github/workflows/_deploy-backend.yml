@@ -10,14 +10,6 @@ on:
         required: false
         type: string
         default: ap-southeast-1
-      java-version:
-        required: false
-        type: string
-        default: '25'
-      ssm-service-tag:
-        required: false
-        type: string
-        default: backend
 
 permissions:
   id-token: write
@@ -33,7 +25,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: ${{ inputs.java-version }}
+          java-version: '25'
           cache: 'gradle'
 
       - name: Build jar
@@ -49,15 +41,15 @@ jobs:
       - name: Upload jar to S3
         run: |
           JAR_FILE=$(ls spm/build/libs/*.jar | head -1)
-          aws s3 cp "$JAR_FILE" s3://${{ secrets.DEV_DEPLOY_BUCKET }}/spm-app.jar
+          aws s3 cp "$JAR_FILE" s3://${{ secrets.DEPLOY_BUCKET }}/spm-app.jar
 
       - name: Deploy via SSM
         run: |
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
-            --targets "Key=tag:Service,Values=${{ inputs.ssm-service-tag }}" "Key=tag:Environment,Values=${{ inputs.environment }}" \
+            --targets "Key=tag:Service,Values=backend" "Key=tag:Environment,Values=${{ inputs.environment }}" \
             --parameters 'commands=[
-              "aws s3 cp s3://${{ secrets.DEV_DEPLOY_BUCKET }}/spm-app.jar /opt/spm/spm-app.jar",
+              "aws s3 cp s3://${{ secrets.DEPLOY_BUCKET }}/spm-app.jar /opt/spm/spm-app.jar",
               "sudo systemctl restart spm"
             ]' \
             --output text

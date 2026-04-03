@@ -1,41 +1,37 @@
 {
   "realm": "spm",
   "enabled": true,
-  "registrationAllowed": false,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
   "resetPasswordAllowed": true,
   "editUsernameAllowed": false,
   "bruteForceProtected": true,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 5,
+
   "roles": {
     "realm": [
+      { "name": "ADMIN", "description": "System administrator" },
       { "name": "TEACHER", "description": "Teacher role" },
-      { "name": "PARENT", "description": "Parent role" },
       { "name": "STUDENT", "description": "Student role" },
-      { "name": "ADMIN", "description": "Admin role" }
+      { "name": "PARENT", "description": "Parent role" }
     ]
   },
-  "clients": [
+
+  "clientScopes": [
     {
-      "clientId": "spm-frontend",
-      "name": "SPM Frontend",
-      "enabled": true,
-      "publicClient": true,
-      "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": true,
-      "redirectUris": ["http://localhost:5173/*"],
-      "webOrigins": ["http://localhost:5173"],
+      "name": "roles",
       "protocol": "openid-connect",
-      "attributes": {
-        "post.logout.redirect.uris": "http://localhost:5173/*"
-      },
-      "defaultClientScopes": ["basic", "web-origins", "acr", "profile", "roles", "email"],
+      "attributes": { "include.in.token.scope": "true" },
       "protocolMappers": [
         {
-          "name": "realm-roles",
+          "name": "realm roles",
           "protocol": "openid-connect",
           "protocolMapper": "oidc-usermodel-realm-role-mapper",
-          "consentRequired": false,
           "config": {
             "multivalued": "true",
             "userinfo.token.claim": "true",
@@ -46,179 +42,33 @@
           }
         }
       ]
+    }
+  ],
+
+  "clients": [
+    {
+      "clientId": "spm-frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "protocol": "openid-connect",
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "defaultClientScopes": ["basic", "web-origins", "acr", "profile", "roles", "email"]
     },
     {
       "clientId": "spm-backend",
-      "name": "SPM Backend",
       "enabled": true,
       "publicClient": false,
-      "bearerOnly": false,
-      "serviceAccountsEnabled": true,
       "standardFlowEnabled": false,
-      "directAccessGrantsEnabled": false,
-      "secret": "spm-backend-secret",
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "secret": "CHANGE_ME_AFTER_IMPORT",
       "protocol": "openid-connect",
       "defaultClientScopes": ["basic", "web-origins", "acr", "profile", "roles", "email"]
     }
   ],
-  "users": [
-    {
-      "username": "service-account-spm-backend",
-      "enabled": true,
-      "serviceAccountClientId": "spm-backend",
-      "clientRoles": {
-        "realm-management": ["manage-users", "view-users", "manage-realm", "view-realm"]
-      }
-    },
-    {
-      "username": "admin",
-      "email": "admin@spm.local",
-      "firstName": "System",
-      "lastName": "Admin",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "admin", "temporary": false }],
-      "realmRoles": ["ADMIN"]
-    },
-    {
-      "username": "teacher1",
-      "email": "teacher1@spm.local",
-      "firstName": "Sarah",
-      "lastName": "Lim",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "teacher1", "temporary": false }],
-      "realmRoles": ["TEACHER"]
-    },
-    {
-      "username": "teacher2",
-      "email": "teacher2@spm.local",
-      "firstName": "James",
-      "lastName": "Tan",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "teacher2", "temporary": false }],
-      "realmRoles": ["TEACHER"]
-    },
-    {
-      "username": "parent1",
-      "email": "parent1@spm.local",
-      "firstName": "David",
-      "lastName": "Wong",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "parent1", "temporary": false }],
-      "realmRoles": ["PARENT"]
-    },
-    {
-      "username": "parent2",
-      "email": "parent2@spm.local",
-      "firstName": "Linda",
-      "lastName": "Chen",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "parent2", "temporary": false }],
-      "realmRoles": ["PARENT"]
-    },
-    {
-      "username": "student1",
-      "email": "student1@spm.local",
-      "firstName": "GoodStudent",
-      "lastName": "Alice",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "student1", "temporary": false }],
-      "realmRoles": ["STUDENT"]
-    },
-    {
-      "username": "student2",
-      "email": "student2@spm.local",
-      "firstName": "GoodStudent",
-      "lastName": "Ben",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "student2", "temporary": false }],
-      "realmRoles": ["STUDENT"]
-    },
-    {
-      "username": "student3",
-      "email": "student3@spm.local",
-      "firstName": "GoodStudent",
-      "lastName": "Clara",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "student3", "temporary": false }],
-      "realmRoles": ["STUDENT"]
-    },
-    {
-      "username": "student4",
-      "email": "student4@spm.local",
-      "firstName": "GoodStudent",
-      "lastName": "Daniel",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "student4", "temporary": false }],
-      "realmRoles": ["STUDENT"]
-    },
-    {
-      "username": "student5",
-      "email": "student5@spm.local",
-      "firstName": "StrugglingStudent",
-      "lastName": "Ethan",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "student5", "temporary": false }],
-      "realmRoles": ["STUDENT"]
-    },
-    {
-      "username": "student6",
-      "email": "student6@spm.local",
-      "firstName": "StrugglingStudent",
-      "lastName": "Fiona",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "student6", "temporary": false }],
-      "realmRoles": ["STUDENT"]
-    },
-    {
-      "username": "student7",
-      "email": "student7@spm.local",
-      "firstName": "GoodStudent",
-      "lastName": "Grace",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "student7", "temporary": false }],
-      "realmRoles": ["STUDENT"]
-    },
-    {
-      "username": "student8",
-      "email": "student8@spm.local",
-      "firstName": "GoodStudent",
-      "lastName": "Henry",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "student8", "temporary": false }],
-      "realmRoles": ["STUDENT"]
-    },
-    {
-      "username": "student9",
-      "email": "student9@spm.local",
-      "firstName": "StrugglingStudent",
-      "lastName": "Irene",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "student9", "temporary": false }],
-      "realmRoles": ["STUDENT"]
-    },
-    {
-      "username": "student10",
-      "email": "student10@spm.local",
-      "firstName": "StrugglingStudent",
-      "lastName": "Jack",
-      "enabled": true,
-      "emailVerified": true,
-      "credentials": [{ "type": "password", "value": "student10", "temporary": false }],
-      "realmRoles": ["STUDENT"]
-    }
-  ]
+
+  "users": []
 }

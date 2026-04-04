@@ -1,13 +1,19 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { keycloakService } from './keycloakService';
+import { getConfig } from '../config';
 
 const MAX_RETRIES = 2;
 
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
+  baseURL: '/api/v1', // placeholder, updated after config loads
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
 });
+
+/** Call after loadConfig() to set the real base URL */
+export function configureApiClient(): void {
+  apiClient.defaults.baseURL = getConfig().apiBaseUrl;
+}
 
 // Request interceptor: attach JWT
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {

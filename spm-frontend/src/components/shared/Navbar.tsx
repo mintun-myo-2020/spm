@@ -1,5 +1,6 @@
 import { Badge } from 'flowbite-react';
 import { useAuth } from '../../hooks/useAuth';
+import { getConfig } from '../../config';
 import { HiMenuAlt2 } from 'react-icons/hi';
 
 interface NavbarProps {
@@ -20,7 +21,7 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
         <HiMenuAlt2 className="h-6 w-6" />
       </button>
 
-      <span className="ml-2 text-lg font-bold text-blue-600 lg:ml-0 dark:text-blue-400">{import.meta.env.VITE_TENANT_NAME}</span>
+      <span className="ml-2 text-lg font-bold text-blue-600 lg:ml-0 dark:text-blue-400">{getConfig().tenantName}</span>
 
       <div className="flex-1" />
 

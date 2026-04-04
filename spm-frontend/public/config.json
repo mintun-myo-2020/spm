@@ -1,0 +1,7 @@
+{
+  "apiBaseUrl": "http://localhost:8080/api/v1",
+  "keycloakUrl": "http://localhost:8180",
+  "keycloakRealm": "spm",
+  "keycloakClientId": "spm-frontend",
+  "tenantName": "Eggtive SPM"
+}

@@ -3,17 +3,29 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './components/shared/Toast';
+import { loadConfig } from './config';
+import { keycloakService } from './services/keycloakService';
+import { configureApiClient } from './services/apiClient';
 import App from './App';
 import './index.css';
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <ToastProvider>
-          <App />
-        </ToastProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </StrictMode>,
-);
+// Load runtime config, then bootstrap the app
+loadConfig().then((config) => {
+  keycloakService.configure(config);
+  configureApiClient();
+
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <BrowserRouter>
+        <AuthProvider>
+          <ToastProvider>
+            <App />
+          </ToastProvider>
+        </AuthProvider>
+      </BrowserRouter>
+    </StrictMode>,
+  );
+}).catch((err) => {
+  document.getElementById('root')!.innerHTML =
+    `<div style="padding:2rem;color:red">Failed to load app config: ${err.message}</div>`;
+});

@@ -30,12 +30,6 @@ jobs:
 
       - name: Install & build
         working-directory: spm-frontend
-        env:
-          VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
-          VITE_KEYCLOAK_URL: ${{ secrets.KEYCLOAK_URL }}
-          VITE_KEYCLOAK_REALM: ${{ secrets.KEYCLOAK_REALM }}
-          VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.KEYCLOAK_CLIENT_ID }}
-          VITE_TENANT_NAME: ${{ secrets.TENANT_NAME }}
         run: |
           npm ci
           npm run build
@@ -46,8 +40,8 @@ jobs:
           role-to-assume: ${{ secrets.AWS_CICD_ROLE_ARN }}
           aws-region: ${{ inputs.aws-region }}
 
-      - name: Deploy to S3
-        run: aws s3 sync spm-frontend/dist/ s3://${{ secrets.FRONTEND_BUCKET }}/ --delete
+      - name: Deploy to S3 (preserving config.json from infra)
+        run: aws s3 sync spm-frontend/dist/ s3://${{ secrets.FRONTEND_BUCKET }}/ --delete --exclude "config.json"
 
       - name: Invalidate CloudFront
         run: |

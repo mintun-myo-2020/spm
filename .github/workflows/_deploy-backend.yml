@@ -43,13 +43,12 @@ jobs:
           JAR_FILE=$(ls spm/build/libs/*.jar | head -1)
           aws s3 cp "$JAR_FILE" s3://${{ secrets.DEPLOY_BUCKET }}/spm-app.jar
 
-      - name: Deploy via SSM
+      - name: Trigger deploy via SSM
         run: |
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --targets "Key=tag:Service,Values=backend" "Key=tag:Environment,Values=${{ inputs.environment }}" \
             --parameters 'commands=[
-              "aws s3 cp s3://${{ secrets.DEPLOY_BUCKET }}/spm-app.jar /opt/spm/spm-app.jar",
-              "sudo systemctl restart spm"
+              "bash /opt/deploy/deploy.sh"
             ]' \
             --output text

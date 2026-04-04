@@ -15,6 +15,7 @@ export const keycloakService = {
       onLoad: 'check-sso',
       silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html`,
       pkceMethod: 'S256',
+      responseMode: 'query',
     }).then((authenticated) => {
       if (authenticated) {
         this.scheduleTokenRefresh();

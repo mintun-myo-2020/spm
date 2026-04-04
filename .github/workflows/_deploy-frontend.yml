@@ -40,14 +40,19 @@ jobs:
           role-to-assume: ${{ secrets.AWS_CICD_ROLE_ARN }}
           aws-region: ${{ inputs.aws-region }}
 
+      - name: Discover infra from SSM
+        id: ssm
+        run: |
+          PREFIX="/${{ vars.PROJECT_NAME }}/${{ vars.ENVIRONMENT }}/cicd"
+          echo "frontend-bucket=$(aws ssm get-parameter --name "$PREFIX/frontend-bucket" --query Parameter.Value --output text)" >> "$GITHUB_OUTPUT"
+          echo "cf-dist-id=$(aws ssm get-parameter --name "$PREFIX/cloudfront-distribution-id" --query Parameter.Value --output text)" >> "$GITHUB_OUTPUT"
+
       - name: Deploy to S3 (preserving config.json from infra)
-        run: aws s3 sync spm-frontend/dist/ s3://${{ secrets.FRONTEND_BUCKET }}/ --delete --exclude "config.json"
+        run: aws s3 sync spm-frontend/dist/ s3://${{ steps.ssm.outputs.frontend-bucket }}/ --delete --exclude "config.json"
 
       - name: Invalidate CloudFront
         run: |
-          DIST_ID=$(aws cloudfront list-distributions \
-            --query "DistributionList.Items[?Comment=='${{ secrets.CLOUDFRONT_COMMENT }}'].Id" \
-            --output text)
+          DIST_ID="${{ steps.ssm.outputs.cf-dist-id }}"
           if [ -n "$DIST_ID" ] && [ "$DIST_ID" != "None" ]; then
             aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
           fi

@@ -38,16 +38,22 @@ jobs:
           role-to-assume: ${{ secrets.AWS_CICD_ROLE_ARN }}
           aws-region: ${{ inputs.aws-region }}
 
+      - name: Discover infra from SSM
+        id: ssm
+        run: |
+          PREFIX="/${{ vars.PROJECT_NAME }}/${{ vars.ENVIRONMENT }}/cicd"
+          echo "artifacts-bucket=$(aws ssm get-parameter --name "$PREFIX/artifacts-bucket" --query Parameter.Value --output text)" >> "$GITHUB_OUTPUT"
+
       - name: Upload jar to S3
         run: |
           JAR_FILE=$(ls spm/build/libs/*.jar | head -1)
-          aws s3 cp "$JAR_FILE" s3://${{ secrets.DEPLOY_BUCKET }}/spm-app.jar
+          aws s3 cp "$JAR_FILE" s3://${{ steps.ssm.outputs.artifacts-bucket }}/spm-app.jar
 
       - name: Trigger deploy via SSM
         run: |
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
-            --targets "Key=tag:Service,Values=backend" "Key=tag:Environment,Values=${{ inputs.environment }}" \
+            --targets "Key=tag:Service,Values=backend" "Key=tag:Environment,Values=${{ vars.ENVIRONMENT }}" \
             --parameters 'commands=[
               "bash /opt/deploy/deploy.sh"
             ]' \

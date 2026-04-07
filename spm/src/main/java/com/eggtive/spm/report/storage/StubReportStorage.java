@@ -2,6 +2,7 @@ package com.eggtive.spm.report.storage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import java.nio.file.Path;
  * In production, replace with S3ReportStorage using pre-signed URLs.
  */
 @Component
+@ConditionalOnProperty(name = "app.report.dispatcher", havingValue = "local", matchIfMissing = true)
 public class StubReportStorage implements ReportStorage {
 
     private static final Logger log = LoggerFactory.getLogger(StubReportStorage.class);

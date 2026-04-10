@@ -1,4 +1,5 @@
 import { Badge } from 'flowbite-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getConfig } from '../../config';
 import { HiMenuAlt2 } from 'react-icons/hi';
@@ -9,6 +10,9 @@ interface NavbarProps {
 
 export function Navbar({ onMenuToggle }: NavbarProps) {
   const { user } = useAuth();
+
+  const role = user?.profileType?.toLowerCase() ?? '';
+  const dashboardPath = role ? `/${role}/dashboard` : '/';
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 shadow-sm dark:border-gray-700 dark:bg-gray-800" data-testid="navbar">
@@ -21,7 +25,7 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
         <HiMenuAlt2 className="h-6 w-6" />
       </button>
 
-      <span className="ml-2 text-lg font-bold text-blue-600 lg:ml-0 dark:text-blue-400">{getConfig().tenantName}</span>
+      <Link to={dashboardPath} className="ml-2 text-lg font-bold text-blue-600 hover:text-blue-800 lg:ml-0 dark:text-blue-400 dark:hover:text-blue-300">{getConfig().tenantName}</Link>
 
       <div className="flex-1" />
 

@@ -163,7 +163,7 @@ export function TestScoreDetail({ score }: Props) {
                                 )}
                               </div>
                               {sq.teacherRemarks && (
-                                <p className="ml-6 text-xs text-amber-700 dark:text-amber-400 italic">💬 {sq.teacherRemarks}</p>
+                                <p className="ml-6 text-xs text-amber-700 dark:text-amber-400 italic">{sq.teacherRemarks}</p>
                               )}
                             </div>
                           ))}

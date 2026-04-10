@@ -43,7 +43,7 @@ export function ClassSummaryPanel({ classId }: Props) {
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {summary.strongestTopic && (
           <div className="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-900/20">
-            <span className="text-lg">💪</span>
+            <span className="text-lg">▲</span>
             <div className="min-w-0 flex-1">
               <p className="text-xs text-green-700 dark:text-green-400">Strongest Topic</p>
               <p className="truncate text-sm font-medium text-green-900 dark:text-green-200">{summary.strongestTopic.topicName}</p>
@@ -53,7 +53,7 @@ export function ClassSummaryPanel({ classId }: Props) {
         )}
         {summary.weakestTopic && summary.weakestTopic.topicId !== summary.strongestTopic?.topicId && (
           <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
-            <span className="text-lg">📉</span>
+            <span className="text-lg">▼</span>
             <div className="min-w-0 flex-1">
               <p className="text-xs text-red-700 dark:text-red-400">Weakest Topic</p>
               <p className="truncate text-sm font-medium text-red-900 dark:text-red-200">{summary.weakestTopic.topicName}</p>

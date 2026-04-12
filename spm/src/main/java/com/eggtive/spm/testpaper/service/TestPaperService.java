@@ -134,6 +134,7 @@ public class TestPaperService {
     }
 
     @Async
+    @Transactional
     public void processExtractionAsync(UUID uploadId) {
         try {
             TestPaperUpload upload = findUploadOrThrow(uploadId);
@@ -142,6 +143,7 @@ public class TestPaperService {
             UUID subjectId = upload.getTuitionClass().getSubject().getId();
             List<String> topicNames = topicRepository.findBySubjectIdAndIsActiveTrue(subjectId)
                     .stream().map(Topic::getName).toList();
+            log.debug("Extraction for upload {} — subject={}, topics={}", uploadId, subjectId, topicNames);
 
             boolean allSuccess = true;
 

@@ -15,7 +15,7 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import java.time.Duration;
 
 @Component
-@ConditionalOnProperty(name = "app.report.dispatcher", havingValue = "s3")
+@ConditionalOnProperty(name = "app.storage.type", havingValue = "s3")
 public class S3ReportStorage implements ReportStorage {
 
     private static final Logger log = LoggerFactory.getLogger(S3ReportStorage.class);
@@ -27,7 +27,7 @@ public class S3ReportStorage implements ReportStorage {
     public S3ReportStorage(
             S3Client s3,
             S3Presigner presigner,
-            @Value("${app.report-storage.s3-bucket}") String bucket) {
+            @Value("${app.storage.report-s3-bucket}") String bucket) {
         this.s3 = s3;
         this.presigner = presigner;
         this.bucket = bucket;

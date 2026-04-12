@@ -16,14 +16,14 @@ import java.nio.file.Path;
  * In production, replace with S3ReportStorage using pre-signed URLs.
  */
 @Component
-@ConditionalOnProperty(name = "app.report.dispatcher", havingValue = "local", matchIfMissing = true)
+@ConditionalOnProperty(name = "app.storage.type", havingValue = "local", matchIfMissing = true)
 public class StubReportStorage implements ReportStorage {
 
     private static final Logger log = LoggerFactory.getLogger(StubReportStorage.class);
 
     private final Path basePath;
 
-    public StubReportStorage(@Value("${app.report-storage.local-path:./report-files}") String localPath) {
+    public StubReportStorage(@Value("${app.storage.report-local-path:./report-files}") String localPath) {
         Path preferred = Path.of(localPath);
         Path resolved;
         try {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useForm, useFieldArray, type Control, type UseFormRegister, type UseFormSetValue, type FieldErrors } from 'react-hook-form';
+import { useForm, useFieldArray, useWatch, type Control, type UseFormRegister, type UseFormSetValue, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, Card, Label, Select, TextInput, Textarea } from 'flowbite-react';
@@ -70,6 +70,23 @@ export function TestScoreForm() {
   });
 
   const { fields: questionFields, append: addQuestion, remove: removeQuestion } = useFieldArray({ control, name: 'questions' });
+
+  // Auto-calculate overallScore and maxScore from questions
+  const watchedQuestions = useWatch({ control, name: 'questions' });
+  useEffect(() => {
+    if (!watchedQuestions) return;
+    let totalScore = 0;
+    let totalMax = 0;
+    for (const q of watchedQuestions) {
+      if (!q.subQuestions) continue;
+      for (const sq of q.subQuestions) {
+        totalScore += Number(sq.score) || 0;
+        totalMax += Number(sq.maxScore) || 0;
+      }
+    }
+    setValue('overallScore', Math.round(totalScore * 100) / 100);
+    setValue('maxScore', Math.round(totalMax * 100) / 100);
+  }, [watchedQuestions, setValue]);
 
   useEffect(() => {
     if (!classId) return;
@@ -189,8 +206,8 @@ export function TestScoreForm() {
         showToast('Test score recorded', 'success');
       }
       navigate(-1);
-    } catch {
-      showToast('Failed to save test score', 'error');
+    } catch (err) {
+      showToast((err instanceof Error ? err.message : null) || 'Failed to save test score', 'error');
     }
   };
 
@@ -219,13 +236,13 @@ export function TestScoreForm() {
             </select>
           </div>
           <div>
-            <Label htmlFor="overallScore">Overall Score</Label>
-            <TextInput id="overallScore" type="number" step="0.01" {...register('overallScore', { valueAsNumber: true })} color={errors.overallScore ? 'failure' : undefined} data-testid="overall-score-input" />
+            <Label htmlFor="overallScore">Obtained Score (auto-calculated)</Label>
+            <TextInput id="overallScore" type="number" step="0.01" {...register('overallScore', { valueAsNumber: true })} readOnly className="bg-gray-100 dark:bg-gray-700" color={errors.overallScore ? 'failure' : undefined} data-testid="overall-score-input" />
             {errors.overallScore && <p className="mt-1 text-sm text-red-600">{errors.overallScore.message}</p>}
           </div>
           <div>
-            <Label htmlFor="maxScore">Max Score</Label>
-            <TextInput id="maxScore" type="number" step="0.01" {...register('maxScore', { valueAsNumber: true })} data-testid="max-score-input" />
+            <Label htmlFor="maxScore">Max Score (auto-calculated)</Label>
+            <TextInput id="maxScore" type="number" step="0.01" {...register('maxScore', { valueAsNumber: true })} readOnly className="bg-gray-100 dark:bg-gray-700" data-testid="max-score-input" />
           </div>
         </div>
 

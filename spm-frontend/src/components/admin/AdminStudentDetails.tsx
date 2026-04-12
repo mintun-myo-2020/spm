@@ -16,6 +16,7 @@ export function AdminStudentDetails() {
       />
       <StudentProgressView
         studentId={studentId}
+        classId={classId}
         actions={[
           { label: 'View Recent Tests →', color: 'blue', onClick: () => navigate(`/admin/classes/${classId}/students/${studentId}/scores`), testId: 'view-scores-link' },
           { label: 'View Reports →', color: 'gray', onClick: () => navigate(`/admin/classes/${classId}/students/${studentId}/reports`), testId: 'view-reports-link' },

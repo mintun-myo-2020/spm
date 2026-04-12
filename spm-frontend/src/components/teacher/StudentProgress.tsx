@@ -13,6 +13,7 @@ export function StudentProgress() {
       <PageHeader title="Student Progress" backTo={`/teacher/classes/${classId}/students/${studentId}`} />
       <StudentProgressView
         studentId={studentId}
+        classId={classId}
         onTestClick={(testScoreId) => navigate(`/teacher/classes/${classId}/students/${studentId}/scores/${testScoreId}`)}
       />
     </div>

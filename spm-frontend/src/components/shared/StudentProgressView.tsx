@@ -17,6 +17,7 @@ interface ActionButton {
 
 interface Props {
   studentId: string;
+  classId?: string;
   actions?: ActionButton[];
   onTestClick?: (testScoreId: string) => void;
   onViewScores?: () => void;
@@ -25,7 +26,7 @@ interface Props {
 const scoreColor = (pct: number) =>
   pct >= 70 ? 'text-green-600' : pct < 60 ? 'text-[#8B2500]' : '';
 
-export function StudentProgressView({ studentId, actions, onTestClick, onViewScores }: Props) {
+export function StudentProgressView({ studentId, classId, actions, onTestClick, onViewScores }: Props) {
   const [overall, setOverall] = useState<OverallProgressDTO | null>(null);
   const [topics, setTopics] = useState<TopicProgressSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,14 +37,17 @@ export function StudentProgressView({ studentId, actions, onTestClick, onViewSco
     if (!studentId) return;
     setLoading(true);
     setError(null);
-    Promise.all([
-      progressService.getOverallProgress(studentId).then((r) => r.data.data),
-      progressService.getAllTopicsProgress(studentId).then((r) => r.data.data),
-    ])
+    const overallPromise = classId
+      ? progressService.getProgressByClass(studentId, classId).then((r) => r.data.data)
+      : progressService.getOverallProgress(studentId).then((r) => r.data.data);
+    const topicsPromise = classId
+      ? progressService.getTopicsProgressByClass(studentId, classId).then((r) => r.data.data)
+      : progressService.getAllTopicsProgress(studentId).then((r) => r.data.data);
+    Promise.all([overallPromise, topicsPromise])
       .then(([o, t]) => { setOverall(o); setTopics(t); })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [studentId]);
+  }, [studentId, classId]);
 
   if (loading) return <LoadingSpinner />;
   if (error) return <ErrorMessage message={error} />;

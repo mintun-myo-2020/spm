@@ -21,6 +21,8 @@ public record TestPaperUploadDTO(
         String questionText,
         String questionType,
         BigDecimal maxScore,
+        String studentAnswer,
+        String topicHint,
         List<AggregatedSubQuestion> subQuestions,
         List<AggregatedMcqOption> mcqOptions,
         float confidence,

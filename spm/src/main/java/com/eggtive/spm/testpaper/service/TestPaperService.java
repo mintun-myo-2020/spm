@@ -288,7 +288,8 @@ public class TestPaperService {
                         .toList();
                 result.add(new TestPaperUploadDTO.AggregatedQuestion(
                     pq.questionNumber(), pq.questionText(), pq.questionType(),
-                    pq.maxScore(), subs, opts, pq.confidence(), page.getPageNumber()));
+                    pq.maxScore(), pq.studentAnswer(), pq.topicHint(),
+                    subs, opts, pq.confidence(), page.getPageNumber()));
             }
         }
         return result;

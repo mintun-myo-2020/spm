@@ -135,14 +135,14 @@ export function TestScoreForm() {
       mcqOptions: q.mcqOptions?.map((o) => ({ key: o.key, text: o.text })) ?? [],
       subQuestions: q.subQuestions.length > 0
         ? q.subQuestions.map((sq) => ({
-            label: sq.label,
-            questionText: sq.questionText ?? '',
-            score: 0,
-            maxScore: sq.maxScore ?? 0,
-            topicId: '',
-            studentAnswer: sq.studentAnswer ?? '',
-            teacherRemarks: '',
-          }))
+          label: sq.label,
+          questionText: sq.questionText ?? '',
+          score: 0,
+          maxScore: sq.maxScore ?? 0,
+          topicId: '',
+          studentAnswer: sq.studentAnswer ?? '',
+          teacherRemarks: '',
+        }))
         : [{ label: 'a', questionText: '', score: 0, maxScore: q.maxScore ?? 0, topicId: '', studentAnswer: '', teacherRemarks: '' }],
     }));
 
@@ -380,25 +380,26 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
               </div>
               <div className="flex flex-wrap items-end gap-2">
                 <div className="sm:w-20">
-                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Attained Score</Label>
+                  <Label className="mb-1 block text-xs text-gray-500">Score</Label>
                   <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.score`, { valueAsNumber: true })} placeholder="0" className="w-20" />
                 </div>
                 <div className="sm:w-20">
-                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Max Score</Label>
+                  <Label className="mb-1 block text-xs text-gray-500">Max</Label>
                   <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.maxScore`, { valueAsNumber: true })} placeholder="10" className="w-20" />
                 </div>
                 <div className="flex-1">
-                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Topic</Label>
+                  <Label className="mb-1 block text-xs text-gray-500">Topic</Label>
                   <Select sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.topicId`)} className="w-full" data-testid={`topic-select-${qIdx}-${sIdx}`}>
                     <option value="">Select topic</option>
                     {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                   </Select>
                 </div>
-                <div className="sm:w-40">
-                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Answer</Label>
-                  <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.studentAnswer`)} placeholder="Student answer" className="w-40" />
-                </div>
               </div>
+              <div>
+                <Label className="mb-1 block text-xs text-gray-500">Student Answer</Label>
+                <Textarea {...register(`questions.${qIdx}.subQuestions.${sIdx}.studentAnswer`)} placeholder="Student answer" rows={1} className="text-xs" />
+              </div>
+              <Label className="mb-1 block text-xs text-gray-500">Teacher remarks</Label>
               <Textarea {...register(`questions.${qIdx}.subQuestions.${sIdx}.teacherRemarks`)} placeholder="Teacher remarks (optional)" rows={1} className="text-xs" />
             </div>
           ))}

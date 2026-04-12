@@ -366,7 +366,7 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
           {/* Open question: sub-questions */}
           <p className="mb-2 text-xs font-medium text-gray-600 dark:text-gray-400">Sub-questions</p>
           {subFields.map((sf, sIdx) => (
-            <div key={sf.id} className="mb-2 space-y-1" data-testid={`sub-question-${qIdx}-${sIdx}`}>
+            <div key={sf.id} className="mb-3 rounded-lg border border-gray-200 bg-gray-50/50 p-3 space-y-2 dark:border-gray-700 dark:bg-gray-800/30" data-testid={`sub-question-${qIdx}-${sIdx}`}>
               <div className="flex items-end gap-2">
                 <div className="w-14">
                   <Label className="mb-1 block text-xs text-gray-500">Label</Label>
@@ -397,7 +397,7 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
               </div>
               <div>
                 <Label className="mb-1 block text-xs text-gray-500">Student Answer</Label>
-                <Textarea {...register(`questions.${qIdx}.subQuestions.${sIdx}.studentAnswer`)} placeholder="Student answer" rows={1} className="text-xs" />
+                <Textarea {...register(`questions.${qIdx}.subQuestions.${sIdx}.studentAnswer`)} placeholder="Student answer" rows={2} className="text-sm" />
               </div>
               <Label className="mb-1 block text-xs text-gray-500">Teacher remarks</Label>
               <Textarea {...register(`questions.${qIdx}.subQuestions.${sIdx}.teacherRemarks`)} placeholder="Teacher remarks (optional)" rows={1} className="text-xs" />

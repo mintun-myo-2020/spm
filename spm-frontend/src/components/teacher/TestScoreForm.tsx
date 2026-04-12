@@ -365,32 +365,26 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
         <>
           {/* Open question: sub-questions */}
           <p className="mb-2 text-xs font-medium text-gray-600 dark:text-gray-400">Sub-questions</p>
-          <div className="mb-2 hidden gap-2 sm:flex">
-            <span className="w-14 text-xs text-gray-400">Label</span>
-            <span className="flex-1 text-xs text-gray-400">Question</span>
-            <span className="w-20 text-xs text-gray-400">Score</span>
-            <span className="w-20 text-xs text-gray-400">Max</span>
-            <span className="flex-1 text-xs text-gray-400">Topic</span>
-            <span className="w-32 text-xs text-gray-400">Answer</span>
-            <span className="w-8" />
-          </div>
           {subFields.map((sf, sIdx) => (
             <div key={sf.id} className="mb-2 space-y-1" data-testid={`sub-question-${qIdx}-${sIdx}`}>
-              <div className="flex flex-wrap items-end gap-2">
-                <div className="sm:w-14">
-                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Label</Label>
+              <div className="flex items-end gap-2">
+                <div className="w-14">
+                  <Label className="mb-1 block text-xs text-gray-500">Label</Label>
                   <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.label`)} placeholder="a" className="w-14" />
                 </div>
                 <div className="flex-1">
-                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Question</Label>
+                  <Label className="mb-1 block text-xs text-gray-500">Question</Label>
                   <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.questionText`)} placeholder="Sub-question text" />
                 </div>
+                <Button size="xs" color="failure" onClick={() => removeSub(sIdx)}>×</Button>
+              </div>
+              <div className="flex flex-wrap items-end gap-2">
                 <div className="sm:w-20">
-                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Score</Label>
+                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Attained Score</Label>
                   <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.score`, { valueAsNumber: true })} placeholder="0" className="w-20" />
                 </div>
                 <div className="sm:w-20">
-                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Max</Label>
+                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Max Score</Label>
                   <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.maxScore`, { valueAsNumber: true })} placeholder="10" className="w-20" />
                 </div>
                 <div className="flex-1">
@@ -400,11 +394,10 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
                     {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                   </Select>
                 </div>
-                <div className="sm:w-32">
+                <div className="sm:w-40">
                   <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Answer</Label>
-                  <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.studentAnswer`)} placeholder="Student answer" className="w-32" />
+                  <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.studentAnswer`)} placeholder="Student answer" className="w-40" />
                 </div>
-                <Button size="xs" color="failure" onClick={() => removeSub(sIdx)}>×</Button>
               </div>
               <Textarea {...register(`questions.${qIdx}.subQuestions.${sIdx}.teacherRemarks`)} placeholder="Teacher remarks (optional)" rows={1} className="text-xs" />
             </div>

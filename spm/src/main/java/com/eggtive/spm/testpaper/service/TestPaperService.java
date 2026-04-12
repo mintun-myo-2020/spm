@@ -16,6 +16,8 @@ import com.eggtive.spm.testpaper.parser.ParsedResult;
 import com.eggtive.spm.testpaper.repository.TestPaperPageRepository;
 import com.eggtive.spm.testpaper.repository.TestPaperUploadRepository;
 import com.eggtive.spm.testpaper.storage.FileStorageService;
+import com.eggtive.spm.subject.entity.Topic;
+import com.eggtive.spm.subject.repository.TopicRepository;
 import com.eggtive.spm.user.entity.Student;
 import com.eggtive.spm.user.entity.User;
 import com.eggtive.spm.user.service.UserService;
@@ -45,6 +47,7 @@ public class TestPaperService {
     private final UserService userService;
     private final ClassService classService;
     private final JsonMapper jsonMapper;
+    private final TopicRepository topicRepository;
 
     public TestPaperService(TestPaperUploadRepository uploadRepository,
                             TestPaperPageRepository pageRepository,
@@ -52,7 +55,8 @@ public class TestPaperService {
                             TestPaperExtractionService extractionService,
                             UserService userService,
                             ClassService classService,
-                            JsonMapper jsonMapper) {
+                            JsonMapper jsonMapper,
+                            TopicRepository topicRepository) {
         this.uploadRepository = uploadRepository;
         this.pageRepository = pageRepository;
         this.fileStorageService = fileStorageService;
@@ -60,6 +64,7 @@ public class TestPaperService {
         this.userService = userService;
         this.classService = classService;
         this.jsonMapper = jsonMapper;
+        this.topicRepository = topicRepository;
     }
 
     /**
@@ -132,6 +137,12 @@ public class TestPaperService {
     public void processExtractionAsync(UUID uploadId) {
         try {
             TestPaperUpload upload = findUploadOrThrow(uploadId);
+
+            // Load topic names for the subject so the LLM can classify questions
+            UUID subjectId = upload.getTuitionClass().getSubject().getId();
+            List<String> topicNames = topicRepository.findBySubjectIdAndIsActiveTrue(subjectId)
+                    .stream().map(Topic::getName).toList();
+
             boolean allSuccess = true;
 
             for (TestPaperPage page : upload.getPages()) {
@@ -143,7 +154,7 @@ public class TestPaperService {
                             page.getStorageKey());
 
                     ParsedResult parsed = extractionService.extractQuestions(
-                            imageBytes, page.getContentType(), page.getFileName());
+                            imageBytes, page.getContentType(), page.getFileName(), topicNames);
 
                     page.setParsedResult(jsonMapper.writeValueAsString(parsed));
                     page.setOcrConfidence(averageConfidence(parsed));

@@ -1,7 +1,6 @@
 package com.eggtive.spm.testpaper.llm;
 
 import com.eggtive.spm.testpaper.parser.*;
-import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +12,6 @@ import software.amazon.awssdk.services.bedrockruntime.BedrockRuntimeClient;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelRequest;
 import software.amazon.awssdk.services.bedrockruntime.model.InvokeModelResponse;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -49,14 +47,15 @@ public class BedrockExtractionService implements TestPaperExtractionService {
     }
 
     @Override
-    public ParsedResult extractQuestions(byte[] imageBytes, String contentType, String fileName) {
+    public ParsedResult extractQuestions(byte[] imageBytes, String contentType, String fileName, List<String> topicNames) {
         log.info("Bedrock extraction for '{}' ({}, {} bytes) using model {}",
                 fileName, contentType, imageBytes.length, modelId);
         try {
             String base64Image = Base64.getEncoder().encodeToString(imageBytes);
             String mediaType = contentType != null ? contentType : "image/jpeg";
 
-            String requestBody = modelAdapter.buildRequestBody(base64Image, mediaType, EXTRACTION_PROMPT);
+            String prompt = buildPrompt(topicNames);
+            String requestBody = modelAdapter.buildRequestBody(base64Image, mediaType, prompt);
 
             InvokeModelResponse response = bedrockClient.invokeModel(
                     InvokeModelRequest.builder()
@@ -69,7 +68,7 @@ public class BedrockExtractionService implements TestPaperExtractionService {
             String responseBody = response.body().asUtf8String();
             String textContent = modelAdapter.extractResponseText(responseBody);
 
-            return mapToParsedResult(textContent);
+            return ExtractionResponseMapper.map(textContent, jsonMapper);
 
         } catch (Exception e) {
             log.error("Bedrock extraction failed for '{}'", fileName, e);
@@ -78,109 +77,17 @@ public class BedrockExtractionService implements TestPaperExtractionService {
         }
     }
 
-    // ── Response mapping (model-agnostic — works with any adapter) ──────
-
-    private ParsedResult mapToParsedResult(String textContent) throws Exception {
-        String jsonContent = extractJsonFromText(textContent);
-        JsonNode data = jsonMapper.readTree(jsonContent);
-
-        List<ParsedQuestion> questions = new ArrayList<>();
-        BigDecimal totalMarks = BigDecimal.ZERO;
-        List<String> notes = new ArrayList<>();
-
-        JsonNode questionsNode = data.get("questions");
-        if (questionsNode != null && questionsNode.isArray()) {
-            for (JsonNode qNode : questionsNode) {
-                ParsedQuestion pq = mapQuestion(qNode);
-                questions.add(pq);
-                if (pq.maxScore() != null) {
-                    totalMarks = totalMarks.add(pq.maxScore());
-                }
-            }
-        }
-
-        JsonNode notesNode = data.get("notes");
-        if (notesNode != null && notesNode.isArray()) {
-            for (JsonNode n : notesNode) {
-                notes.add(n.asText());
-            }
-        }
-
-        return new ParsedResult(questions,
-                totalMarks.compareTo(BigDecimal.ZERO) > 0 ? totalMarks : null,
-                notes);
-    }
-
-    private ParsedQuestion mapQuestion(JsonNode node) {
-        String questionNumber = textOrNull(node, "questionNumber");
-        String questionText = textOrNull(node, "questionText");
-        String questionType = textOrNull(node, "questionType");
-        BigDecimal maxScore = decimalOrNull(node, "maxScore");
-        float confidence = node.has("confidence")
-                ? (float) node.get("confidence").asDouble() : 0.85f;
-
-        List<McqOption> mcqOptions = new ArrayList<>();
-        JsonNode optsNode = node.get("mcqOptions");
-        if (optsNode != null && optsNode.isArray()) {
-            for (JsonNode o : optsNode) {
-                mcqOptions.add(new McqOption(textOrNull(o, "key"), textOrNull(o, "text")));
-            }
-        }
-
-        List<ParsedSubQuestion> subQuestions = new ArrayList<>();
-        JsonNode subsNode = node.get("subQuestions");
-        if (subsNode != null && subsNode.isArray()) {
-            for (JsonNode s : subsNode) {
-                subQuestions.add(ParsedSubQuestion.defaults()
-                        .label(textOrNull(s, "label"))
-                        .questionText(textOrNull(s, "questionText"))
-                        .maxScore(decimalOrNull(s, "maxScore"))
-                        .studentAnswer(textOrNull(s, "studentAnswer"))
-                        .studentCorrection(textOrNull(s, "studentCorrection"))
-                        .teacherRemarks(textOrNull(s, "teacherRemarks"))
-                        .confidence(s.has("confidence") ? (float) s.get("confidence").asDouble() : 0.80f)
-                        .build());
-            }
-        }
-
-        return ParsedQuestion.defaults()
-                .questionNumber(questionNumber)
-                .questionText(questionText)
-                .questionType(questionType != null ? questionType : "OPEN")
-                .mcqOptions(mcqOptions)
-                .maxScore(maxScore)
-                .subQuestions(subQuestions)
-                .hasDiagramInQuestion(node.has("hasDiagramInQuestion") && node.get("hasDiagramInQuestion").asBoolean())
-                .requiresDiagramAnswer(node.has("requiresDiagramAnswer") && node.get("requiresDiagramAnswer").asBoolean())
-                .confidence(confidence)
-                .build();
-    }
-
     // ── Helpers ──────────────────────────────────────────────────────────
 
-    /** Strip markdown code fences the model may wrap around its JSON. */
-    private String extractJsonFromText(String text) {
-        if (text == null || text.isBlank()) return "{}";
-        String trimmed = text.trim();
-        if (trimmed.startsWith("```")) {
-            int firstNewline = trimmed.indexOf('\n');
-            int lastFence = trimmed.lastIndexOf("```");
-            if (firstNewline > 0 && lastFence > firstNewline) {
-                trimmed = trimmed.substring(firstNewline + 1, lastFence).trim();
-            }
+    /** Build the extraction prompt, injecting topic names when available. */
+    static String buildPrompt(List<String> topicNames) {
+        if (topicNames == null || topicNames.isEmpty()) {
+            return EXTRACTION_PROMPT;
         }
-        return trimmed;
-    }
-
-    private String textOrNull(JsonNode node, String field) {
-        JsonNode child = node.get(field);
-        return (child != null && !child.isNull()) ? child.asText() : null;
-    }
-
-    private BigDecimal decimalOrNull(JsonNode node, String field) {
-        JsonNode child = node.get(field);
-        return (child != null && !child.isNull() && child.isNumber())
-                ? new BigDecimal(child.asText()) : null;
+        String topicList = String.join(", ", topicNames);
+        return EXTRACTION_PROMPT + "\n\nAvailable topics for this subject: [" + topicList
+                + "]. For each question, set \"topicHint\" to the best-matching topic name from this list. "
+                + "If no topic clearly matches, set topicHint to null.";
     }
 
     static final String EXTRACTION_PROMPT = """
@@ -198,6 +105,8 @@ public class BedrockExtractionService implements TestPaperExtractionService {
                     { "key": "A", "text": "Option text" }
                   ],
                   "maxScore": 10,
+                  "studentAnswer": "The student's selected answer (e.g. 'A' for MCQ, or written text for OPEN)",
+                  "topicHint": "Best-matching topic name from the provided list, or null",
                   "hasDiagramInQuestion": false,
                   "requiresDiagramAnswer": false,
                   "subQuestions": [
@@ -220,11 +129,13 @@ public class BedrockExtractionService implements TestPaperExtractionService {
             Rules:
             - questionType is "MCQ" if the question has multiple-choice options, otherwise "OPEN"
             - For MCQ questions, include all visible options in mcqOptions
-            - For MCQ answers, the student may have written the letter/number OR circled the chosen option — detect either method and record the selected option key in studentAnswer
-            - For OPEN questions with parts (a, b, c or i, ii, iii), list them as subQuestions
+            - For MCQ questions, the student may have written the letter/number OR circled/ticked the chosen option — detect either method and record the selected option key in the top-level studentAnswer field
+            - For OPEN questions without sub-parts, record the student's written answer in the top-level studentAnswer field
+            - For OPEN questions with parts (a, b, c or i, ii, iii), list them as subQuestions with individual studentAnswer fields; the top-level studentAnswer can be null
             - studentAnswer should ONLY contain what the student originally wrote (typically blue/black ink)
             - GREEN TEXT indicates corrections — extract this into studentCorrection, NOT studentAnswer
             - teacherRemarks is for any other teacher feedback, comments, or annotations (not the correction itself)
+            - topicHint: if a list of topics is provided, classify each question to the best-matching topic; otherwise set to null
             - hasDiagramInQuestion: true if the question includes a diagram, graph, chart, or image as part of the question itself
             - requiresDiagramAnswer: true if the student was required to draw a diagram, graph, or chart as part of their answer
             - If handwriting is illegible, set the field to null and lower the confidence

@@ -2,6 +2,8 @@ package com.eggtive.spm.testpaper.llm;
 
 import com.eggtive.spm.testpaper.parser.ParsedResult;
 
+import java.util.List;
+
 /**
  * Abstraction for extracting structured question data from test paper images
  * using a multimodal LLM. Replaces the OCR + regex-parser pipeline with a
@@ -17,7 +19,8 @@ public interface TestPaperExtractionService {
      * @param imageBytes  raw image content (JPEG or PNG)
      * @param contentType MIME type of the image (image/jpeg, image/png)
      * @param fileName    original file name (for logging / context)
+     * @param topicNames  list of topic names for the subject (used for topic classification)
      * @return parsed result containing questions, marks, and parsing notes
      */
-    ParsedResult extractQuestions(byte[] imageBytes, String contentType, String fileName);
+    ParsedResult extractQuestions(byte[] imageBytes, String contentType, String fileName, List<String> topicNames);
 }

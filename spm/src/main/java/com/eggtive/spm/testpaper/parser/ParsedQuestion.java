@@ -12,6 +12,8 @@ public record ParsedQuestion(
     String questionType,
     List<McqOption> mcqOptions,
     BigDecimal maxScore,
+    String studentAnswer,
+    String topicHint,
     List<ParsedSubQuestion> subQuestions,
     boolean hasDiagramInQuestion,
     boolean requiresDiagramAnswer,

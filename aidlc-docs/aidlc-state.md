@@ -4,7 +4,8 @@
 - **Project Type**: Brownfield (Sprint 2)
 - **Start Date**: 2026-03-08T00:00:00Z
 - **Sprint 2 Start Date**: 2026-03-15T00:00:00Z
-- **Current Stage**: CONSTRUCTION - Functional Design (Unit 2: OCR Test Upload) - IN PROGRESS
+- **Sprint 6 Start Date**: 2026-04-04T00:00:00Z
+- **Current Stage**: Sprint 6 — Functional Design — IN PROGRESS
 
 ## Workspace State
 - **Existing Code**: Yes (Sprint 1 complete)
@@ -67,9 +68,9 @@ All INCEPTION and CONSTRUCTION stages complete for both units (Backend API + Fro
 
 ## Current Status
 - **Lifecycle Phase**: CONSTRUCTION
-- **Current Stage**: Sprint 5 — User Onboarding & Account Management — IN PROGRESS
-- **Next Stage**: Resolve onboarding blockers (self-service signup, data isolation)
-- **Status**: Sprint 5 in progress. Temporary passwords, change password, settings page, create-and-enroll all done. Blocked on decisions for self-service signup and multi-tenancy.
+- **Current Stage**: Sprint 6 — Functional Design — IN PROGRESS
+- **Next Stage**: Functional Design questions pending user answers
+- **Status**: Sprint 6 Functional Design started. 8 clarifying questions created in sprint-6/functional-design-questions.md. Awaiting user answers before generating design artifacts.
 
 ## Sprint 4 — Class Page Restructuring & Session Notes
 
@@ -179,3 +180,36 @@ The backend is NOT locked into Keycloak. It uses `spring-boot-starter-oauth2-res
 - [ ] Deployment automation (ECS/Fargate or similar)
 - [ ] Monitoring & alerting setup
 - [ ] Error tracking integration
+
+
+## Sprint 6 — Multi-Tenant Center-Level Data Segregation
+
+### Status: IN PROGRESS
+
+### INCEPTION PHASE
+- [x] Workspace Detection — COMPLETED
+- [x] Requirements Analysis — COMPLETED
+- [x] Workflow Planning — COMPLETED
+- [ ] User Stories — SKIP (existing personas apply, architectural change)
+- [ ] Application Design — SKIP (no new components, changes within existing boundaries)
+- [ ] Units Generation — SKIP (single tightly-coupled unit)
+
+### CONSTRUCTION PHASE (Single Unit: Multi-Tenant Data Segregation)
+- [ ] Functional Design — IN PROGRESS
+- [ ] NFR Requirements — SKIP
+- [ ] NFR Design — SKIP
+- [ ] Infrastructure Design — SKIP
+- [ ] Code Generation — EXECUTE
+- [ ] Build and Test — EXECUTE
+
+### Key Decisions
+- Tenant ID: UUID column on all scoped tables, FK to tenants table
+- Scoping: Explicit repository methods (no Hibernate filters)
+- JWT claim: Keycloak Organizations built-in `organization` claim
+- Roles: No SUPER_ADMIN in app — operator uses Keycloak Admin Console
+- Subjects/Topics: Fully tenant-scoped (seeded per tenant)
+- Data migration: Wipe existing data, fresh start
+- Provisioning: CLI script (Keycloak org + DB tenant + first admin + seed data)
+- Frontend: Per-tenant URL via CloudFront, kc_org login hint
+- Deployment: Shared backend, separate frontend per tenant
+- created_by: Retained alongside tenant_id (defense in depth)

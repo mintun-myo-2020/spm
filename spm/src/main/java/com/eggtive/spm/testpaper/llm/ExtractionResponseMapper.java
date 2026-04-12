@@ -4,6 +4,8 @@ import com.eggtive.spm.common.llm.LlmResponseUtil;
 import com.eggtive.spm.testpaper.parser.*;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -16,10 +18,13 @@ import java.util.List;
  */
 public final class ExtractionResponseMapper {
 
+    private static final Logger log = LoggerFactory.getLogger(ExtractionResponseMapper.class);
+
     private ExtractionResponseMapper() {}
 
     public static ParsedResult map(String textContent, JsonMapper jsonMapper) throws Exception {
         String json = LlmResponseUtil.extractJsonFromText(textContent);
+        log.info("LLM extraction raw JSON: {}", json);
         JsonNode data = jsonMapper.readTree(json);
 
         List<ParsedQuestion> questions = new ArrayList<>();

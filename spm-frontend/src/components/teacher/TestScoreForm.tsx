@@ -22,6 +22,7 @@ const mcqOptionSchema = z.object({
 
 const subQuestionSchema = z.object({
   label: z.string().min(1, 'Required'),
+  questionText: z.string().optional(),
   score: z.number().min(0),
   maxScore: z.number().min(0.01),
   topicId: z.string().min(1, 'Topic is required'),
@@ -64,7 +65,7 @@ export function TestScoreForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       testName: '', testDate: '', testSource: 'CENTRE' as const, overallScore: 0, maxScore: 100,
-      questions: [{ questionNumber: 'Q1', maxScore: 20, questionText: '', questionType: 'OPEN', mcqOptions: [], subQuestions: [{ label: 'a', score: 0, maxScore: 10, topicId: '', studentAnswer: '', teacherRemarks: '' }] }],
+      questions: [{ questionNumber: 'Q1', maxScore: 20, questionText: '', questionType: 'OPEN', mcqOptions: [], subQuestions: [{ label: 'a', questionText: '', score: 0, maxScore: 10, topicId: '', studentAnswer: '', teacherRemarks: '' }] }],
     },
   });
 
@@ -135,13 +136,14 @@ export function TestScoreForm() {
       subQuestions: q.subQuestions.length > 0
         ? q.subQuestions.map((sq) => ({
             label: sq.label,
+            questionText: sq.questionText ?? '',
             score: 0,
             maxScore: sq.maxScore ?? 0,
             topicId: '',
             studentAnswer: sq.studentAnswer ?? '',
             teacherRemarks: '',
           }))
-        : [{ label: 'a', score: 0, maxScore: q.maxScore ?? 0, topicId: '', studentAnswer: '', teacherRemarks: '' }],
+        : [{ label: 'a', questionText: '', score: 0, maxScore: q.maxScore ?? 0, topicId: '', studentAnswer: '', teacherRemarks: '' }],
     }));
 
     reset((prev) => ({
@@ -250,7 +252,7 @@ export function TestScoreForm() {
           {questionFields.map((qField, qIdx) => (
             <QuestionBlock key={qField.id} qIdx={qIdx} control={control} register={register} setValue={setValue} topics={topics} defaultType={qField.questionType ?? 'OPEN'} onRemove={() => removeQuestion(qIdx)} />
           ))}
-          <Button size="sm" color="light" onClick={() => addQuestion({ questionNumber: `Q${questionFields.length + 1}`, maxScore: 20, questionText: '', questionType: 'OPEN', mcqOptions: [], subQuestions: [{ label: 'a', score: 0, maxScore: 10, topicId: '', studentAnswer: '', teacherRemarks: '' }] })} data-testid="add-question-button">+ Add Question</Button>
+          <Button size="sm" color="light" onClick={() => addQuestion({ questionNumber: `Q${questionFields.length + 1}`, maxScore: 20, questionText: '', questionType: 'OPEN', mcqOptions: [], subQuestions: [{ label: 'a', questionText: '', score: 0, maxScore: 10, topicId: '', studentAnswer: '', teacherRemarks: '' }] })} data-testid="add-question-button">+ Add Question</Button>
         </div>
 
         <div className="flex justify-end gap-3">
@@ -365,6 +367,7 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
           <p className="mb-2 text-xs font-medium text-gray-600 dark:text-gray-400">Sub-questions</p>
           <div className="mb-2 hidden gap-2 sm:flex">
             <span className="w-14 text-xs text-gray-400">Label</span>
+            <span className="flex-1 text-xs text-gray-400">Question</span>
             <span className="w-20 text-xs text-gray-400">Score</span>
             <span className="w-20 text-xs text-gray-400">Max</span>
             <span className="flex-1 text-xs text-gray-400">Topic</span>
@@ -377,6 +380,10 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
                 <div className="sm:w-14">
                   <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Label</Label>
                   <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.label`)} placeholder="a" className="w-14" />
+                </div>
+                <div className="flex-1">
+                  <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Question</Label>
+                  <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.questionText`)} placeholder="Sub-question text" />
                 </div>
                 <div className="sm:w-20">
                   <Label className="mb-1 block text-xs text-gray-500 sm:hidden">Score</Label>
@@ -402,7 +409,7 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
               <Textarea {...register(`questions.${qIdx}.subQuestions.${sIdx}.teacherRemarks`)} placeholder="Teacher remarks (optional)" rows={1} className="text-xs" />
             </div>
           ))}
-          <Button size="xs" color="light" onClick={() => addSub({ label: String.fromCharCode(97 + subFields.length), score: 0, maxScore: 10, topicId: '', studentAnswer: '', teacherRemarks: '' })} data-testid={`add-sub-question-${qIdx}`}>+ Sub-question</Button>
+          <Button size="xs" color="light" onClick={() => addSub({ label: String.fromCharCode(97 + subFields.length), questionText: '', score: 0, maxScore: 10, topicId: '', studentAnswer: '', teacherRemarks: '' })} data-testid={`add-sub-question-${qIdx}`}>+ Sub-question</Button>
         </>
       )}
     </Card>

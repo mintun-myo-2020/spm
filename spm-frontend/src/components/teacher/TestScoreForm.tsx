@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useForm, useFieldArray, type Control, type UseFormRegister, type UseFormSetValue } from 'react-hook-form';
+import { useForm, useFieldArray, type Control, type UseFormRegister, type UseFormSetValue, type FieldErrors } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button, Card, Label, Select, TextInput, Textarea } from 'flowbite-react';
@@ -250,7 +250,7 @@ export function TestScoreForm() {
             </div>
           </div>
           {questionFields.map((qField, qIdx) => (
-            <QuestionBlock key={qField.id} qIdx={qIdx} control={control} register={register} setValue={setValue} topics={topics} defaultType={qField.questionType ?? 'OPEN'} onRemove={() => removeQuestion(qIdx)} />
+            <QuestionBlock key={qField.id} qIdx={qIdx} control={control} register={register} setValue={setValue} topics={topics} defaultType={qField.questionType ?? 'OPEN'} onRemove={() => removeQuestion(qIdx)} errors={errors} />
           ))}
           <Button size="sm" color="light" onClick={() => addQuestion({ questionNumber: `Q${questionFields.length + 1}`, maxScore: 20, questionText: '', questionType: 'OPEN', mcqOptions: [], subQuestions: [{ label: 'a', questionText: '', score: 0, maxScore: 10, topicId: '', studentAnswer: '', teacherRemarks: '' }] })} data-testid="add-question-button">+ Add Question</Button>
         </div>
@@ -264,8 +264,8 @@ export function TestScoreForm() {
   );
 }
 
-function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType, onRemove }: {
-  qIdx: number; control: Control<FormValues>; register: UseFormRegister<FormValues>; setValue: UseFormSetValue<FormValues>; topics: TopicDTO[]; defaultType: string; onRemove: () => void;
+function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType, onRemove, errors }: {
+  qIdx: number; control: Control<FormValues>; register: UseFormRegister<FormValues>; setValue: UseFormSetValue<FormValues>; topics: TopicDTO[]; defaultType: string; onRemove: () => void; errors: FieldErrors<FormValues>;
 }) {
   const { fields: subFields, append: addSub, remove: removeSub } = useFieldArray({ control, name: `questions.${qIdx}.subQuestions` });
   const { fields: optionFields, append: addOption, remove: removeOption } = useFieldArray({ control, name: `questions.${qIdx}.mcqOptions` });
@@ -277,11 +277,11 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
         <div className="flex flex-wrap gap-3">
           <div>
             <Label className="mb-1 text-xs text-gray-500 dark:text-gray-400">Question #</Label>
-            <TextInput sizing="sm" {...register(`questions.${qIdx}.questionNumber`)} placeholder="Q1" className="w-20" />
+            <TextInput sizing="sm" {...register(`questions.${qIdx}.questionNumber`)} placeholder="Q1" className="w-20" color={errors.questions?.[qIdx]?.questionNumber ? 'failure' : undefined} />
           </div>
           <div>
             <Label className="mb-1 text-xs text-gray-500 dark:text-gray-400">Max Score</Label>
-            <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.maxScore`, { valueAsNumber: true })} placeholder="20" className="w-24" />
+            <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.maxScore`, { valueAsNumber: true })} placeholder="20" className="w-24" color={errors.questions?.[qIdx]?.maxScore ? 'failure' : undefined} />
           </div>
           <div>
             <Label className="mb-1 text-xs text-gray-500 dark:text-gray-400">Type</Label>
@@ -347,14 +347,17 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
             </div>
             <div>
               <Label className="mb-1 text-xs text-gray-500 dark:text-gray-400">Score</Label>
-              <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.0.score`, { valueAsNumber: true })} placeholder="0" />
+              <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.0.score`, { valueAsNumber: true })} placeholder="0" color={errors.questions?.[qIdx]?.subQuestions?.[0]?.score ? 'failure' : undefined} />
             </div>
             <div>
               <Label className="mb-1 text-xs text-gray-500 dark:text-gray-400">Topic</Label>
-              <Select sizing="sm" {...register(`questions.${qIdx}.subQuestions.0.topicId`)} data-testid={`topic-select-${qIdx}-0`}>
+              <Select sizing="sm" {...register(`questions.${qIdx}.subQuestions.0.topicId`)} color={errors.questions?.[qIdx]?.subQuestions?.[0]?.topicId ? 'failure' : undefined} data-testid={`topic-select-${qIdx}-0`}>
                 <option value="">Select topic</option>
                 {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
               </Select>
+              {errors.questions?.[qIdx]?.subQuestions?.[0]?.topicId && (
+                <p className="mt-1 text-xs text-red-600">{errors.questions[qIdx]?.subQuestions?.[0]?.topicId?.message}</p>
+              )}
             </div>
           </div>
           {/* Hidden fields for the single MCQ sub-question */}
@@ -370,7 +373,7 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
               <div className="flex items-end gap-2">
                 <div className="w-14">
                   <Label className="mb-1 block text-xs text-gray-500">Label</Label>
-                  <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.label`)} placeholder="a" className="w-14" />
+                  <TextInput sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.label`)} placeholder="a" className="w-14" color={errors.questions?.[qIdx]?.subQuestions?.[sIdx]?.label ? 'failure' : undefined} />
                 </div>
                 <div className="flex-1">
                   <Label className="mb-1 block text-xs text-gray-500">Question</Label>
@@ -378,21 +381,24 @@ function QuestionBlock({ qIdx, control, register, setValue, topics, defaultType,
                 </div>
                 <Button size="xs" color="failure" onClick={() => removeSub(sIdx)}>×</Button>
               </div>
-              <div className="flex flex-wrap items-end gap-2">
+              <div className="flex flex-wrap items-start gap-2">
                 <div className="sm:w-20">
                   <Label className="mb-1 block text-xs text-gray-500">Score</Label>
-                  <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.score`, { valueAsNumber: true })} placeholder="0" className="w-20" />
+                  <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.score`, { valueAsNumber: true })} placeholder="0" className="w-20" color={errors.questions?.[qIdx]?.subQuestions?.[sIdx]?.score ? 'failure' : undefined} />
                 </div>
                 <div className="sm:w-20">
                   <Label className="mb-1 block text-xs text-gray-500">Max</Label>
-                  <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.maxScore`, { valueAsNumber: true })} placeholder="10" className="w-20" />
+                  <TextInput sizing="sm" type="number" step="0.01" {...register(`questions.${qIdx}.subQuestions.${sIdx}.maxScore`, { valueAsNumber: true })} placeholder="10" className="w-20" color={errors.questions?.[qIdx]?.subQuestions?.[sIdx]?.maxScore ? 'failure' : undefined} />
                 </div>
                 <div className="flex-1">
                   <Label className="mb-1 block text-xs text-gray-500">Topic</Label>
-                  <Select sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.topicId`)} className="w-full" data-testid={`topic-select-${qIdx}-${sIdx}`}>
+                  <Select sizing="sm" {...register(`questions.${qIdx}.subQuestions.${sIdx}.topicId`)} color={errors.questions?.[qIdx]?.subQuestions?.[sIdx]?.topicId ? 'failure' : undefined} className="w-full" data-testid={`topic-select-${qIdx}-${sIdx}`}>
                     <option value="">Select topic</option>
                     {topics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                   </Select>
+                  {errors.questions?.[qIdx]?.subQuestions?.[sIdx]?.topicId && (
+                    <p className="mt-1 text-xs text-red-600">{errors.questions[qIdx]?.subQuestions?.[sIdx]?.topicId?.message}</p>
+                  )}
                 </div>
               </div>
               <div>

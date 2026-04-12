@@ -99,6 +99,9 @@ management:
         include: health,info,metrics,prometheus
 
 logging:
+  structured:
+    format:
+      console: ${LOG_FORMAT:}
   level:
     root: ${LOG_LEVEL:INFO}
     com.eggtive.spm: ${LOG_LEVEL:INFO}

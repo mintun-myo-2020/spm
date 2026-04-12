@@ -1,5 +1,6 @@
 package com.eggtive.spm.report.storage;
 
+import com.eggtive.spm.common.enums.StorageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -72,5 +73,10 @@ public class StubReportStorage implements ReportStorage {
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to read report file: " + key, e);
         }
+    }
+
+    @Override
+    public StorageType storageType() {
+        return StorageType.LOCAL;
     }
 }

@@ -1,5 +1,6 @@
 package com.eggtive.spm.testpaper.storage;
 
+import com.eggtive.spm.common.enums.StorageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,14 +59,17 @@ public class S3FileStorageService implements FileStorageService {
     }
 
     @Override
-    public byte[] readFileBytes(String storageLocation, String storageKey) {
-        String effectiveBucket = (storageLocation != null && !storageLocation.isBlank())
-                ? storageLocation : this.bucket;
+    public byte[] readFileBytes(String storageKey) {
         try (var response = s3Client.getObject(
-                GetObjectRequest.builder().bucket(effectiveBucket).key(storageKey).build())) {
+                GetObjectRequest.builder().bucket(bucket).key(storageKey).build())) {
             return response.readAllBytes();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to read file from S3: s3://" + effectiveBucket + "/" + storageKey, e);
+            throw new RuntimeException("Failed to read file from S3: s3://" + bucket + "/" + storageKey, e);
         }
+    }
+
+    @Override
+    public StorageType storageType() {
+        return StorageType.S3;
     }
 }

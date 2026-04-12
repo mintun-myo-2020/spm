@@ -1,5 +1,6 @@
 package com.eggtive.spm.testpaper.storage;
 
+import com.eggtive.spm.common.enums.StorageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,11 +75,11 @@ public class LocalFileStorageService implements FileStorageService {
 
     /** Read file bytes — used by the local file serving endpoint. */
     public byte[] readFile(String key) {
-        return readFileBytes("local", key);
+        return readFileBytes(key);
     }
 
     @Override
-    public byte[] readFileBytes(String storageLocation, String storageKey) {
+    public byte[] readFileBytes(String storageKey) {
         try {
             Path filePath = basePath.resolve(storageKey).normalize();
             if (!filePath.startsWith(basePath)) {
@@ -88,6 +89,11 @@ public class LocalFileStorageService implements FileStorageService {
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to read file: " + storageKey, e);
         }
+    }
+
+    @Override
+    public StorageType storageType() {
+        return StorageType.LOCAL;
     }
 
     /** Detect content type from stored file. */

@@ -1,5 +1,6 @@
 package com.eggtive.spm.report.storage;
 
+import com.eggtive.spm.common.enums.StorageType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,5 +68,10 @@ public class S3ReportStorage implements ReportStorage {
                         .bucket(bucket)
                         .key(key)
                         .build()).asByteArray();
+    }
+
+    @Override
+    public StorageType storageType() {
+        return StorageType.S3;
     }
 }

@@ -99,7 +99,7 @@ public class TestPaperService {
             TestPaperPage page = new TestPaperPage();
             page.setUpload(upload);
             page.setPageNumber(i + 1);
-            page.setStorageLocation("local");
+            page.setStorageLocation(fileStorageService.storageType().value());
             page.setStorageKey(key);
             page.setFileName(file.getOriginalFilename());
             page.setContentType(file.getContentType());
@@ -140,7 +140,7 @@ public class TestPaperService {
                     pageRepository.save(page);
 
                     byte[] imageBytes = fileStorageService.readFileBytes(
-                            page.getStorageLocation(), page.getStorageKey());
+                            page.getStorageKey());
 
                     ParsedResult parsed = extractionService.extractQuestions(
                             imageBytes, page.getContentType(), page.getFileName());

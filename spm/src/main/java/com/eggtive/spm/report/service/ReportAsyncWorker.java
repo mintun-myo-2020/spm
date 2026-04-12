@@ -85,7 +85,7 @@ public class ReportAsyncWorker implements ReportJobDispatcher {
 
             if (plan != null) report.setPlanJson(jsonMapper.writeValueAsString(plan));
             report.setStorageKey(storageKey);
-            report.setStorageLocation("local");
+            report.setStorageLocation(reportStorage.storageType().value());
             report.setStatus(ReportStatus.COMPLETED);
             reportRepository.save(report);
             log.info("Report generation completed — reportId: {}", reportId);

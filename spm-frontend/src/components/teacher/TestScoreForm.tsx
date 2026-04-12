@@ -246,11 +246,11 @@ export function TestScoreForm() {
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Questions</h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">Break down the test into questions and sub-questions. Map each sub-question to a topic for tracking.</p>
             </div>
-            <Button size="sm" color="light" onClick={() => addQuestion({ questionNumber: `Q${questionFields.length + 1}`, maxScore: 20, questionText: '', questionType: 'OPEN', mcqOptions: [], subQuestions: [{ label: 'a', score: 0, maxScore: 10, topicId: '', studentAnswer: '', teacherRemarks: '' }] })} data-testid="add-question-button">+ Add Question</Button>
           </div>
           {questionFields.map((qField, qIdx) => (
             <QuestionBlock key={qField.id} qIdx={qIdx} control={control} register={register} setValue={setValue} topics={topics} defaultType={qField.questionType ?? 'OPEN'} onRemove={() => removeQuestion(qIdx)} />
           ))}
+          <Button size="sm" color="light" onClick={() => addQuestion({ questionNumber: `Q${questionFields.length + 1}`, maxScore: 20, questionText: '', questionType: 'OPEN', mcqOptions: [], subQuestions: [{ label: 'a', score: 0, maxScore: 10, topicId: '', studentAnswer: '', teacherRemarks: '' }] })} data-testid="add-question-button">+ Add Question</Button>
         </div>
 
         <div className="flex justify-end gap-3">

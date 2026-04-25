@@ -25,7 +25,7 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
         <HiMenuAlt2 className="h-6 w-6" />
       </button>
 
-      <Link to={dashboardPath} className="ml-2 text-lg font-bold text-blue-600 hover:text-blue-800 lg:ml-0 dark:text-blue-400 dark:hover:text-blue-300">{getConfig().tenantName}</Link>
+      <Link to={dashboardPath} className="ml-2 text-lg font-bold text-blue-600 hover:text-blue-800 lg:ml-0 dark:text-blue-400 dark:hover:text-blue-300">{getConfig().tenantName || 'Eggtive SPM'}</Link>
 
       <div className="flex-1" />
 

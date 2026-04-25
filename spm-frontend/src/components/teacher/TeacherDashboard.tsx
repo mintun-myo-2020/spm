@@ -16,8 +16,14 @@ export function TeacherDashboard() {
   useEffect(() => {
     classService
       .getMyClasses({ size: 10 })
-      .then((res) => setClasses(res.data?.content ?? []))
-      .catch((err) => setError(err.message))
+      .then((res) => {
+        console.log('[TeacherDashboard] /my-classes response:', JSON.stringify(res.data));
+        setClasses(res.data?.content ?? []);
+      })
+      .catch((err) => {
+        console.error('[TeacherDashboard] /my-classes error:', err);
+        setError(err.message);
+      })
       .finally(() => setLoading(false));
   }, []);
 

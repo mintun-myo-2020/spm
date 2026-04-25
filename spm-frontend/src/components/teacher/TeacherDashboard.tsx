@@ -16,7 +16,7 @@ export function TeacherDashboard() {
   useEffect(() => {
     classService
       .getMyClasses({ size: 10 })
-      .then((res) => setClasses(res.data.content))
+      .then((res) => setClasses(res.data?.content ?? []))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);

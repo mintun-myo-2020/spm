@@ -55,7 +55,7 @@ export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => v
   const role = user?.profileType ?? '';
   const items = navByRole[role] ?? [];
 
-  const settingsPath = `/${role.toLowerCase()}/settings`;
+  const settingsPath = role ? `/${role.toLowerCase()}/settings` : '/settings';
 
   return (
     <>

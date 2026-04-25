@@ -5,6 +5,8 @@ import com.eggtive.spm.common.enums.Role;
 import com.eggtive.spm.common.exception.AppException;
 import com.eggtive.spm.user.entity.*;
 import com.eggtive.spm.user.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -16,6 +18,8 @@ import java.util.*;
 
 @Service
 public class CurrentUserService {
+
+    private static final Logger log = LoggerFactory.getLogger(CurrentUserService.class);
 
     private final UserRepository userRepository;
     private final TeacherRepository teacherRepository;
@@ -36,14 +40,36 @@ public class CurrentUserService {
     public User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !(auth.getPrincipal() instanceof Jwt jwt)) {
+            log.warn("getCurrentUser called with no JWT authentication");
             throw new AppException(ErrorCode.UNAUTHORIZED, "Not authenticated");
         }
         String keycloakId = jwt.getSubject();
+        log.debug("getCurrentUser: keycloakId={}, email={}", keycloakId, jwt.getClaimAsString("email"));
         User user = userRepository.findByKeycloakId(keycloakId)
-            .orElseGet(() -> provisionFromToken(jwt));
+            .map(existing -> syncRolesFromToken(existing, jwt))
+            .orElseGet(() -> {
+                log.info("First login — provisioning user from JWT: keycloakId={}, email={}", keycloakId, jwt.getClaimAsString("email"));
+                return provisionFromToken(jwt);
+            });
         if (!user.isActive()) {
+            log.warn("User {} is deactivated", user.getEmail());
             throw new AppException(ErrorCode.FORBIDDEN, "Account is deactivated");
         }
+        log.debug("getCurrentUser resolved: id={}, email={}, roles={}", user.getId(), user.getEmail(), user.getRoles());
+        return user;
+    }
+
+    /** Sync roles from JWT on every login and create missing profile records. */
+    @SuppressWarnings("unchecked")
+    private User syncRolesFromToken(User user, Jwt jwt) {
+        Set<Role> jwtRoles = extractRoles(jwt);
+        if (jwtRoles.isEmpty() || jwtRoles.equals(user.getRoles())) {
+            return user;
+        }
+        log.info("Syncing roles for user {}: {} -> {}", user.getEmail(), user.getRoles(), jwtRoles);
+        user.setRoles(jwtRoles);
+        user = userRepository.save(user);
+        ensureProfileExists(user, jwtRoles);
         return user;
     }
 
@@ -68,33 +94,23 @@ public class CurrentUserService {
         String firstName = jwt.getClaimAsString("given_name") != null ? jwt.getClaimAsString("given_name") : "";
         String lastName = jwt.getClaimAsString("family_name") != null ? jwt.getClaimAsString("family_name") : "";
 
-        Set<Role> roles = new HashSet<>();
-        Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
-        if (realmAccess != null && realmAccess.containsKey("roles")) {
-            for (String name : (List<String>) realmAccess.get("roles")) {
-                try { roles.add(Role.valueOf(name.toUpperCase())); }
-                catch (IllegalArgumentException ignored) { /* skip unmapped roles */ }
-            }
-        }
+        Set<Role> roles = extractRoles(jwt);
+        log.info("provisionFromToken: email={}, resolved roles={}", email, roles);
 
-        // Link by email if the existing user was admin-created (pending keycloakId),
-        // or update keycloakId if the user already exists with a different keycloakId
-        // (e.g. re-created in Keycloak with a new subject ID).
         Optional<User> existing = userRepository.findByEmail(email);
         if (existing.isPresent()) {
             User user = existing.get();
             if (user.getKeycloakId() == null || user.getKeycloakId().startsWith("pending-")) {
-                // Admin-created user awaiting first login — link to this Keycloak account
                 user.setKeycloakId(keycloakId);
                 user.setFirstName(firstName);
                 user.setLastName(lastName);
                 if (!roles.isEmpty()) {
                     user.setRoles(roles);
                 }
-                return userRepository.save(user);
+                user = userRepository.save(user);
+                ensureProfileExists(user, roles);
+                return user;
             }
-            // User already exists with a real keycloakId — update it to the current one
-            // (handles Keycloak user recreation or DB/Keycloak sync mismatches)
             user.setKeycloakId(keycloakId);
             return userRepository.save(user);
         }
@@ -106,23 +122,42 @@ public class CurrentUserService {
         user.setLastName(lastName);
         user.setRoles(roles);
         user = userRepository.save(user);
+        ensureProfileExists(user, roles);
+        return user;
+    }
 
-        // Create the matching profile record so profileType/profileId resolve immediately
-        if (roles.contains(Role.TEACHER)) {
+    @SuppressWarnings("unchecked")
+    private Set<Role> extractRoles(Jwt jwt) {
+        Set<Role> roles = new HashSet<>();
+        Map<String, Object> realmAccess = jwt.getClaimAsMap("realm_access");
+        if (realmAccess != null && realmAccess.containsKey("roles")) {
+            for (String name : (List<String>) realmAccess.get("roles")) {
+                try { roles.add(Role.valueOf(name.toUpperCase())); }
+                catch (IllegalArgumentException ignored) { log.trace("Skipping unmapped Keycloak role: {}", name); }
+            }
+        }
+        return roles;
+    }
+
+    private void ensureProfileExists(User user, Set<Role> roles) {
+        if (roles.contains(Role.TEACHER) && teacherRepository.findByUserId(user.getId()).isEmpty()) {
+            log.info("Creating Teacher profile for user {}", user.getEmail());
             Teacher t = new Teacher();
             t.setUser(user);
             teacherRepository.save(t);
-        } else if (roles.contains(Role.STUDENT)) {
+        }
+        if (roles.contains(Role.STUDENT) && studentRepository.findByUserId(user.getId()).isEmpty()) {
+            log.info("Creating Student profile for user {}", user.getEmail());
             Student s = new Student();
             s.setUser(user);
             s.setEnrollmentDate(LocalDate.now());
             studentRepository.save(s);
-        } else if (roles.contains(Role.PARENT)) {
+        }
+        if (roles.contains(Role.PARENT) && parentRepository.findByUserId(user.getId()).isEmpty()) {
+            log.info("Creating Parent profile for user {}", user.getEmail());
             Parent p = new Parent();
             p.setUser(user);
             parentRepository.save(p);
         }
-
-        return user;
     }
 }

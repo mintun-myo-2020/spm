@@ -104,4 +104,6 @@ logging:
       console: ${LOG_FORMAT:}
   level:
     root: ${LOG_LEVEL:INFO}
-    com.eggtive.spm: ${LOG_LEVEL:INFO}
+    com.eggtive.spm: ${APP_LOG_LEVEL:INFO}
+    org.springframework.security: ${SECURITY_LOG_LEVEL:WARN}
+    org.springframework.web: ${WEB_LOG_LEVEL:INFO}

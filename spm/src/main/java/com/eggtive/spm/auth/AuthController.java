@@ -3,6 +3,8 @@ package com.eggtive.spm.auth;
 import com.eggtive.spm.common.dto.ApiResponse;
 import com.eggtive.spm.user.dto.UserInfoDTO;
 import com.eggtive.spm.user.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -10,6 +12,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     private final CurrentUserService currentUserService;
     private final UserService userService;
@@ -23,7 +27,10 @@ public class AuthController {
 
     @GetMapping("/me")
     public ApiResponse<UserInfoDTO> me() {
-        return ApiResponse.ok(userService.getUserInfo(currentUserService.getCurrentUser()));
+        log.debug("GET /auth/me called");
+        UserInfoDTO info = userService.getUserInfo(currentUserService.getCurrentUser());
+        log.debug("GET /auth/me returning: profileType={}, profileId={}", info.profileType(), info.profileId());
+        return ApiResponse.ok(info);
     }
 
     @PutMapping("/change-password")

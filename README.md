@@ -6,7 +6,7 @@ A tuition centre management system for tracking student progress, test scores, f
 
 - Multi-role access: Admin, Teacher, Student, Parent
 - Test score entry with per-question topic mapping
-- OCR test paper upload (AWS Textract)
+- OCR test paper upload (AWS Bedrock)
 - Progress tracking with trend analysis and topic breakdowns
 - AI-powered improvement plans (AWS Bedrock)
 - Async progress report generation with HTML export
@@ -24,7 +24,6 @@ A tuition centre management system for tracking student progress, test scores, f
 | Frontend | React 19, TypeScript, Vite 8, Tailwind CSS 4, Flowbite React |
 | Auth | Keycloak 26 (OIDC/OAuth2) — swappable via standard OIDC |
 | AI/LLM | AWS Bedrock (Nova) — behind interface, stub available |
-| OCR | AWS Textract — behind interface, stub available |
 | Storage | Local filesystem / AWS S3 — behind interface |
 
 ## Quick Start (Local Dev)
@@ -121,7 +120,6 @@ All integrations are config-driven and swappable via `application.yml` / `.env`:
 | Integration | Config Key | Options |
 |---|---|---|
 | LLM | `app.llm.type` | `stub` (default), `bedrock` |
-| OCR | `app.ocr.type` | `stub` (default), `textract` |
 | File Storage | `app.storage.type` | `local` (default), `s3` |
 | Report Storage | `app.report.storage-type` | `stub` (default), `s3` |
 | Job Dispatch | `app.report.dispatcher-type` | `sync` (default), `sqs` |

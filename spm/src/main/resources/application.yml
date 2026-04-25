@@ -60,8 +60,6 @@ app:
     s3-bucket: ${APP_STORAGE_S3_BUCKET:spm-uploads}
     report-local-path: ${APP_REPORT_STORAGE_LOCAL_PATH:./report-files}
     report-s3-bucket: ${APP_REPORT_STORAGE_S3_BUCKET:spm-reports}
-  ocr:
-    type: ${APP_OCR_TYPE:stub}
   extraction:
     type: ${APP_EXTRACTION_TYPE:stub}
     bedrock:

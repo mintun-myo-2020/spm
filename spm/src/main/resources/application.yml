@@ -61,9 +61,7 @@ app:
     report-local-path: ${APP_REPORT_STORAGE_LOCAL_PATH:./report-files}
     report-s3-bucket: ${APP_REPORT_STORAGE_S3_BUCKET:spm-reports}
   ocr:
-    type: ${APP_OCR_TYPE:tesseract}
-    tesseract:
-      server-url: ${APP_OCR_TESSERACT_URL:http://spm-tesseract:8080}
+    type: ${APP_OCR_TYPE:stub}
   extraction:
     type: ${APP_EXTRACTION_TYPE:stub}
     bedrock:

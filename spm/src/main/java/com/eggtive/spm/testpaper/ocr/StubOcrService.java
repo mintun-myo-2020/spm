@@ -10,7 +10,7 @@ import java.util.List;
  * so the BasicTestPaperParser can be tested end-to-end.
  */
 @Component
-@ConditionalOnProperty(name = "app.ocr.type", havingValue = "stub")
+@ConditionalOnProperty(name = "app.ocr.type", havingValue = "stub", matchIfMissing = true)
 public class StubOcrService implements OcrService {
 
     private static final String SAMPLE_TEXT = """

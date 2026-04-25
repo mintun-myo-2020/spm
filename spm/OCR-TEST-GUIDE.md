@@ -6,7 +6,7 @@ Make sure Docker containers are running:
 
 ```bash
 cd spm
-docker-compose up -d postgres keycloak-postgres keycloak tesseract
+docker-compose up -d postgres keycloak-postgres keycloak
 ```
 
 Then start the Spring Boot app:
@@ -136,8 +136,8 @@ Keep polling until `status` changes from `PROCESSING` to `COMPLETED`.
 ### What to look for in the response:
 
 - `status` — should go `UPLOADED` → `PROCESSING` → `COMPLETED`
-- `pages[].extractedText` — raw OCR text from Tesseract
-- `pages[].ocrConfidence` — confidence score (0.85 default for Tesseract CLI)
+- `pages[].extractedText` — raw OCR text
+- `pages[].ocrConfidence` — confidence score
 - `pages[].parsedResult` — structured questions/sub-questions parsed by BasicTestPaperParser
 - `aggregatedQuestions` — flattened questions across all pages
 
@@ -159,23 +159,6 @@ open /tmp/downloaded.png
 ---
 
 ## Troubleshooting
-
-### Tesseract container not running
-
-```bash
-docker ps | grep spm-tesseract
-# If not running:
-docker-compose up -d tesseract
-```
-
-### OCR returns empty text
-
-- Make sure the image has clear, readable text
-- Check the tesseract container can see the file:
-  ```bash
-  docker exec spm-tesseract ls /data/uploads/
-  ```
-- The `spm/uploads/` directory on your host maps to `/data/` in the container
 
 ### Token expired
 

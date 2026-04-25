@@ -69,13 +69,6 @@ services:
       retries: 20
       start_period: 60s
 
-  tesseract:
-    build: ./ocr-server
-    container_name: spm-tesseract
-    ports:
-      - "8090:8080"
-    restart: unless-stopped
-
   app:
     image: spm-app:latest
     container_name: spm-app

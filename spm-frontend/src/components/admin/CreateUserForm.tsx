@@ -42,8 +42,20 @@ export function CreateUserForm({ onSuccess, onCancel }: { onSuccess: () => void;
         await userService.createParent({ email: data.email, firstName: data.firstName, lastName: data.lastName, password: data.password, phoneNumber: data.phoneNumber, studentId: data.studentId ?? '' });
       }
       onSuccess();
-    } catch {
-      showToast('Failed to create user', 'error');
+    } catch (err: unknown) {
+      let msg = 'Failed to create user';
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axErr = err as { response?: { data?: { message?: string; details?: Record<string, string> } }; message?: string };
+        const details = axErr.response?.data?.details;
+        if (details && typeof details === 'object') {
+          msg = Object.values(details).join('. ');
+        } else if (axErr.response?.data?.message) {
+          msg = axErr.response.data.message;
+        } else if (axErr.message) {
+          msg = axErr.message;
+        }
+      }
+      showToast(msg, 'error');
     } finally {
       setSubmitting(false);
     }

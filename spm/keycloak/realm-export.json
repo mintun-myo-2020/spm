@@ -174,7 +174,8 @@
       "standardFlowEnabled": false,
       "directAccessGrantsEnabled": true,
       "serviceAccountsEnabled": true,
-      "secret": "CHANGE_ME_AFTER_IMPORT",
+      "clientAuthenticatorType": "client-secret",
+      "secret": "spm-backend-secret",
       "protocol": "openid-connect",
       "defaultClientScopes": [
         "basic",

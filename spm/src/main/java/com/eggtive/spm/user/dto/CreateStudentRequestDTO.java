@@ -9,7 +9,7 @@ public record CreateStudentRequestDTO(
     @NotBlank @Email String email,
     @NotBlank String firstName,
     @NotBlank String lastName,
-    @NotBlank @Size(min = 8) String password,
+    @NotBlank @Size(min = 8, max = 18, message = "Password must be between 8 and 18 characters") String password,
     LocalDate dateOfBirth,
     String grade
 ) {}

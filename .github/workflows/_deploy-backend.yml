@@ -47,7 +47,7 @@ jobs:
       - name: Upload jar to S3
         run: |
           JAR_FILE=$(ls spm/build/libs/*.jar | head -1)
-          aws s3 cp "$JAR_FILE" s3://${{ steps.ssm.outputs.artifacts-bucket }}/spm-app.jar
+          aws s3 cp "$JAR_FILE" s3://${{ steps.ssm.outputs.artifacts-bucket }}/spm/spm-app.jar
 
       - name: Trigger deploy via SSM
         run: |
